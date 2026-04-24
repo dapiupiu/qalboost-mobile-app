@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'main.dart';
+import 'settings.dart';
 
 class CheckerSimpleScreen extends StatefulWidget {
   const CheckerSimpleScreen({Key? key}) : super(key: key);
@@ -8,8 +10,9 @@ class CheckerSimpleScreen extends StatefulWidget {
 }
 
 class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
-  String? _mood; // 'baik' or 'buruk'
+  String? _mood;
   final TextEditingController _controller = TextEditingController();
+  int _selectedIndex = 1; // karena ini halaman Q-Checker
 
   @override
   void dispose() {
@@ -31,26 +34,22 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 12),
-
-              // Mascot placeholder
               Container(
                 width: 96,
                 height: 96,
-                decoration: BoxDecoration(color: Colors.grey.shade300, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  shape: BoxShape.circle,
+                ),
               ),
-
               const SizedBox(height: 16),
-
-              // Title
               const Text(
                 'BAGAIMANA MOOD KAMU HARI INI',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-
               const SizedBox(height: 18),
 
-              // Mood buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -61,7 +60,9 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                       height: 100,
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: _mood == 'baik' ? Colors.grey.shade200 : Colors.grey.shade100,
+                        color: _mood == 'baik'
+                            ? Colors.grey.shade200
+                            : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.black12),
                       ),
@@ -75,9 +76,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(width: 18),
-
                   GestureDetector(
                     onTap: () => setState(() => _mood = 'buruk'),
                     child: Container(
@@ -85,7 +84,9 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                       height: 100,
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: _mood == 'buruk' ? Colors.grey.shade200 : Colors.grey.shade100,
+                        color: _mood == 'buruk'
+                            ? Colors.grey.shade200
+                            : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.black12),
                       ),
@@ -104,13 +105,13 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
 
               const SizedBox(height: 20),
 
-              // Question + helper text
-              Align(
+              const Align(
                 alignment: Alignment.centerLeft,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Apa emosi yang sedang kamu rasakan?', style: TextStyle(fontWeight: FontWeight.bold)),
+                  children: [
+                    Text('Apa emosi yang sedang kamu rasakan?',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     SizedBox(height: 6),
                     Text('Pilih 1 emosi yang paling menggambarkan'),
                   ],
@@ -119,13 +120,13 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
 
               const SizedBox(height: 16),
 
-              // Another question + text input
-              Align(
+              const Align(
                 alignment: Alignment.centerLeft,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Kamu mau cerita apa yang terjadi?', style: TextStyle(fontWeight: FontWeight.bold)),
+                  children: [
+                    Text('Kamu mau cerita apa yang terjadi?',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     SizedBox(height: 6),
                     Text('Jangan ragu untuk menuangkan isi pikiran kamu'),
                   ],
@@ -134,28 +135,30 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
 
               const SizedBox(height: 12),
 
-              // Text field
               TextField(
                 controller: _controller,
                 minLines: 4,
                 maxLines: 6,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  border:
+                      OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   hintText: 'Tulis di sini...',
                 ),
               ),
 
               const SizedBox(height: 12),
 
-              // Save button
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
                   onPressed: () {
-                    // For now, just show a simple snackbar
                     final mood = _mood ?? 'belum dipilih';
-                    final text = _controller.text.isEmpty ? '-' : _controller.text;
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Mood: $mood, Text: $text')));
+                    final text =
+                        _controller.text.isEmpty ? '-' : _controller.text;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Mood: $mood, Text: $text')),
+                    );
                   },
                   child: const Text('Simpan'),
                 ),
@@ -166,17 +169,37 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
           ),
         ),
       ),
-      // bottom nav placeholder
-      bottomNavigationBar: SizedBox(
-        height: 64,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: const [
-            Icon(Icons.home),
-            Text('Q-Checker'),
-            Icon(Icons.settings),
-          ],
-        ),
+
+      // ✅ Bottom Nav Konsisten
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() => _selectedIndex = index);
+
+          if (index == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(),
+              ),
+            );
+          } else if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SettingsPage(),
+              ),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.psychology), label: 'Q-Checker'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: 'Settings'),
+        ],
       ),
     );
   }

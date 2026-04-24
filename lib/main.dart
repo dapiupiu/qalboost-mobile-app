@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'diary.dart';
 import 'tips.dart';
+import 'mood.dart';
+import 'consul.dart';
+import 'checker.dart';
+import 'settings.dart';
+import 'quotes.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -38,9 +44,9 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header: User info and date
+            // Header
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -48,117 +54,113 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
-                        children: [
+                        children: const [
                           CircleAvatar(child: Icon(Icons.person)),
                           SizedBox(width: 12),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Selamat Datang'),
-                              Text('Nama Pengguna', style: TextStyle(fontWeight: FontWeight.bold)),
+                              Text(
+                                'Nama Pengguna',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ],
                           ),
                         ],
                       ),
-                      Icon(Icons.location_on),
+                      const Icon(Icons.location_on),
                     ],
                   ),
-                  SizedBox(height: 8),
-                  Text('Maret 15 2026', style: TextStyle(fontSize: 12)),
+                  const SizedBox(height: 8),
+                  const Text('Maret 15 2026',
+                      style: TextStyle(fontSize: 12)),
                 ],
               ),
             ),
-            // Main title
-            Padding(
+
+            // Title
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Bagaimana Perasaan Kamu Hari Ini?',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(height: 20),
-            // Four buttons: Quotes, Konsul, Diary, Tips
+
+            const SizedBox(height: 20),
+
+            // Menu Buttons
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Column(
-                    children: [
-                      Container(width: 60, height: 60, decoration: BoxDecoration(border: Border.all()), child: Icon(Icons.format_quote)),
-                      SizedBox(height: 8),
-                      Text('Q-Quotes'),
-                    ],
+                  menuButton(
+                    context,
+                    icon: Icons.format_quote,
+                    label: 'Q-Quotes',
+                    page: const QuotesSimpleScreen(),
                   ),
-                  Column(
-                    children: [
-                      Container(width: 60, height: 60, decoration: BoxDecoration(border: Border.all()), child: Icon(Icons.chat)),
-                      SizedBox(height: 8),
-                      Text('Q-Konsul'),
-                    ],
+                  menuButton(
+                    context,
+                    icon: Icons.chat,
+                    label: 'Q-Konsul',
+                    page: const ConsulPage(),
                   ),
-                  Column(
-  children: [
-    GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const DiaryPage()),
-        );
-      },
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(border: Border.all()),
-        child: Icon(Icons.event_note),
-      ),
-    ),
-    SizedBox(height: 8),
-    Text('Q-Diary'),
-  ],
-),
-                  Column(
-  children: [
-    InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const TipsPage()),
-        );
-      },
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(border: Border.all()),
-        child: Icon(Icons.lightbulb),
-      ),
-    ),
-    SizedBox(height: 8),
-    Text('Q-Tips'),
-  ],
-),
+                  menuButton(
+                    context,
+                    icon: Icons.event_note,
+                    label: 'Q-Diary',
+                    page: const DiaryPage(),
+                  ),
+                  menuButton(
+                    context,
+                    icon: Icons.lightbulb,
+                    label: 'Q-Tips',
+                    page: const TipsPage(),
+                  ),
                 ],
               ),
             ),
-            SizedBox(height: 30),
-            // History Mood section
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('History Mood', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text('Lihat Kalender', style: TextStyle(fontSize: 12)),
-                ],
-              ),
+
+            const SizedBox(height: 30),
+
+           // History Mood
+Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 16),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      const Text(
+        'History Mood',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MoodPage(),
             ),
-            SizedBox(height: 12),
+          );
+        },
+        child: const Text(
+          'Lihat Kalender',
+          style: TextStyle(fontSize: 12),
+        ),
+      ),
+    ],
+  ),
+),
+ 
+            const SizedBox(height: 12),
+
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     'Senin',
                     'Selasa',
@@ -167,32 +169,51 @@ class _HomePageState extends State<HomePage> {
                     'Jumat',
                     'Sabtu',
                     'Minggu',
-                  ].map((day) => Padding(
-                    padding: EdgeInsets.only(right: 12),
-                    child: Column(
-                      children: [
-                        Container(width: 30, height: 30, decoration: BoxDecoration(border: Border.all()), child: Center(child: Text('😊'))),
-                        SizedBox(height: 4),
-                        Text(day, style: TextStyle(fontSize: 10)),
-                      ],
-                    ),
-                  )).toList(),
+                  ].map((day) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              border: Border.all(),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Center(child: Text('😊')),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(day,
+                              style: const TextStyle(fontSize: 10)),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
-            SizedBox(height: 30),
-            // Perasaan Kamu Hari Ini section
-            Padding(
+
+            const SizedBox(height: 30),
+
+            // Perasaan Hari Ini
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text('Perasaan Kamu Hari Ini', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text('Perasaan Kamu Hari Ini',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
-            SizedBox(height: 12),
+
+            const SizedBox(height: 12),
+
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(border: Border.all()),
-                child: Column(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Column(
                   children: [
                     Icon(Icons.emoji_people, size: 40),
                     SizedBox(height: 8),
@@ -201,44 +222,117 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            SizedBox(height: 12),
+
+            const SizedBox(height: 12),
+
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(border: Border.all()),
-                child: Text('catatan kecil dari isi q-checker'),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text('catatan kecil dari isi q-checker'),
               ),
             ),
-            SizedBox(height: 30),
-            // Hari ini ada apa ya? section
-            Padding(
+
+            const SizedBox(height: 30),
+
+            // Catatan
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text('Hari ini ada apa ya?', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text('Hari ini ada apa ya?',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
-            SizedBox(height: 12),
+
+            const SizedBox(height: 12),
+
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(border: Border.all()),
-                child: Text('Tuliskan aktivitas atau perasaanmu hari ini...'),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                    'Tuliskan aktivitas atau perasaanmu hari ini...'),
               ),
             ),
-            SizedBox(height: 30),
+
+            const SizedBox(height: 30),
           ],
         ),
       ),
+
+      // Bottom Nav
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.emoji_emotions), label: 'Mood'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+        onTap: (index) {
+            setState(() => _selectedIndex = index);
+            if (index == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CheckerSimpleScreen(),
+                ),
+              );
+            } else if (index == 2) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsPage(),
+                ),
+              );
+            }
+          },
+        items: const [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.psychology), label: 'Q-Checker'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),
+    );
+  }
+
+  // 🔥 REUSABLE BUTTON (INI YANG BIKIN ADA EFEK KEDIP)
+  Widget menuButton(BuildContext context,
+      {required IconData icon,
+      required String label,
+      required Widget page}) {
+    return Column(
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            splashColor: Colors.blue.withOpacity(0.3),
+            highlightColor: Colors.blue.withOpacity(0.1),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => page),
+              );
+            },
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                border: Border.all(),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(label),
+      ],
     );
   }
 }

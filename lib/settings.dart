@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'main.dart';
+import 'checker.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  int _selectedIndex = 2; // karena ini halaman Settings
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +28,6 @@ class SettingsPage extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Profile card
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -45,7 +53,6 @@ class SettingsPage extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Expansion sections
               Expanded(
                 child: ListView(
                   children: [
@@ -59,7 +66,6 @@ class SettingsPage extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     Card(
                       child: ExpansionTile(
                         leading: const Icon(Icons.notifications),
@@ -69,7 +75,6 @@ class SettingsPage extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     Card(
                       child: ExpansionTile(
                         leading: const Icon(Icons.phone),
@@ -79,9 +84,7 @@ class SettingsPage extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 12),
-                    // Logout button
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: ElevatedButton.icon(
@@ -98,21 +101,36 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
 
-      // Bottom navigation mimic
-      bottomNavigationBar: BottomAppBar(
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.home)),
-              // center moon mascot placeholder
-              IconButton(
-                  onPressed: () {}, icon: const Icon(Icons.brightness_3)),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
-            ],
-          ),
-        ),
+      // ✅ Bottom Nav Konsisten
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() => _selectedIndex = index);
+
+          if (index == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomePage(),
+              ),
+            );
+          } else if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CheckerSimpleScreen(),
+              ),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.psychology), label: 'Q-Checker'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: 'Settings'),
+        ],
       ),
     );
   }
