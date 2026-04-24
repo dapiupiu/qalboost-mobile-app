@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'diary.dart';
+import 'tips.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -97,19 +98,45 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   Column(
-                    children: [
-                      Container(width: 60, height: 60, decoration: BoxDecoration(border: Border.all()), child: Icon(Icons.event_note)),
-                      SizedBox(height: 8),
-                      Text('Q-Diary'),
-                    ],
-                  ),
+  children: [
+    GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const DiaryPage()),
+        );
+      },
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(border: Border.all()),
+        child: Icon(Icons.event_note),
+      ),
+    ),
+    SizedBox(height: 8),
+    Text('Q-Diary'),
+  ],
+),
                   Column(
-                    children: [
-                      Container(width: 60, height: 60, decoration: BoxDecoration(border: Border.all()), child: Icon(Icons.lightbulb)),
-                      SizedBox(height: 8),
-                      Text('Q-Tips'),
-                    ],
-                  ),
+  children: [
+    InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const TipsPage()),
+        );
+      },
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(border: Border.all()),
+        child: Icon(Icons.lightbulb),
+      ),
+    ),
+    SizedBox(height: 8),
+    Text('Q-Tips'),
+  ],
+),
                 ],
               ),
             ),
