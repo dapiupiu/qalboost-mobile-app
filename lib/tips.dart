@@ -58,7 +58,7 @@ class TipsPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
-                            'HARUS\nNGAPAIN SIH\nKALAU LAGI\nGERASA...',
+                            'Harus\nNgapain Sih\nKalau Lagi\nNgerasa...',
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w800,
