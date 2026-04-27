@@ -1,133 +1,156 @@
 import 'package:flutter/material.dart';
+import 'checker.dart';
 
-class MoodPage extends StatelessWidget {
-	const MoodPage({Key? key}) : super(key: key);
+class MoodPage extends StatefulWidget {
+  const MoodPage({Key? key}) : super(key: key);
 
-	@override
-	Widget build(BuildContext context) {
-		// Sample month grid (5 rows x 7 cols = 35 cells)
-		final days = List.generate(35, (i) {
-			// put some sample moods on some days
-			if (i == 8 || i == 9 || i == 10 || i == 11) return {'day': i - 3, 'mood': '😢', 'label': 'Sedih'};
-			if (i == 6 || i == 13) return {'day': i - 1, 'mood': null, 'label': 'Kosong'};
-			if (i >= 0 && i < 7) return {'day': i + 1, 'mood': null, 'label': ''};
-			return {'day': i - 6, 'mood': null, 'label': ''};
-		});
-
-		return Scaffold(
-			appBar: AppBar(
-				leading: IconButton(
-					icon: const Icon(Icons.arrow_back),
-					onPressed: () => Navigator.maybePop(context),
-				),
-				title: Column(
-					children: const [
-						Text('Kalender Mood', style: TextStyle(fontSize: 16)),
-						SizedBox(height: 2),
-						Text('Maret, 2026', style: TextStyle(fontSize: 12)),
-					],
-				),
-				centerTitle: true,
-				actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.calendar_today))],
-			),
-			body: SafeArea(
-				child: Padding(
-					padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-					child: Column(
-						children: [
-							// Weekday headers
-							Row(
-								mainAxisAlignment: MainAxisAlignment.spaceBetween,
-								children: const [
-									Expanded(child: Center(child: Text('Senin', style: TextStyle(fontSize: 12)))),
-									Expanded(child: Center(child: Text('Selasa', style: TextStyle(fontSize: 12)))),
-									Expanded(child: Center(child: Text('Rabu', style: TextStyle(fontSize: 12)))),
-									Expanded(child: Center(child: Text('Kamis', style: TextStyle(fontSize: 12)))),
-									Expanded(child: Center(child: Text('Jumat', style: TextStyle(fontSize: 12)))),
-									Expanded(child: Center(child: Text('Sabtu', style: TextStyle(fontSize: 12)))),
-									Expanded(child: Center(child: Text('Minggu', style: TextStyle(fontSize: 12)))),
-								],
-							),
-							const SizedBox(height: 8),
-
-							// Calendar grid (fixed height)
-							SizedBox(
-								height: 320,
-								child: GridView.count(
-									crossAxisCount: 7,
-									childAspectRatio: 1.1,
-									physics: const NeverScrollableScrollPhysics(),
-									children: days.map((d) {
-										final dayNum = d['day'] as int;
-										final mood = d['mood'] as String?;
-										final label = d['label'] as String;
-										return DayCell(day: dayNum > 0 ? dayNum.toString() : '', mood: mood, label: label);
-									}).toList(),
-								),
-							),
-
-							const SizedBox(height: 16),
-
-							// Recap card
-							Card(
-								child: Padding(
-									padding: const EdgeInsets.all(16.0),
-									child: Row(
-										children: [
-											// Text area
-											Expanded(
-												child: Column(
-													crossAxisAlignment: CrossAxisAlignment.start,
-													children: const [
-														Text('Recap Bulanan Perasaan Kamu', style: TextStyle(fontSize: 14)),
-														SizedBox(height: 8),
-														Text('Sedih', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-													],
-												),
-											),
-											// Icon placeholder
-											const Padding(
-												padding: EdgeInsets.only(left: 8.0),
-												child: Icon(Icons.mood_bad, size: 56),
-											),
-										],
-									),
-								),
-							),
-						],
-					),
-				),
-			),
-		);
-	}
+  @override
+  State<MoodPage> createState() => _MoodPageState();
 }
 
-class DayCell extends StatelessWidget {
-	final String day;
-	final String? mood;
-	final String label;
+class _MoodPageState extends State<MoodPage> {
+  late int _currentMonth;
+  late int _currentYear;
 
-	const DayCell({Key? key, required this.day, this.mood, this.label = ''}) : super(key: key);
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _currentMonth = now.month;
+    _currentYear = now.year;
+  }
 
-	@override
-	Widget build(BuildContext context) {
-		return Padding(
-			padding: const EdgeInsets.all(4.0),
-			child: Card(
-				child: Padding(
-					padding: const EdgeInsets.all(6.0),
-					child: Column(
-						crossAxisAlignment: CrossAxisAlignment.start,
-						children: [
-							Align(alignment: Alignment.topLeft, child: Text(day, style: const TextStyle(fontSize: 12))),
-							const Spacer(),
-							if (mood != null) Align(alignment: Alignment.center, child: Text(mood!, style: const TextStyle(fontSize: 20))),
-							if (label.isNotEmpty) Align(alignment: Alignment.center, child: Text(label, style: const TextStyle(fontSize: 10))),
-						],
-					),
-				),
-			),
-		);
-	}
+  @override
+  Widget build(BuildContext context) {
+    final firstDay = DateTime(_currentYear, _currentMonth, 1);
+    final lastDay = DateTime(_currentYear, _currentMonth + 1, 0);
+    final daysInMonth = lastDay.day;
+    final startWeekday = firstDay.weekday; // 1 = Senin, 7 = Minggu
+
+    final List<int?> days = List.generate(42, (index) {
+      final dayNum = index - (startWeekday - 1) + 1;
+      return (dayNum > 0 && dayNum <= daysInMonth) ? dayNum : null;
+    });
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF6E9E1),
+      appBar: AppBar(
+        title: Text('${_getMonthName(_currentMonth)} $_currentYear'),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Header Hari
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: ['S', 'S', 'R', 'K', 'J', 'S', 'M']
+                  .map((d) => Text(d, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey))).toList(),
+            ),
+            const SizedBox(height: 10),
+            
+            // Grid Kalender
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 7,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                ),
+                itemCount: days.length,
+                itemBuilder: (context, index) {
+                  final dayNum = days[index];
+                  if (dayNum == null) return const SizedBox.shrink();
+
+                  final date = DateTime(_currentYear, _currentMonth, dayNum);
+                  final data = MoodStorage.getMood(date);
+
+                  return _buildDayCell(context, dayNum, data);
+                },
+              ),
+            ),
+            
+            // Recap Hari Ini
+            _buildTodayRecap(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDayCell(BuildContext context, int day, Map<String, dynamic>? data) {
+    return GestureDetector(
+      onTap: () {
+        if (data != null) {
+          showModalBottomSheet(
+            context: context,
+            builder: (_) => Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(data['emoji'], style: const TextStyle(fontSize: 50)),
+                  const SizedBox(height: 10),
+                  Text('Tanggal $day', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  Text(data['catatan'] ?? 'Tidak ada catatan'),
+                ],
+              ),
+            ),
+          );
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: data != null ? Colors.white : Colors.white24,
+          borderRadius: BorderRadius.circular(8),
+          border: data != null ? Border.all(color: Colors.blue.withOpacity(0.3)) : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('$day', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+            if (data != null) Text(data['emoji'], style: const TextStyle(fontSize: 18)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTodayRecap() {
+    final data = MoodStorage.getMood(DateTime.now());
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: data == null
+          ? const Text('Belum ada mood untuk hari ini.', textAlign: TextAlign.center)
+          : Row(
+              children: [
+                Text(data['emoji'], style: const TextStyle(fontSize: 40)),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Mood Hari Ini', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(data['catatan'], maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                )
+              ],
+            ),
+    );
+  }
+
+  String _getMonthName(int month) {
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return months[month - 1];
+  }
 }
-
