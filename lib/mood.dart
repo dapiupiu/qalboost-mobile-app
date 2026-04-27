@@ -1,5 +1,25 @@
 import 'package:flutter/material.dart';
-import 'checker.dart';
+
+// Penyimpanan data mood dipindah ke file mood.dart agar tidak terjadi import sirkular
+class MoodStorage {
+  static final Map<String, Map<String, dynamic>> _moodData = {};
+
+  static void saveMood(DateTime date, String emoji, String catatan) {
+    final key =
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    _moodData[key] = {
+      'emoji': emoji,
+      'catatan': catatan,
+      'timestamp': DateTime.now(),
+    };
+  }
+
+  static Map<String, dynamic>? getMood(DateTime date) {
+    final key =
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return _moodData[key];
+  }
+}
 
 class MoodPage extends StatefulWidget {
   const MoodPage({Key? key}) : super(key: key);
@@ -48,10 +68,19 @@ class _MoodPageState extends State<MoodPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: ['S', 'S', 'R', 'K', 'J', 'S', 'M']
-                  .map((d) => Text(d, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey))).toList(),
+                  .map(
+                    (d) => Text(
+                      d,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
             const SizedBox(height: 10),
-            
+
             // Grid Kalender
             Expanded(
               child: GridView.builder(
@@ -72,7 +101,7 @@ class _MoodPageState extends State<MoodPage> {
                 },
               ),
             ),
-            
+
             // Recap Hari Ini
             _buildTodayRecap(),
           ],
@@ -81,7 +110,11 @@ class _MoodPageState extends State<MoodPage> {
     );
   }
 
-  Widget _buildDayCell(BuildContext context, int day, Map<String, dynamic>? data) {
+  Widget _buildDayCell(
+    BuildContext context,
+    int day,
+    Map<String, dynamic>? data,
+  ) {
     return GestureDetector(
       onTap: () {
         if (data != null) {
@@ -94,7 +127,10 @@ class _MoodPageState extends State<MoodPage> {
                 children: [
                   Text(data['emoji'], style: const TextStyle(fontSize: 50)),
                   const SizedBox(height: 10),
-                  Text('Tanggal $day', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    'Tanggal $day',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 10),
                   Text(data['catatan'] ?? 'Tidak ada catatan'),
                 ],
@@ -107,13 +143,19 @@ class _MoodPageState extends State<MoodPage> {
         decoration: BoxDecoration(
           color: data != null ? Colors.white : Colors.white24,
           borderRadius: BorderRadius.circular(8),
-          border: data != null ? Border.all(color: Colors.blue.withOpacity(0.3)) : null,
+          border: data != null
+              ? Border.all(color: Colors.blue.withOpacity(0.3))
+              : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('$day', style: const TextStyle(fontSize: 12, color: Colors.black54)),
-            if (data != null) Text(data['emoji'], style: const TextStyle(fontSize: 18)),
+            Text(
+              '$day',
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+            ),
+            if (data != null)
+              Text(data['emoji'], style: const TextStyle(fontSize: 18)),
           ],
         ),
       ),
@@ -130,7 +172,10 @@ class _MoodPageState extends State<MoodPage> {
         borderRadius: BorderRadius.circular(15),
       ),
       child: data == null
-          ? const Text('Belum ada mood untuk hari ini.', textAlign: TextAlign.center)
+          ? const Text(
+              'Belum ada mood untuk hari ini.',
+              textAlign: TextAlign.center,
+            )
           : Row(
               children: [
                 Text(data['emoji'], style: const TextStyle(fontSize: 40)),
@@ -139,18 +184,38 @@ class _MoodPageState extends State<MoodPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Mood Hari Ini', style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(data['catatan'], maxLines: 1, overflow: TextOverflow.ellipsis),
+                      const Text(
+                        'Mood Hari Ini',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        data['catatan'],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
     );
   }
 
   String _getMonthName(int month) {
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
     return months[month - 1];
   }
 }

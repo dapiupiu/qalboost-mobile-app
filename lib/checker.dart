@@ -1,26 +1,5 @@
 import 'package:flutter/material.dart';
-import 'main.dart'; // Pastikan file main.dart ada
-import 'settings.dart'; // Pastikan file settings.dart ada
 import 'mood.dart';
-
-// ✅ Penyimpanan Data Statis
-class MoodStorage {
-  static final Map<String, Map<String, dynamic>> _moodData = {};
-
-  static void saveMood(DateTime date, String emoji, String catatan) {
-    final key = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    _moodData[key] = {
-      'emoji': emoji,
-      'catatan': catatan,
-      'timestamp': DateTime.now(),
-    };
-  }
-
-  static Map<String, dynamic>? getMood(DateTime date) {
-    final key = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    return _moodData[key];
-  }
-}
 
 class CheckerSimpleScreen extends StatefulWidget {
   const CheckerSimpleScreen({Key? key}) : super(key: key);
@@ -48,14 +27,12 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
       return;
     }
 
-    MoodStorage.saveMood(
-      _selectedDate,
-      _selectedMoodEmoji!,
-      _controller.text,
-    );
+    MoodStorage.saveMood(_selectedDate, _selectedMoodEmoji!, _controller.text);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Mood tanggal ${_selectedDate.day} berhasil disimpan!')),
+      SnackBar(
+        content: Text('Mood tanggal ${_selectedDate.day} berhasil disimpan!'),
+      ),
     );
 
     setState(() {
@@ -72,7 +49,10 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: const BackButton(color: Colors.black87),
-        title: const Text('Q-Checker', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Q-Checker',
+          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -84,7 +64,8 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                 child: Image.asset(
                   'assets/images/moon_large.png',
                   height: 120,
-                  errorBuilder: (c, e, s) => const Text('🌙', style: TextStyle(fontSize: 60)),
+                  errorBuilder: (c, e, s) =>
+                      const Text('🌙', style: TextStyle(fontSize: 60)),
                 ),
               ),
               const SizedBox(height: 15),
@@ -94,7 +75,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
-              
+
               // Pilih Tanggal
               GestureDetector(
                 onTap: () async {
@@ -107,7 +88,10 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   if (picked != null) setState(() => _selectedDate = picked);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 16,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -115,7 +99,11 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.calendar_today, size: 16, color: Colors.blue),
+                      const Icon(
+                        Icons.calendar_today,
+                        size: 16,
+                        color: Colors.blue,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
@@ -125,9 +113,9 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 25),
-              
+
               // Mood Selection
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -147,11 +135,14 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 30),
               const Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Apa yang kamu rasakan?', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(
+                  'Apa yang kamu rasakan?',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
               const SizedBox(height: 10),
               TextField(
@@ -174,7 +165,9 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   backgroundColor: const Color(0xFF58A6F0),
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: const Text('Simpan Mood Hari Ini'),
               ),
@@ -199,21 +192,39 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                IconButton(icon: const Icon(Icons.home, color: Colors.white), onPressed: () {}),
+                IconButton(
+                  icon: const Icon(Icons.home, color: Colors.white),
+                  onPressed: () =>
+                      Navigator.popUntil(context, (route) => route.isFirst),
+                ),
                 const SizedBox(width: 56),
-                IconButton(icon: const Icon(Icons.settings, color: Colors.white), onPressed: () {}),
+                IconButton(
+                  icon: const Icon(Icons.settings, color: Colors.white),
+                  onPressed: () => Navigator.pushNamed(context, '/settings'),
+                ),
               ],
             ),
           ),
           Positioned(
-            top: -22, left: 0, right: 0,
+            top: -22,
+            left: 0,
+            right: 0,
             child: Center(
               child: GestureDetector(
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoodPage())),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MoodPage()),
+                ),
                 child: Container(
-                  width: 70, height: 70,
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: const Center(child: Text('🌙', style: TextStyle(fontSize: 30))),
+                  width: 70,
+                  height: 70,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Text('🌙', style: TextStyle(fontSize: 30)),
+                  ),
                 ),
               ),
             ),
@@ -224,7 +235,20 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
   }
 
   String _getMonthName(int month) {
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
     return months[month - 1];
   }
 }
@@ -235,7 +259,12 @@ class _MoodCard extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _MoodCard({required this.label, required this.assetPath, required this.selected, required this.onTap});
+  const _MoodCard({
+    required this.label,
+    required this.assetPath,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -243,17 +272,33 @@ class _MoodCard extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 130, height: 150,
+        width: 130,
+        height: 150,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: selected ? Colors.white : (label == 'Baik' ? const Color(0xFFFFF7C2) : const Color(0xFFD7EAF8)),
+          color: selected
+              ? Colors.white
+              : (label == 'Baik'
+                    ? const Color(0xFFFFF7C2)
+                    : const Color(0xFFD7EAF8)),
           borderRadius: BorderRadius.circular(20),
           border: selected ? Border.all(color: Colors.blue, width: 2) : null,
-          boxShadow: [if (selected) const BoxShadow(color: Colors.black12, blurRadius: 10)],
+          boxShadow: [
+            if (selected)
+              const BoxShadow(color: Colors.black12, blurRadius: 10),
+          ],
         ),
         child: Column(
           children: [
-            Expanded(child: Image.asset(assetPath, errorBuilder: (c, e, s) => Text(label == 'Baik' ? '😊' : '😢', style: const TextStyle(fontSize: 40)))),
+            Expanded(
+              child: Image.asset(
+                assetPath,
+                errorBuilder: (c, e, s) => Text(
+                  label == 'Baik' ? '😊' : '😢',
+                  style: const TextStyle(fontSize: 40),
+                ),
+              ),
+            ),
             Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),

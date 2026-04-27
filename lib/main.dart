@@ -18,10 +18,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'QalBoost',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
+      routes: {
+        '/settings': (context) => const SettingsPage(),
+        '/checker': (context) => const CheckerSimpleScreen(),
+        '/mood': (context) => const MoodPage(),
+        '/home': (context) => const HomePage(),
+      },
       home: const HomePage(),
     );
   }
@@ -38,6 +45,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF6E9E1),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +75,18 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      const Icon(Icons.location_on),
+
+                      // top-right moon graphic (asset optional)
+                      SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Image.asset(
+                          'assets/images/moon_small.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (c, e, s) =>
+                              const Icon(Icons.location_on),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -80,40 +99,44 @@ class _HomePageState extends State<HomePage> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'Bagaimana Perasaan Kamu Hari Ini?',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                'Bagaimana Perasaan\nKamu Hari Ini?',
+                style: TextStyle(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF1F1B18),
+                ),
               ),
             ),
 
             const SizedBox(height: 20),
 
-            // Menu Buttons
+            // Menu Buttons (as rounded cards with images)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   menuButton(
                     context,
-                    icon: Icons.format_quote,
+                    assetPath: 'assets/images/menu_quotes.png',
                     label: 'Q-Quotes',
                     page: const QuotesSimpleScreen(),
                   ),
                   menuButton(
                     context,
-                    icon: Icons.chat,
-                    label: 'Q-Konsul',
+                    assetPath: 'assets/images/menu_consul.png',
+                    label: 'Q-Qonsul',
                     page: const ConsulPage(),
                   ),
                   menuButton(
                     context,
-                    icon: Icons.event_note,
+                    assetPath: 'assets/images/menu_diary.png',
                     label: 'Q-Diary',
                     page: const DiaryPage(),
                   ),
                   menuButton(
                     context,
-                    icon: Icons.lightbulb,
+                    assetPath: 'assets/images/menu_tips.png',
                     label: 'Q-Tips',
                     page: const TipsPage(),
                   ),
@@ -131,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   const Text(
                     'History Mood',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -143,8 +166,8 @@ class _HomePageState extends State<HomePage> {
                       );
                     },
                     child: const Text(
-                      'Lihat Kalender',
-                      style: TextStyle(fontSize: 12),
+                      'Buka Kalender',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF6B6B6B)),
                     ),
                   ),
                 ],
@@ -168,20 +191,23 @@ class _HomePageState extends State<HomePage> {
                         'Sabtu',
                         'Minggu',
                       ].map((day) {
+                        final isFirst = day == 'Senin';
                         return Padding(
                           padding: const EdgeInsets.only(right: 12),
                           child: Column(
                             children: [
                               Container(
-                                width: 30,
-                                height: 30,
+                                width: 40,
+                                height: 40,
                                 decoration: BoxDecoration(
-                                  border: Border.all(),
-                                  borderRadius: BorderRadius.circular(6),
+                                  color: isFirst
+                                      ? const Color(0xFFFFEFD6)
+                                      : const Color(0xFFD7EAF8),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Center(child: Text('😊')),
+                                child: Center(child: Text(isFirst ? '😞' : '')),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 6),
                               Text(day, style: const TextStyle(fontSize: 10)),
                             ],
                           ),
@@ -197,7 +223,7 @@ class _HomePageState extends State<HomePage> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                'Perasaan Kamu Hari Ini',
+                'Perasaan Kamu Hari ini',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -207,43 +233,55 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  border: Border.all(),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Column(
-                  children: [
-                    Icon(Icons.emoji_people, size: 40),
-                    SizedBox(height: 8),
-                    Text('Kecewa'),
+                  color: const Color(0xFFFFEFD6),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
                   ],
                 ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  border: Border.all(),
-                  borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  children: [
+                    // moon left
+                    SizedBox(
+                      width: 80,
+                      height: 80,
+                      child: Image.asset(
+                        'assets/images/moon_small.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (c, e, s) => const Center(
+                          child: Text('🌙', style: TextStyle(fontSize: 36)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            '"catatan kecil dari isi q-checker"',
+                            style: TextStyle(color: Color(0xFF2E2A28)),
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            'Kecewa',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Color(0xFF1F1B18),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                child: const Text('catatan kecil dari isi q-checker'),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // Catatan
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Hari ini ada apa ya?',
-                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
 
@@ -342,10 +380,11 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// 🔥 REUSABLE BUTTON (INI YANG BIKIN ADA EFEK KEDIP)
+// 🔥 REUSABLE BUTTON (image-based or icon)
 Widget menuButton(
   BuildContext context, {
-  required IconData icon,
+  IconData? icon,
+  String? assetPath,
   required String label,
   required Widget page,
 }) {
@@ -354,7 +393,7 @@ Widget menuButton(
       Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           splashColor: Colors.blue.withOpacity(0.3),
           highlightColor: Colors.blue.withOpacity(0.1),
           onTap: () {
@@ -364,13 +403,30 @@ Widget menuButton(
             );
           },
           child: Container(
-            width: 60,
-            height: 60,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
-              border: Border.all(),
-              borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-            child: Icon(icon),
+            child: Center(
+              child: assetPath != null
+                  ? Image.asset(
+                      assetPath,
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.contain,
+                      errorBuilder: (c, e, s) => Icon(icon ?? Icons.extension),
+                    )
+                  : Icon(icon ?? Icons.extension),
+            ),
           ),
         ),
       ),
