@@ -48,7 +48,7 @@ class _DiaryPageState extends State<DiaryPage> {
               Stack(
                 children: [
                   SizedBox(
-                    height: 110,
+                    height: 120,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -58,14 +58,14 @@ class _DiaryPageState extends State<DiaryPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
                               Text(
-                                'Your',
+                                'Diary',
                                 style: TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
                               Text(
-                                'Diary',
+                                'Kamu',
                                 style: TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.w800,
@@ -74,45 +74,37 @@ class _DiaryPageState extends State<DiaryPage> {
                             ],
                           ),
                         ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            GestureDetector(
-                              onTap: _addEntry,
-                              child: Container(
-                                margin: const EdgeInsets.only(top: 8),
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black54),
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Colors.white,
-                                ),
-                                child: const Icon(Icons.add, size: 22),
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
+                  // Add button positioned top-right of header
                   Positioned(
-                    right: 0,
-                    top: 4,
-                    child: Text(
-                      '🌙',
-                      style: TextStyle(
-                        fontSize: 68,
-                        shadows: [
-                          BoxShadow(color: Colors.black12, blurRadius: 4),
-                        ],
+                    top: 8,
+                    right: 8,
+                    child: SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _addEntry,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF58A6F0),
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.add,
+                          size: 22,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 6),
-              const Divider(thickness: 1),
+              Divider(color: Colors.grey.shade300, thickness: 1),
               const SizedBox(height: 12),
               Expanded(
                 child: ListView.separated(
@@ -178,11 +170,12 @@ class _DiaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFD7EAF8),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
         ],
+        border: Border.all(color: const Color(0xFFD7EAF8)),
       ),
       padding: const EdgeInsets.all(14),
       child: Column(

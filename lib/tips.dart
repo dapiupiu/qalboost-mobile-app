@@ -58,7 +58,7 @@ class TipsPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
-                            'Harus\nNgapain Sih\nKalau Lagi\ Ngerasa...',
+                            'HARUS\nNGAPAIN SIH\nKALAU LAGI\nGERASA...',
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w800,
@@ -162,18 +162,45 @@ class _ColoredExpansionCardState extends State<_ColoredExpansionCard> {
           borderRadius: BorderRadius.circular(24),
           onTap: () => setState(() => _open = !_open),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-            child: Row(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Column(
               children: [
-                Expanded(
-                  child: Text(
-                    widget.title,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.title,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      AnimatedRotation(
+                        turns: _open ? 0.0 : 0.5,
+                        duration: const Duration(milliseconds: 250),
+                        child: const Icon(Icons.keyboard_arrow_up),
+                      ),
+                    ],
                   ),
                 ),
-                Transform.rotate(
-                  angle: _open ? 3.14 : 0,
-                  child: const Icon(Icons.keyboard_arrow_up),
+
+                AnimatedCrossFade(
+                  firstChild: const SizedBox.shrink(),
+                  secondChild: Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 16,
+                      left: 8,
+                      right: 8,
+                    ),
+                    child: Text(
+                      widget.content,
+                      style: const TextStyle(color: Colors.black87),
+                    ),
+                  ),
+                  crossFadeState: _open
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  duration: const Duration(milliseconds: 300),
                 ),
               ],
             ),
