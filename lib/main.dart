@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart'; // Tambahkan ini untuk video
 import 'diary.dart';
 import 'tips.dart';
 import 'mood.dart';
@@ -23,17 +24,73 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
+      // Diarahkan ke Splash Screen terlebih dahulu
+      home: const VideoSplashScreen(), 
       routes: {
         '/settings': (context) => const SettingsPage(),
         '/checker': (context) => const CheckerSimpleScreen(),
         '/mood': (context) => const MoodPage(),
         '/home': (context) => const HomePage(),
       },
-      home: const HomePage(),
     );
   }
 }
 
+// --- WIDGET VIDEO SPLASH SCREEN (Tambahan Baru) ---
+class VideoSplashScreen extends StatefulWidget {
+  const VideoSplashScreen({super.key});
+
+  @override
+  State<VideoSplashScreen> createState() => _VideoSplashScreenState();
+}
+
+class _VideoSplashScreenState extends State<VideoSplashScreen> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset('assets/videos/splash_video.mp4')
+      ..initialize().then((_) {
+        setState(() {});
+        _controller.play();
+      });
+
+    _controller.addListener(() {
+      if (_controller.value.position == _controller.value.duration) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // 1. Ubah background Scaffold jadi Putih
+      backgroundColor: Colors.white, 
+      body: Center(
+        child: _controller.value.isInitialized
+            ? AspectRatio(
+                aspectRatio: _controller.value.aspectRatio,
+                child: VideoPlayer(_controller),
+              )
+            // 2. Ubah warna loading indicator jadi putih juga agar tidak terlihat (invisible)
+            // atau ganti dengan Container kosong agar tidak ada warna orange muncul
+            : const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+      ),
+    );
+  }
+}
+
+// --- HOME PAGE (Tetap Sesuai Kode Asli Kamu) ---
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -90,7 +147,7 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text('Maret 15 2026', style: TextStyle(fontSize: 12)),
+                  const Text('Mei 07 2026', style: TextStyle(fontSize: 12)),
                 ],
               ),
             ),
@@ -237,7 +294,7 @@ class _HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFEFD6),
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
                       blurRadius: 8,
@@ -260,10 +317,10 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Expanded(
+                    const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
                             '"catatan kecil dari isi q-checker"',
                             style: TextStyle(color: Color(0xFF2E2A28)),
@@ -321,18 +378,12 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.home, color: Colors.white),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const HomePage()),
-                    ),
+                    onPressed: () {}, // Sudah di HomePage
                   ),
                   const SizedBox(width: 56), // space for center moon
                   IconButton(
                     icon: const Icon(Icons.settings, color: Colors.white),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SettingsPage()),
-                    ),
+                    onPressed: () => Navigator.pushNamed(context, '/settings'),
                   ),
                 ],
               ),
@@ -344,18 +395,11 @@ class _HomePageState extends State<HomePage> {
               right: 0,
               child: Center(
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const CheckerSimpleScreen(),
-                      ),
-                    );
-                  },
+                  onTap: () => Navigator.pushNamed(context, '/checker'),
                   child: Container(
                     width: 72,
                     height: 72,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white,
                     ),
@@ -380,7 +424,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// 🔥 REUSABLE BUTTON (image-based or icon)
+// 🔥 REUSABLE BUTTON
 Widget menuButton(
   BuildContext context, {
   IconData? icon,
@@ -394,8 +438,6 @@ Widget menuButton(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          splashColor: Colors.blue.withOpacity(0.3),
-          highlightColor: Colors.blue.withOpacity(0.1),
           onTap: () {
             Navigator.push(
               context,
@@ -408,7 +450,7 @@ Widget menuButton(
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: Colors.black12,
                   blurRadius: 8,
