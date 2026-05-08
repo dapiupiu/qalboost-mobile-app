@@ -25,7 +25,6 @@ flutter:
   assets:
     - assets/videos/
     - assets/images/
-    - assets/icons/
 
 # Konfigurasi Icon Aplikasi (Launcher)
 flutter_launcher_icons:
