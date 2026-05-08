@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // Diarahkan ke Splash Screen terlebih dahulu
-      home: const VideoSplashScreen(), 
+      home: const VideoSplashScreen(),
       routes: {
         '/settings': (context) => const SettingsPage(),
         '/checker': (context) => const CheckerSimpleScreen(),
@@ -50,11 +50,19 @@ class _VideoSplashScreenState extends State<VideoSplashScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/videos/splash_video.mp4')
-      ..initialize().then((_) {
-        setState(() {});
-        _controller.play();
-      });
+    _controller = VideoPlayerController.asset('assets/videos/splash_video.mp4');
+    _controller
+        .initialize()
+        .then((_) {
+          setState(() {});
+          _controller.play();
+        })
+        .catchError((error) {
+          // Jika inisialisasi video gagal, langsung pindah ke halaman utama sebagai fallback
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushReplacementNamed(context, '/home');
+          });
+        });
 
     _controller.addListener(() {
       if (_controller.value.position == _controller.value.duration) {
@@ -73,17 +81,30 @@ class _VideoSplashScreenState extends State<VideoSplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // 1. Ubah background Scaffold jadi Putih
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white,
       body: Center(
         child: _controller.value.isInitialized
             ? AspectRatio(
                 aspectRatio: _controller.value.aspectRatio,
                 child: VideoPlayer(_controller),
               )
-            // 2. Ubah warna loading indicator jadi putih juga agar tidak terlihat (invisible)
-            // atau ganti dengan Container kosong agar tidak ada warna orange muncul
-            : const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Tampilkan logo sebagai fallback sementara video belum siap
+                  SizedBox(
+                    width: 120,
+                    height: 120,
+                    child: Image.asset(
+                      'assets/images/app_logo.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (c, e, s) =>
+                          const Icon(Icons.flutter_dash, size: 64),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const CircularProgressIndicator(),
+                ],
               ),
       ),
     );
