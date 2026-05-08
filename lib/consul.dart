@@ -10,6 +10,8 @@ class ConsulPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     final advisors = List.generate(
       6,
       (i) => {
@@ -21,13 +23,15 @@ class ConsulPage extends StatelessWidget {
     );
 
     return Scaffold(
+      backgroundColor: isDarkMode ? const Color(0xFF121212) : Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Q-Qonsul'),
+        title: Text('Q-Qonsul', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
         centerTitle: true,
+        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.white,
         elevation: 0,
       ),
       body: SafeArea(

@@ -5,6 +5,8 @@ class TipsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     final tips = [
       {
         'title': 'Kamu ngerasa sedih ya...',
@@ -27,15 +29,15 @@ class TipsPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6E9E1),
+      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black87),
           onPressed: () => Navigator.maybePop(context),
         ),
-        title: const Text('Q-Tips', style: TextStyle(color: Colors.black87)),
+        title: Text('Q-Tips', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87)),
         centerTitle: true,
       ),
       body: SafeArea(
