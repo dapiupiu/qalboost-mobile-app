@@ -25,19 +25,20 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bg = const Color(0xFFF6E9E1);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1);
     final accentBlue = const Color(0xFF1976D2);
 
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black87),
           onPressed: () => Navigator.maybePop(context),
         ),
-        title: const Text('Q-Quotes', style: TextStyle(color: Colors.black87)),
+        title: Text('Q-Quotes', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87)),
         centerTitle: true,
         actions: [
           Padding(
@@ -47,7 +48,7 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
               width: 28,
               height: 28,
               errorBuilder: (c, e, s) =>
-                  const Icon(Icons.info_outline, color: Colors.black54),
+                  Icon(Icons.info_outline, color: isDarkMode ? Colors.grey : Colors.black54),
             ),
           ),
         ],

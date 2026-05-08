@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'theme_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -12,23 +13,38 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _notifReminder = false;
   bool _notifUpdate = true;
 
-  String _selectedTheme = 'light';
+  bool _isDarkMode = false;
   String _selectedFrequency = 'daily';
 
   Set<String> _selectedLanguages = {'id'};
 
+  void _showNotificationPreview() {
+    // Tampilkan preview notifikasi dari atas
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('🔔 Notifikasi Aktif'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        backgroundColor: const Color(0xFF2F80ED),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFF6E9E1),
+      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black87),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text('Settings', style: TextStyle(color: Colors.black87)),
+        title: Text('Settings', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87)),
         centerTitle: false,
       ),
       body: SafeArea(
@@ -40,7 +56,7 @@ class _SettingsPageState extends State<SettingsPage> {
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFEFD6),
+                  color: isDarkMode ? const Color(0xFF1F1F1F) : const Color(0xFFFFEFD6),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: const [
                     BoxShadow(
@@ -59,17 +75,18 @@ class _SettingsPageState extends State<SettingsPage> {
                       child: Icon(Icons.person, color: Colors.black54),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'Nama Pengguna',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: isDarkMode ? Colors.white : Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'Pengguna@gmail.com',
-                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                      style: TextStyle(fontSize: 12, color: isDarkMode ? Colors.grey[400] : Colors.black54),
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
@@ -77,8 +94,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       icon: const Icon(Icons.edit, size: 16),
                       label: const Text('Edit Profil'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black87,
+                        backgroundColor: isDarkMode ? const Color(0xFF2F2F2F) : Colors.white,
+                        foregroundColor: isDarkMode ? Colors.white : Colors.black87,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -111,11 +128,15 @@ class _SettingsPageState extends State<SettingsPage> {
                       icon: Icons.notifications,
                       title: 'Notifikasi',
                       children: [
-                        CheckboxListTile(
+                        SwitchListTile(
                           title: const Text('Aktifkan Notifikasi'),
                           value: _notifAktif,
-                          onChanged: (bool? value) =>
-                              setState(() => _notifAktif = value ?? false),
+                          onChanged: (bool value) {
+                            setState(() => _notifAktif = value);
+                            if (value) {
+                              _showNotificationPreview();
+                            }
+                          },
                         ),
                         CheckboxListTile(
                           title: const Text('Reminder Harian'),
@@ -153,21 +174,17 @@ class _SettingsPageState extends State<SettingsPage> {
                                 'Tema:',
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                              RadioListTile<String>(
-                                title: const Text('Terang (Light)'),
-                                value: 'light',
-                                groupValue: _selectedTheme,
-                                onChanged: (String? value) => setState(
-                                  () => _selectedTheme = value ?? 'light',
-                                ),
-                              ),
-                              RadioListTile<String>(
-                                title: const Text('Gelap (Dark)'),
-                                value: 'dark',
-                                groupValue: _selectedTheme,
-                                onChanged: (String? value) => setState(
-                                  () => _selectedTheme = value ?? 'dark',
-                                ),
+                              SwitchListTile(
+                                title: const Text('Mode Malam (Dark Mode)'),
+                                subtitle: const Text('Gunakan tema gelap'),
+                                value: _isDarkMode,
+                                onChanged: (bool value) {
+                                  setState(() => _isDarkMode = value);
+                                  final themeService = ThemeService();
+                                  themeService.setThemeMode(
+                                    value ? ThemeMode.dark : ThemeMode.light,
+                                  );
+                                },
                               ),
                               const SizedBox(height: 12),
                               const Text(
@@ -261,6 +278,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         label: const Text('Log out'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2F80ED),
+                          foregroundColor: Colors.white,
                           shape: const StadiumBorder(),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
@@ -337,9 +355,11 @@ class _SettingsPageState extends State<SettingsPage> {
     required String title,
     required List<Widget> children,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1F1F1F) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
@@ -351,14 +371,17 @@ class _SettingsPageState extends State<SettingsPage> {
           leading: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFF7C2),
+              color: isDarkMode ? const Color(0xFF2F2F2F) : const Color(0xFFFFF7C2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: Colors.black87),
+            child: Icon(icon, color: isDarkMode ? Colors.white : Colors.black87),
           ),
           title: Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: isDarkMode ? Colors.white : Colors.black87,
+            ),
           ),
           children: children,
         ),

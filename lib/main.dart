@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart'; // Tambahkan ini untuk video
+import 'package:video_player/video_player.dart';
 import 'diary.dart';
 import 'tips.dart';
 import 'mood.dart';
@@ -7,6 +7,7 @@ import 'consul.dart';
 import 'checker.dart';
 import 'settings.dart';
 import 'quotes.dart';
+import 'theme_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,26 +18,46 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'QalBoost',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      // Diarahkan ke Splash Screen terlebih dahulu
-      home: const VideoSplashScreen(),
-      routes: {
-        '/settings': (context) => const SettingsPage(),
-        '/checker': (context) => const CheckerSimpleScreen(),
-        '/mood': (context) => const MoodPage(),
-        '/home': (context) => const HomePage(),
+    final themeService = ThemeService();
+
+    return ListenableBuilder(
+      listenable: themeService,
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'QalBoost',
+          debugShowCheckedModeBanner: false,
+          themeMode: themeService.themeMode,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+            useMaterial3: true,
+            brightness: Brightness.light,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.blue,
+              brightness: Brightness.dark,
+            ),
+            useMaterial3: true,
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF121212),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF1F1F1F),
+              surfaceTintColor: Colors.transparent,
+            ),
+          ),
+          home: const VideoSplashScreen(),
+          routes: {
+            '/settings': (context) => const SettingsPage(),
+            '/checker': (context) => const CheckerSimpleScreen(),
+            '/mood': (context) => const MoodPage(),
+            '/home': (context) => const HomePage(),
+          },
+        );
       },
     );
   }
 }
 
-// --- WIDGET VIDEO SPLASH SCREEN (Tambahan Baru) ---
 class VideoSplashScreen extends StatefulWidget {
   const VideoSplashScreen({super.key});
 
@@ -80,7 +101,6 @@ class _VideoSplashScreenState extends State<VideoSplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // 1. Ubah background Scaffold jadi Putih
       backgroundColor: Colors.white,
       body: Center(
         child: _controller.value.isInitialized
@@ -88,30 +108,14 @@ class _VideoSplashScreenState extends State<VideoSplashScreen> {
                 aspectRatio: _controller.value.aspectRatio,
                 child: VideoPlayer(_controller),
               )
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Tampilkan logo sebagai fallback sementara video belum siap
-                  SizedBox(
-                    width: 120,
-                    height: 120,
-                    child: Image.asset(
-                      'assets/images/app_logo.png',
-                      fit: BoxFit.contain,
-                      errorBuilder: (c, e, s) =>
-                          const Icon(Icons.flutter_dash, size: 64),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const CircularProgressIndicator(),
-                ],
+            : const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
       ),
     );
   }
 }
 
-// --- HOME PAGE (Tetap Sesuai Kode Asli Kamu) ---
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -122,13 +126,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF6E9E1),
+      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // --- HEADER ---
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -138,57 +144,68 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
-                        children: const [
-                          CircleAvatar(child: Icon(Icons.person)),
-                          SizedBox(width: 12),
+                        children: [
+                          const CircleAvatar(child: Icon(Icons.person)),
+                          const SizedBox(width: 12),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Selamat Datang'),
+                              Text(
+                                'Selamat Datang',
+                                style: TextStyle(
+                                  color: isDarkMode ? Colors.grey[400] : Colors.black54,
+                                ),
+                              ),
                               Text(
                                 'Nama Pengguna',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isDarkMode ? Colors.white : Colors.black87,
+                                ),
                               ),
                             ],
                           ),
                         ],
                       ),
-
-                      // top-right moon graphic (asset optional)
                       SizedBox(
                         width: 48,
                         height: 48,
                         child: Image.asset(
                           'assets/images/moon_small.png',
                           fit: BoxFit.contain,
-                          errorBuilder: (c, e, s) =>
-                              const Icon(Icons.location_on),
+                          errorBuilder: (c, e, s) => const Icon(Icons.location_on),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text('Mei 07 2026', style: TextStyle(fontSize: 12)),
+                  Text(
+                    'Mei 07 2026',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDarkMode ? Colors.grey[500] : Colors.grey,
+                    ),
+                  ),
                 ],
               ),
             ),
 
-            // Title
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+            // --- TITLE ---
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Bagaimana Perasaan\nKamu Hari Ini?',
                 style: TextStyle(
                   fontSize: 34,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF1F1B18),
+                  color: isDarkMode ? Colors.white : const Color(0xFF1F1B18),
                 ),
               ),
             ),
 
             const SizedBox(height: 20),
 
-            // Menu Buttons (as rounded cards with images)
+            // --- MENU BUTTONS ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -224,7 +241,7 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: 30),
 
-            // History Mood
+            // --- HISTORY MOOD ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -238,9 +255,7 @@ class _HomePageState extends State<HomePage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const MoodPage(),
-                        ),
+                        MaterialPageRoute(builder: (context) => const MoodPage()),
                       );
                     },
                     child: const Text(
@@ -259,45 +274,44 @@ class _HomePageState extends State<HomePage> {
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children:
-                      [
-                        'Senin',
-                        'Selasa',
-                        'Rabu',
-                        'Kamis',
-                        'Jumat',
-                        'Sabtu',
-                        'Minggu',
-                      ].map((day) {
-                        final isFirst = day == 'Senin';
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: Column(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: isFirst
-                                      ? const Color(0xFFFFEFD6)
-                                      : const Color(0xFFD7EAF8),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Center(child: Text(isFirst ? '😞' : '')),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(day, style: const TextStyle(fontSize: 10)),
-                            ],
+                  children: [
+                    'Senin',
+                    'Selasa',
+                    'Rabu',
+                    'Kamis',
+                    'Jumat',
+                    'Sabtu',
+                    'Minggu',
+                  ].map((day) {
+                    final isFirst = day == 'Senin';
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: isFirst
+                                  ? const Color(0xFFFFEFD6)
+                                  : const Color(0xFFD7EAF8),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(child: Text(isFirst ? '😞' : '')),
                           ),
-                        );
-                      }).toList(),
+                          const SizedBox(height: 6),
+                          Text(day, style: const TextStyle(fontSize: 10)),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
 
             const SizedBox(height: 30),
 
-            // Perasaan Hari Ini
+            // --- PERASAAN HARI INI ---
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
@@ -325,7 +339,6 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: Row(
                   children: [
-                    // moon left
                     SizedBox(
                       width: 80,
                       height: 80,
@@ -385,7 +398,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      // Bottom Nav
+      // --- BOTTOM NAVIGATION BAR ---
       bottomNavigationBar: SizedBox(
         height: 72,
         child: Stack(
@@ -399,9 +412,9 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.home, color: Colors.white),
-                    onPressed: () {}, // Sudah di HomePage
+                    onPressed: () {},
                   ),
-                  const SizedBox(width: 56), // space for center moon
+                  const SizedBox(width: 56),
                   IconButton(
                     icon: const Icon(Icons.settings, color: Colors.white),
                     onPressed: () => Navigator.pushNamed(context, '/settings'),
@@ -409,7 +422,6 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            // center moon icon overlap (tappable -> Q-Checker)
             Positioned(
               top: -22,
               left: 0,
