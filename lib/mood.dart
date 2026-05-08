@@ -47,17 +47,19 @@ class _MoodPageState extends State<MoodPage> {
     final daysInMonth = lastDay.day;
     final startWeekday = firstDay.weekday; // 1 = Senin, 7 = Minggu
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     final List<int?> days = List.generate(42, (index) {
       final dayNum = index - (startWeekday - 1) + 1;
       return (dayNum > 0 && dayNum <= daysInMonth) ? dayNum : null;
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6E9E1),
+      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
       appBar: AppBar(
         title: Text('${_getMonthName(_currentMonth)} $_currentYear'),
         centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
       ),
       body: Padding(
