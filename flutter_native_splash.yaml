@@ -1,7 +1,9 @@
 flutter_native_splash:
-  color: "#FFFFFF" # Membuat background awal putih bersih
-  image: assets/images/logo_static.png # Munculkan logo kamu di tengah
+  color: "#FFFFFF" # Membuat layar awal jadi putih polos
+  # image: "assets/images/app_logo.png"  <-- JANGAN MASUKKAN IMAGE (KOMENTARI/HAPUS)
+  
   android_12:
     color: "#FFFFFF"
-    image: assets/images/logo_static.png
+    # Biarkan image kosong agar tidak muncul logo Android/Flutter
+    
   fullscreen: true
