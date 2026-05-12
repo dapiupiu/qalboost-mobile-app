@@ -40,18 +40,128 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
         ),
         title: Text('Q-Quotes', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87)),
         centerTitle: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: Image.asset(
-              'assets/images/menu_quotes.png',
-              width: 28,
-              height: 28,
-              errorBuilder: (c, e, s) =>
-                  Icon(Icons.info_outline, color: isDarkMode ? Colors.grey : Colors.black54),
-            ),
-          ),
-        ],
+actions: [
+  Padding(
+    padding: const EdgeInsets.only(right: 12.0),
+    child: GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (context) {
+            return Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 16,
+              ),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF6E9E1),
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Colors.orangeAccent,
+                        child: const Icon(
+                          Icons.tips_and_updates,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      const Text(
+                        'Tutorial',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  _tutorialItem(
+                    Icons.play_circle_fill,
+                    'Play',
+                    'Tekan untuk memutar atau menghentikan audio quotes',
+                  ),
+
+                  _tutorialItem(
+                    Icons.swipe,
+                    'Swipe',
+                    'Geser layar kebawah untuk melihat quotes lain',
+                  ),
+
+                  _tutorialItem(
+                    Icons.download,
+                    'Download',
+                    'Simpan quotes ke perangkat',
+                  ),
+
+                  _tutorialItem(
+                    Icons.favorite,
+                    'Favorite',
+                    'Tambah ke favorit',
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1976D2),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        'Mengerti',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+      child: Image.asset(
+        'assets/images/menu_quotes.png',
+        width: 28,
+        height: 28,
+        errorBuilder: (c, e, s) => Icon(
+          Icons.info_outline,
+          color: isDarkMode ? Colors.grey : Colors.black54,
+        ),
+      ),
+    ),
+  ),
+],
       ),
       body: SafeArea(
         child: Padding(
@@ -263,4 +373,53 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
       ),
     );
   }
+  Widget _tutorialItem(
+  IconData icon,
+  String title,
+  String desc,
+) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 18),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CircleAvatar(
+          radius: 22,
+          backgroundColor: Colors.white,
+          child: Icon(
+            icon,
+            color: const Color(0xFF1976D2),
+          ),
+        ),
+
+        const SizedBox(width: 14),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                desc,
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
 }
