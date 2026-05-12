@@ -71,11 +71,19 @@ class _VideoSplashScreenState extends State<VideoSplashScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/videos/splash_video.mp4')
-      ..initialize().then((_) {
-        setState(() {});
-        _controller.play();
-      });
+    _controller = VideoPlayerController.asset('assets/videos/splash_video.mp4');
+    _controller
+        .initialize()
+        .then((_) {
+          setState(() {});
+          _controller.play();
+        })
+        .catchError((error) {
+          // Jika inisialisasi video gagal, langsung pindah ke halaman utama sebagai fallback
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushReplacementNamed(context, '/home');
+          });
+        });
 
     _controller.addListener(() {
       if (_controller.value.position == _controller.value.duration) {
