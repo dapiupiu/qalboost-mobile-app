@@ -5,13 +5,43 @@ import 'package:flutter/material.dart';
 // - assets/images/ustadz_avatar.png   (fallback avatar image)
 // Add them to `pubspec.yaml` under `flutter/assets:` before using.
 
-class ConsulPage extends StatelessWidget {
+class ConsulPage extends StatefulWidget {
   const ConsulPage({Key? key}) : super(key: key);
+
+  @override
+  State<ConsulPage> createState() => _ConsulPageState();
+}
+
+class _ConsulPageState extends State<ConsulPage> {
+  final ScrollController _scrollController = ScrollController();
+  bool _showBackToTop = false;
+  bool _hoveringFab = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final shouldShow = _scrollController.offset > 200;
+    if (shouldShow != _showBackToTop) {
+      setState(() {
+        _showBackToTop = shouldShow;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
     final advisors = List.generate(
       6,
       (i) => {
@@ -23,15 +53,25 @@ class ConsulPage extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : Colors.white,
+      backgroundColor: isDarkMode
+          ? const Color(0xFF121212)
+          : const Color(0xFFF6E9E1),
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text('Q-Qonsul', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+        title: Text(
+          'Q-Qonsul',
+          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+        ),
         centerTitle: true,
-        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.white,
+        backgroundColor: isDarkMode
+            ? const Color(0xFF1F1F1F)
+            : Colors.transparent,
         elevation: 0,
       ),
       body: SafeArea(
@@ -115,6 +155,7 @@ class ConsulPage extends StatelessWidget {
               // Grid of advisor cards
               Expanded(
                 child: GridView.count(
+                  controller: _scrollController,
                   crossAxisCount: 2,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
@@ -259,6 +300,33 @@ class ConsulPage extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+      floatingActionButton: AnimatedOpacity(
+        opacity: _showBackToTop ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 260),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hoveringFab = true),
+          onExit: (_) => setState(() => _hoveringFab = false),
+          child: Transform.scale(
+            scale: _hoveringFab ? 1.08 : 1.0,
+            child: FloatingActionButton(
+              heroTag: 'back_to_top',
+              onPressed: () {
+                _scrollController.animateTo(
+                  0,
+                  duration: const Duration(milliseconds: 420),
+                  curve: Curves.easeOut,
+                );
+              },
+              backgroundColor: isDarkMode
+                  ? Colors.tealAccent.shade700
+                  : Colors.blueAccent,
+              tooltip: 'Kembali ke atas',
+              child: const Icon(Icons.arrow_upward),
+            ),
           ),
         ),
       ),

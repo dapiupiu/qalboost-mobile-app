@@ -14,6 +14,10 @@ class _DiaryPageState extends State<DiaryPage> {
     {'title': 'Judul', 'content': 'Isi......', 'date': '30 Maret 2026'},
   ];
 
+  final ScrollController _scrollController = ScrollController();
+  bool _showBackToTop = false;
+  bool _hoveringFab = false;
+
   void _addEntry() {
     setState(() {
       _entries.insert(0, {
@@ -25,19 +29,46 @@ class _DiaryPageState extends State<DiaryPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      final shouldShow = _scrollController.offset > 200;
+      if (shouldShow != _showBackToTop) {
+        setState(() => _showBackToTop = shouldShow);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      backgroundColor: isDarkMode
+          ? const Color(0xFF121212)
+          : const Color(0xFFF6E9E1),
       appBar: AppBar(
-        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
+        backgroundColor: isDarkMode
+            ? const Color(0xFF1F1F1F)
+            : Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black87),
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDarkMode ? Colors.white : Colors.black87,
+          ),
           onPressed: () => Navigator.maybePop(context),
         ),
-        title: Text('Q-Diary', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87)),
+        title: Text(
+          'Q-Diary',
+          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87),
+        ),
         centerTitle: true,
         actions: const [SizedBox(width: 48)],
       ),
@@ -79,7 +110,7 @@ class _DiaryPageState extends State<DiaryPage> {
                       ],
                     ),
                   ),
-                  // Add button positioned top-right of header
+                  // Add button positioned top-right of header (centered icon)
                   Positioned(
                     top: 8,
                     right: 8,
@@ -91,14 +122,14 @@ class _DiaryPageState extends State<DiaryPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF58A6F0),
                           elevation: 4,
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(48, 48),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Icon(
-                          Icons.add,
-                          size: 22,
-                          color: Colors.white,
+                        child: const Center(
+                          child: Icon(Icons.add, size: 20, color: Colors.white),
                         ),
                       ),
                     ),
@@ -110,6 +141,7 @@ class _DiaryPageState extends State<DiaryPage> {
               const SizedBox(height: 12),
               Expanded(
                 child: ListView.separated(
+                  controller: _scrollController,
                   itemCount: _entries.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 14),
                   itemBuilder: (context, index) {
@@ -149,6 +181,33 @@ class _DiaryPageState extends State<DiaryPage> {
               ),
               const SizedBox(height: 12),
             ],
+          ),
+        ),
+      ),
+      floatingActionButton: AnimatedOpacity(
+        opacity: _showBackToTop ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 260),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hoveringFab = true),
+          onExit: (_) => setState(() => _hoveringFab = false),
+          child: Transform.scale(
+            scale: _hoveringFab ? 1.08 : 1.0,
+            child: FloatingActionButton(
+              heroTag: 'diary_back_to_top',
+              onPressed: () {
+                _scrollController.animateTo(
+                  0,
+                  duration: const Duration(milliseconds: 420),
+                  curve: Curves.easeOut,
+                );
+              },
+              backgroundColor: isDarkMode
+                  ? Colors.tealAccent.shade700
+                  : const Color(0xFF58A6F0),
+              tooltip: 'Kembali ke atas',
+              child: const Icon(Icons.arrow_upward),
+            ),
           ),
         ),
       ),
