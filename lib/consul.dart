@@ -43,7 +43,7 @@ class _ConsulPageState extends State<ConsulPage> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final advisors = List.generate(
-      6,
+      14,
       (i) => {
         'name': 'Nama Ustadz',
         'title': 'Gelar',
