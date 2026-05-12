@@ -57,11 +57,49 @@ class _MoodPageState extends State<MoodPage> {
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
       appBar: AppBar(
-        title: Text('${_getMonthName(_currentMonth)} $_currentYear'),
-        centerTitle: true,
-        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
-        elevation: 0,
+  backgroundColor:
+      isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
+  elevation: 0,
+
+  // tombol kembali
+  leading: IconButton(
+    icon: const Icon(Icons.arrow_back),
+    onPressed: () {
+      Navigator.pop(context);
+    },
+  ),
+
+  centerTitle: true,
+
+  // judul bulan & tahun
+  title: Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    IconButton(
+      icon: const Icon(Icons.chevron_left),
+      onPressed: _previousMonth,
+    ),
+
+    GestureDetector(
+      onTap: () {
+        _showMonthYearPicker(context);
+      },
+      child: Text(
+        '${_getMonthName(_currentMonth)} $_currentYear',
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
       ),
+    ),
+
+    IconButton(
+      icon: const Icon(Icons.chevron_right),
+      onPressed: _nextMonth,
+    ),
+  ],
+),
+),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -203,6 +241,108 @@ class _MoodPageState extends State<MoodPage> {
     );
   }
 
+void _previousMonth() {
+  setState(() {
+    if (_currentMonth == 1) {
+      _currentMonth = 12;
+      _currentYear--;
+    } else {
+      _currentMonth--;
+    }
+  });
+}
+
+void _nextMonth() {
+  setState(() {
+    if (_currentMonth == 12) {
+      _currentMonth = 1;
+      _currentYear++;
+    } else {
+      _currentMonth++;
+    }
+  });
+}
+void _showMonthYearPicker(BuildContext context) {
+  int selectedMonth = _currentMonth;
+  int selectedYear = _currentYear;
+
+  showModalBottomSheet(
+    context: context,
+    builder: (_) {
+      return StatefulBuilder(
+        builder: (context, setModalState) {
+          return Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Pilih Bulan & Tahun',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                DropdownButton<int>(
+                  value: selectedMonth,
+                  isExpanded: true,
+                  items: List.generate(12, (index) {
+                    return DropdownMenuItem(
+                      value: index + 1,
+                      child: Text(_getMonthName(index + 1)),
+                    );
+                  }),
+                  onChanged: (value) {
+                    setModalState(() {
+                      selectedMonth = value!;
+                    });
+                  },
+                ),
+
+                const SizedBox(height: 10),
+
+                DropdownButton<int>(
+                  value: selectedYear,
+                  isExpanded: true,
+                  items: List.generate(20, (index) {
+                    int year = 2020 + index;
+
+                    return DropdownMenuItem(
+                      value: year,
+                      child: Text(year.toString()),
+                    );
+                  }),
+                  onChanged: (value) {
+                    setModalState(() {
+                      selectedYear = value!;
+                    });
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentMonth = selectedMonth;
+                      _currentYear = selectedYear;
+                    });
+
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Pilih'),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
   String _getMonthName(int month) {
     const months = [
       'Januari',
