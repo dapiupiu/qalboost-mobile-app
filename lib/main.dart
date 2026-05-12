@@ -171,7 +171,7 @@ class _HomePageState extends State<HomePage> {
                         width: 48,
                         height: 48,
                         child: Image.asset(
-                          'assets/images/moon_small.png',
+                          'assets/images/app_logo.png',
                           fit: BoxFit.contain,
                           errorBuilder: (c, e, s) => const Icon(Icons.location_on),
                         ),
