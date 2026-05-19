@@ -1,57 +1,89 @@
 import 'package:flutter/material.dart';
-
-// --- IMPORT KOMPONEN DRAWER KAMU DI SINI ---
-// Sesuaikan path import jika folder penempatannya berbeda
 import 'components/app_drawer.dart';
+
 
 class TipsPage extends StatelessWidget {
   const TipsPage({Key? key}) : super(key: key);
 
-  // Fungsi tutorial dimasukkan ke dalam class utama agar rapi dan tidak error
-  Widget _tutorialItem(
-    IconData icon,
-    String title,
-    String desc,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: Colors.white,
-            child: Icon(
-              icon,
-              color: const Color(0xFF1976D2),
-              size: 16,
+  // --- 1. WIDGET PINTASAN FITUR (Ukuran Mobile-Friendly) ---
+  Widget _buildShortcutButton({
+    required BuildContext context,
+    required String title,
+    required String desc,
+    required IconData icon,
+    required Color iconColor,
+    required Color bgColor,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), // Padding disesuaikan untuk HP
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            )
+          ],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 18, // Ukuran lingkaran ikon lebih proporsional di HP
+              backgroundColor: bgColor,
+              child: Icon(icon, color: iconColor, size: 18),
             ),
-          ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    desc,
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- 2. WIDGET ITEM REKOMENDASI LIST (Ukuran Ringkas) ---
+  Widget _buildRecommendationItem(String title, String subtitle, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: const Color(0xFFFFB74D)),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  title, 
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black87),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  desc,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                    height: 1.3,
-                  ),
-                ),
+                Text(subtitle, style: const TextStyle(fontSize: 10, color: Colors.grey)),
               ],
             ),
-          ),
+          )
         ],
       ),
     );
@@ -59,334 +91,222 @@ class TipsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final tips = [
-      {
-        'title': 'Kamu ngerasa sedih ya...',
-        'content':
-            'Ceritakan apa yang membuatmu sedih, lalu coba tarik napas dalam-dalam dan tuliskan hal kecil yang membuatmu bersyukur saat ini.',
-        'color': const Color(0xFFBDF2B8),
-      },
-      {
-        'title': 'Lagi marah ya...',
-        'content':
-            'Coba hitung sampai 10, beri jarak sejenak, lalu ungkapkan perasaanmu secara tenang atau tuliskan di buku diary.',
-        'color': const Color(0xFFD6BDF2),
-      },
-      {
-        'title': 'Hati kamu lagi tenang ya...',
-        'content':
-            'Nikmati momen tenang: dengarkan musik lembut, catat perasaan positif, dan simpan rencana kecil untuk menjaga keseimbangan.',
-        'color': const Color(0xFFBCDFF2),
-      },
-    ];
-
-    return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
-      
-      // --- DRAWER DINAMIS BERHASIL DISISIPKAN ---
-      // Bisa diakses via swipe/drag dari tepi kiri layar tanpa tombol hamburger
-      drawer: const CustomAppDrawer(),
-      drawerEdgeDragWidth: 100.0, // Pakai yang ini agar tidak error lagi
-      
-      appBar: AppBar(
-        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
-        elevation: 0,
-        
-        // Tombol Back dipertahankan di sini sesuai keinginanmu
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDarkMode ? Colors.white : Colors.black87,
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF6E9E1),
+        drawer: const CustomAppDrawer(),
+        drawerEdgeDragWidth: 100.0,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 22),
+            onPressed: () => Navigator.maybePop(context),
           ),
-          onPressed: () => Navigator.maybePop(context),
-        ),
-        title: Text(
-          'Q-Tips',
-          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: GestureDetector(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.transparent,
-                  isScrollControlled: true,
-                  builder: (context) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 16,
-                      ),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF6E9E1),
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(24),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // garis atas
-                          Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          // title
-                          Row(
-                            children: const [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor: Colors.orangeAccent,
-                                child: Icon(
-                                  Icons.lightbulb,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Text(
-                                'Tutorial Q-Tips',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 18),
-                          _tutorialItem(
-                            Icons.touch_app,
-                            'Tap Card',
-                            'Tekan card untuk membuka tips.',
-                          ),
-                          _tutorialItem(
-                            Icons.keyboard_arrow_down,
-                            'Expand',
-                            'Card akan terbuka dan menampilkan solusi.',
-                          ),
-                          _tutorialItem(
-                            Icons.palette,
-                            'Warna Emosi',
-                            'Setiap warna menunjukkan kondisi emosi berbeda.',
-                          ),
-                          _tutorialItem(
-                            Icons.favorite,
-                            'Self Healing',
-                            'Gunakan tips untuk membantu menenangkan diri.',
-                          ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1976D2),
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text(
-                                'Mengerti',
-                                style: TextStyle(fontSize: 14, color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-              child: Image.asset(
-                'assets/images/menu_quotes.png',
-                width: 28,
-                height: 28,
-                errorBuilder: (c, e, s) => Icon(
-                  Icons.info_outline,
-                  color: isDarkMode ? Colors.grey : Colors.black54,
-                ),
-              ),
-            ),
+          title: const Text(
+            'Q-Tips',
+            style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 18), // Font AppBar standar HP
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            children: [
-              // Header card (peach) with moon image and rounded bottom
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFEFD6),
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            'Harus\nNgapain Sih\nKalau Lagi\nNgerasa...',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              height: 1.0,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      width: 110,
-                      height: 110,
-                      child: Image.asset(
-                        'assets/images/moon_large.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (c, e, s) => const Center(
-                          child: Text('🌙', style: TextStyle(fontSize: 56)),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              // Bubble decorative placeholders
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Column(
-                  children: const [
-                    SizedBox(height: 8),
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundColor: Color(0xFFFFEFD6),
-                    ),
-                    SizedBox(height: 8),
-                    CircleAvatar(
-                      radius: 12,
-                      backgroundColor: Color(0xFFFFEFD6),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Tips list as rounded colored cards
-              Expanded(
-                child: ListView.separated(
-                  itemCount: tips.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final t = tips[index];
-                    return _ColoredExpansionCard(
-                      title: t['title'] as String,
-                      content: t['content'] as String,
-                      color: t['color'] as Color,
-                    );
-                  },
-                ),
-              ),
+          centerTitle: true,
+          bottom: const TabBar(
+            labelColor: Color(0xFF1976D2),
+            unselectedLabelColor: Colors.grey,
+            indicatorColor: Color(0xFF1976D2),
+            indicatorSize: TabBarIndicatorSize.label,
+            indicatorWeight: 2.5,
+            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), // Ukuran teks Tab disesuaikan
+            tabs: [
+              Tab(text: 'Sedih'),
+              Tab(text: 'Marah'),
+              Tab(text: 'Tenang'),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ColoredExpansionCard extends StatefulWidget {
-  final String title;
-  final String content;
-  final Color color;
-
-  const _ColoredExpansionCard({
-    required this.title,
-    required this.content,
-    required this.color,
-  });
-
-  @override
-  State<_ColoredExpansionCard> createState() => _ColoredExpansionCardState();
-}
-
-class _ColoredExpansionCardState extends State<_ColoredExpansionCard> {
-  bool _open = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      padding: const EdgeInsets.all(0),
-      decoration: BoxDecoration(
-        color: widget.color,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(24),
-          onTap: () => setState(() => _open = !_open),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.title,
-                          style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87),
-                        ),
-                      ),
-                      AnimatedRotation(
-                        turns: _open ? 0.0 : 0.5,
-                        duration: const Duration(milliseconds: 250),
-                        child: const Icon(Icons.keyboard_arrow_up, color: Colors.black87),
-                      ),
-                    ],
-                  ),
-                ),
-                AnimatedCrossFade(
-                  firstChild: const SizedBox.shrink(),
-                  secondChild: Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 16,
-                      left: 8,
-                      right: 8,
-                    ),
+        body: Column(
+          children: [
+            // HEADER CARD (Responsif & Lebih Compact untuk HP)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEFD6),
+                borderRadius: BorderRadius.circular(20), // Sudut tidak terlalu melengkung berlebih di layar kecil
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
                     child: Text(
-                      widget.content,
-                      style: const TextStyle(color: Colors.black87, height: 1.3),
+                      'Harus\nNgapain Sih\nKalau Lagi...',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, height: 1.2, color: Colors.black87),
                     ),
                   ),
-                  crossFadeState: _open ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                  duration: const Duration(milliseconds: 300),
-                ),
-              ],
+                  Image.asset(
+                    'assets/images/moon_large.png',
+                    width: 50, // Ukuran gambar dikecilkan agar seimbang di HP
+                    height: 50,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Text('🌙', style: TextStyle(fontSize: 36));
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
+
+            // TABBARVIEW ISI KONTEN
+            Expanded(
+              child: TabBarView(
+                children: [
+                  
+                  // === 1. KONTEN TAB SEDIH ===
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFBDF2B8),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text('Kamu ngerasa sedih ya...', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
+                              SizedBox(height: 6),
+                              Text(
+                                'Ceritakan apa yang membuatmu sedih, lalu coba tarik napas dalam-dalam dan tuliskan hal kecil yang membuatmu bersyukur.',
+                                style: TextStyle(fontSize: 11.5, height: 1.4, color: Colors.black87),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('PINTASAN FITUR', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5)),
+                        const SizedBox(height: 6),
+                        _buildShortcutButton(
+                          context: context,
+                          title: 'Tulis di Q-Diary',
+                          desc: 'Tuangkan perasaan sedihmu secara pribadi.',
+                          icon: Icons.menu_book_rounded,
+                          iconColor: const Color(0xFF1976D2),
+                          bgColor: const Color(0xFFE3F2FD),
+                          onTap: () {},
+                        ),
+                        const SizedBox(height: 18),
+                        const Text('REKOMENDASI', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5)),
+                        const SizedBox(height: 10),
+                        _buildRecommendationItem('Angin Malam - Instrumen', '4:20 Menit', Icons.music_note),
+                        _buildRecommendationItem('Warm Hug - Piano', '3:15 Menit', Icons.music_note),
+                      ],
+                    ),
+                  ),
+
+                  // === 2. KONTEN TAB MARAH ===
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD6BDF2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text('Lagi marah ya...', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
+                              SizedBox(height: 6),
+                              Text(
+                                'Coba hitung sampai 10, beri jarak sejenak, lalu ungkapkan perasaanmu secara tenang.',
+                                style: TextStyle(fontSize: 11.5, height: 1.4, color: Colors.black87),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('PINTASAN FITUR', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5)),
+                        const SizedBox(height: 6),
+                        _buildShortcutButton(
+                          context: context,
+                          title: 'Q-Konsul Sekarang',
+                          desc: 'Bicara langsung dengan Ustadz.',
+                          icon: Icons.person_rounded,
+                          iconColor: const Color(0xFF1976D2),
+                          bgColor: const Color(0xFFE3F2FD),
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // === 3. KONTEN TAB TENANG ===
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFBCDFF2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text('Hati lagi tenang ya...', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)),
+                              SizedBox(height: 6),
+                              Text(
+                                'Nikmati momen tenang: dengarkan musik lembut, catat perasaan positif.',
+                                style: TextStyle(fontSize: 11.5, height: 1.4, color: Colors.black87),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('REFLEKSI HARIAN', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5)),
+                        const SizedBox(height: 6),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            '"Sebutkan satu hal paling bermakna yang terjadi hari ini."',
+                            style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: Colors.black54),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        const Text('PINTASAN FITUR', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5)),
+                        const SizedBox(height: 6),
+                        _buildShortcutButton(
+                          context: context,
+                          title: 'Cek Mood (Q-Checker)',
+                          desc: 'Simpan energi positif ini.',
+                          icon: Icons.analytics_rounded,
+                          iconColor: const Color(0xFF1976D2),
+                          bgColor: const Color(0xFFE3F2FD),
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
