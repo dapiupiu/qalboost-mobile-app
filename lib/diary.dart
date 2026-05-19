@@ -47,11 +47,7 @@ class _DiaryPageState extends State<DiaryPage> {
     super.dispose();
   }
 
-  Widget _tutorialItem(
-    IconData icon,
-    String title,
-    String desc,
-  ) {
+  Widget _tutorialItem(IconData icon, String title, String desc) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -60,33 +56,32 @@ class _DiaryPageState extends State<DiaryPage> {
           CircleAvatar(
             radius: 16,
             backgroundColor: Colors.white,
-            child: Icon(
-              icon,
-              color: const Color(0xFF1976D2),
-              size: 16,
-            ),
+            child: Icon(icon, color: const Color(0xFF1976D2), size: 16),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
+                // Title only for tutorial items. The three-dot menu
+                // (edit/delete/share) should only appear on diary cards,
+                // so we don't include the IconButton here.
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  desc,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                    height: 1.3,
-                  ),
-                ),
+                const SizedBox(height: 6),
+                Text(desc, style: const TextStyle(color: Colors.black54)),
               ],
             ),
           ),
@@ -100,16 +95,20 @@ class _DiaryPageState extends State<DiaryPage> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
-      
+      backgroundColor: isDarkMode
+          ? const Color(0xFF121212)
+          : const Color(0xFFF6E9E1),
+
       // --- DRAWER TETAP ADA AGAR BISA DI-DRAG DARI KIRI ---
       drawer: const CustomAppDrawer(),
       drawerEdgeDragWidth: 100.0, // Pakai yang ini agar tidak error lagi
-      
+
       appBar: AppBar(
-        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
+        backgroundColor: isDarkMode
+            ? const Color(0xFF1F1F1F)
+            : Colors.transparent,
         elevation: 0,
-        
+
         // --- KEMBALIKAN TOMBOL BACK DI SINI ---
         // Karena ada leading, Flutter tidak akan memunculkan tombol Hamburger Menu otomatis
         leading: IconButton(
@@ -119,7 +118,7 @@ class _DiaryPageState extends State<DiaryPage> {
           ),
           onPressed: () => Navigator.maybePop(context),
         ),
-        
+
         title: Text(
           'Q-Diary',
           style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87),
@@ -209,7 +208,9 @@ class _DiaryPageState extends State<DiaryPage> {
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF1976D2),
-                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),
@@ -217,7 +218,10 @@ class _DiaryPageState extends State<DiaryPage> {
                               onPressed: () => Navigator.pop(context),
                               child: const Text(
                                 'Mengerti',
-                                style: TextStyle(fontSize: 14, color: Colors.white),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
@@ -263,7 +267,9 @@ class _DiaryPageState extends State<DiaryPage> {
                                 style: TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.w800,
-                                  color: isDarkMode ? Colors.white : Colors.black87,
+                                  color: isDarkMode
+                                      ? Colors.white
+                                      : Colors.black87,
                                 ),
                               ),
                               Text(
@@ -271,7 +277,9 @@ class _DiaryPageState extends State<DiaryPage> {
                                 style: TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.w800,
-                                  color: isDarkMode ? Colors.white : Colors.black87,
+                                  color: isDarkMode
+                                      ? Colors.white
+                                      : Colors.black87,
                                 ),
                               ),
                             ],
@@ -411,23 +419,88 @@ class _DiaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16, 
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(content, style: const TextStyle(color: Colors.black87)),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              date,
-              style: const TextStyle(fontSize: 12, color: Colors.black54),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+
+              IconButton(
+                icon: const Icon(Icons.more_vert),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(24),
+                      ),
+                    ),
+                    builder: (context) {
+                      return Container(
+                        padding: const EdgeInsets.all(18),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade400,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            ListTile(
+                              leading: const Icon(Icons.edit),
+                              title: const Text('Edit'),
+                              onTap: () {
+                                Navigator.pop(context);
+
+                                // TODO: EDIT
+                              },
+                            ),
+
+                            ListTile(
+                              leading: const Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                              ),
+                              title: const Text(
+                                'Hapus',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                              onTap: () {
+                                Navigator.pop(context);
+
+                                // TODO: DELETE
+                              },
+                            ),
+
+                            ListTile(
+                              leading: const Icon(Icons.share),
+                              title: const Text('Share'),
+                              onTap: () {
+                                Navigator.pop(context);
+
+                                // TODO: SHARE
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),
