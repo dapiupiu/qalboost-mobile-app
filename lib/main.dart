@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+
+// --- IMPORT KOMPONEN DRAWER KAMU DI SINI ---
+// Sesuaikan path import-nya jika kamu menggunakan folder 'components'
+import 'components/app_drawer.dart'; 
+// import 'app_drawer.dart'; // (Gunakan ini jika file-nya sejajar dengan main.dart)
+
 import 'diary.dart';
 import 'tips.dart';
 import 'mood.dart';
@@ -130,6 +136,12 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      
+      // --- CUKUP PANGGIL KOMPONEN DRAWER DINAMIS DI SINI ---
+      drawer: const CustomAppDrawer(),
+      drawerEdgeDragWidth: 100.0, // Pakai yang ini agar tidak error lagi
+      // -----------------------------------------------------
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +157,21 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Row(
                         children: [
-                          const CircleAvatar(child: Icon(Icons.person)),
+                          // --- AVATAR DIBUNGKUS BUILDER & GESTURE DETECTOR ---
+                          // (Ini tetap dipertahankan agar avatar bisa nge-trigger buka Drawer)
+                          Builder(
+                            builder: (context) {
+                              return GestureDetector(
+                                onTap: () {
+                                  Scaffold.of(context).openDrawer();
+                                },
+                                child: const CircleAvatar(
+                                  child: Icon(Icons.person),
+                                ),
+                              );
+                            }
+                          ),
+                          // ---------------------------------------------------
                           const SizedBox(width: 12),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,7 +183,7 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                               Text(
-                                'Nama Pengguna',
+                                'Pengguna xxxxxx',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: isDarkMode ? Colors.white : Colors.black87,
@@ -180,7 +206,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Mei 07 2026',
+                    'Mei 19 2026', 
                     style: TextStyle(
                       fontSize: 12,
                       color: isDarkMode ? Colors.grey[500] : Colors.grey,

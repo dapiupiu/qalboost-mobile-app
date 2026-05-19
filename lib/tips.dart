@@ -1,7 +1,61 @@
 import 'package:flutter/material.dart';
 
+// --- IMPORT KOMPONEN DRAWER KAMU DI SINI ---
+// Sesuaikan path import jika folder penempatannya berbeda
+import 'components/app_drawer.dart';
+
 class TipsPage extends StatelessWidget {
   const TipsPage({Key? key}) : super(key: key);
+
+  // Fungsi tutorial dimasukkan ke dalam class utama agar rapi dan tidak error
+  Widget _tutorialItem(
+    IconData icon,
+    String title,
+    String desc,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: Colors.white,
+            child: Icon(
+              icon,
+              color: const Color(0xFF1976D2),
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  desc,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +83,18 @@ class TipsPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: isDarkMode
-          ? const Color(0xFF121212)
-          : const Color(0xFFF6E9E1),
+      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      
+      // --- DRAWER DINAMIS BERHASIL DISISIPKAN ---
+      // Bisa diakses via swipe/drag dari tepi kiri layar tanpa tombol hamburger
+      drawer: const CustomAppDrawer(),
+      drawerEdgeDragWidth: 100.0, // Pakai yang ini agar tidak error lagi
+      
       appBar: AppBar(
-        backgroundColor: isDarkMode
-            ? const Color(0xFF1F1F1F)
-            : Colors.transparent,
+        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
+        
+        // Tombol Back dipertahankan di sini sesuai keinginanmu
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
@@ -46,7 +104,7 @@ class TipsPage extends StatelessWidget {
         ),
         title: Text(
           'Q-Tips',
-          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87),
+          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -82,70 +140,58 @@ class TipsPage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-
                           const SizedBox(height: 14),
-
                           // title
                           Row(
-                            children: [
+                            children: const [
                               CircleAvatar(
                                 radius: 16,
                                 backgroundColor: Colors.orangeAccent,
-                                child: const Icon(
+                                child: Icon(
                                   Icons.lightbulb,
                                   color: Colors.white,
                                   size: 16,
                                 ),
                               ),
-
-                              const SizedBox(width: 10),
-
-                              const Text(
+                              SizedBox(width: 10),
+                              Text(
                                 'Tutorial Q-Tips',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
                                 ),
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 18),
-
                           _tutorialItem(
                             Icons.touch_app,
                             'Tap Card',
                             'Tekan card untuk membuka tips.',
                           ),
-
                           _tutorialItem(
                             Icons.keyboard_arrow_down,
                             'Expand',
                             'Card akan terbuka dan menampilkan solusi.',
                           ),
-
                           _tutorialItem(
                             Icons.palette,
                             'Warna Emosi',
                             'Setiap warna menunjukkan kondisi emosi berbeda.',
                           ),
-
                           _tutorialItem(
                             Icons.favorite,
                             'Self Healing',
                             'Gunakan tips untuk membantu menenangkan diri.',
                           ),
-
                           const SizedBox(height: 10),
-
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF1976D2),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),
@@ -153,7 +199,7 @@ class TipsPage extends StatelessWidget {
                               onPressed: () => Navigator.pop(context),
                               child: const Text(
                                 'Mengerti',
-                                style: TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: 14, color: Colors.white),
                               ),
                             ),
                           ),
@@ -201,6 +247,7 @@ class TipsPage extends StatelessWidget {
                               fontSize: 28,
                               fontWeight: FontWeight.w800,
                               height: 1.0,
+                              color: Colors.black87,
                             ),
                           ),
                         ],
@@ -223,7 +270,7 @@ class TipsPage extends StatelessWidget {
 
               const SizedBox(height: 18),
 
-              // Bubble decorative placeholders (to mimic figma speech bubbles)
+              // Bubble decorative placeholders
               Align(
                 alignment: Alignment.centerLeft,
                 child: Column(
@@ -266,59 +313,6 @@ class TipsPage extends StatelessWidget {
     );
   }
 }
-  
-
-  Widget _tutorialItem(
-    IconData icon,
-    String title,
-    String desc,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: Colors.white,
-            child: Icon(
-              icon,
-              color: const Color(0xFF1976D2),
-              size: 16,
-            ),
-          ),
-
-          const SizedBox(width: 10),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 2),
-
-                Text(
-                  desc,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                    height: 1.3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
 class _ColoredExpansionCard extends StatefulWidget {
   final String title;
@@ -363,18 +357,17 @@ class _ColoredExpansionCardState extends State<_ColoredExpansionCard> {
                       Expanded(
                         child: Text(
                           widget.title,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87),
                         ),
                       ),
                       AnimatedRotation(
                         turns: _open ? 0.0 : 0.5,
                         duration: const Duration(milliseconds: 250),
-                        child: const Icon(Icons.keyboard_arrow_up),
+                        child: const Icon(Icons.keyboard_arrow_up, color: Colors.black87),
                       ),
                     ],
                   ),
                 ),
-
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
                   secondChild: Padding(
@@ -385,12 +378,10 @@ class _ColoredExpansionCardState extends State<_ColoredExpansionCard> {
                     ),
                     child: Text(
                       widget.content,
-                      style: const TextStyle(color: Colors.black87),
+                      style: const TextStyle(color: Colors.black87, height: 1.3),
                     ),
                   ),
-                  crossFadeState: _open
-                      ? CrossFadeState.showSecond
-                      : CrossFadeState.showFirst,
+                  crossFadeState: _open ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 300),
                 ),
               ],
@@ -400,5 +391,4 @@ class _ColoredExpansionCardState extends State<_ColoredExpansionCard> {
       ),
     );
   }
-  
 }

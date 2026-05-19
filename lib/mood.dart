@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+// --- IMPORT KOMPONEN DRAWER KAMU DI SINI ---
+// Sesuaikan path import jika folder penempatannya berbeda
+import 'components/app_drawer.dart';
+
 // Penyimpanan data mood dipindah ke file mood.dart agar tidak terjadi import sirkular
 class MoodStorage {
   static final Map<String, Map<String, dynamic>> _moodData = {};
@@ -56,50 +60,57 @@ class _MoodPageState extends State<MoodPage> {
 
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      
+      // --- DRAWER BERHASIL DISISIPKAN ---
+      // Bisa diakses via swipe/drag dari tepi kiri layar
+      drawer: const CustomAppDrawer(),
+      drawerEdgeDragWidth: 100.0, // Pakai yang ini agar tidak error lagi
+      
       appBar: AppBar(
-  backgroundColor:
-      isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
-  elevation: 0,
+        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
+        elevation: 0,
 
-  // tombol kembali
-  leading: IconButton(
-    icon: const Icon(Icons.arrow_back),
-    onPressed: () {
-      Navigator.pop(context);
-    },
-  ),
+        // Tombol kembali dipertahankan di sini sesuai request kamu
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDarkMode ? Colors.white : Colors.black87,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
 
-  centerTitle: true,
+        centerTitle: true,
 
-  // judul bulan & tahun
-  title: Row(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    IconButton(
-      icon: const Icon(Icons.chevron_left),
-      onPressed: _previousMonth,
-    ),
-
-    GestureDetector(
-      onTap: () {
-        _showMonthYearPicker(context);
-      },
-      child: Text(
-        '${_getMonthName(_currentMonth)} $_currentYear',
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
+        // judul bulan & tahun
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.chevron_left, color: isDarkMode ? Colors.white : Colors.black87),
+              onPressed: _previousMonth,
+            ),
+            GestureDetector(
+              onTap: () {
+                _showMonthYearPicker(context);
+              },
+              child: Text(
+                '${_getMonthName(_currentMonth)} $_currentYear',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: isDarkMode ? Colors.white : Colors.black87,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.chevron_right, color: isDarkMode ? Colors.white : Colors.black87),
+              onPressed: _nextMonth,
+            ),
+          ],
         ),
       ),
-    ),
-
-    IconButton(
-      icon: const Icon(Icons.chevron_right),
-      onPressed: _nextMonth,
-    ),
-  ],
-),
-),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -169,10 +180,10 @@ class _MoodPageState extends State<MoodPage> {
                   const SizedBox(height: 10),
                   Text(
                     'Tanggal $day',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   const SizedBox(height: 10),
-                  Text(data['catatan'] ?? 'Tidak ada catatan'),
+                  Text(data['catatan'] ?? 'Tidak ada catatan', style: const TextStyle(color: Colors.black87)),
                 ],
               ),
             ),
@@ -215,6 +226,7 @@ class _MoodPageState extends State<MoodPage> {
           ? const Text(
               'Belum ada mood untuk hari ini.',
               textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.black54),
             )
           : Row(
               children: [
@@ -226,12 +238,13 @@ class _MoodPageState extends State<MoodPage> {
                     children: [
                       const Text(
                         'Mood Hari Ini',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
                       Text(
                         data['catatan'],
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.black54),
                       ),
                     ],
                   ),
@@ -241,108 +254,111 @@ class _MoodPageState extends State<MoodPage> {
     );
   }
 
-void _previousMonth() {
-  setState(() {
-    if (_currentMonth == 1) {
-      _currentMonth = 12;
-      _currentYear--;
-    } else {
-      _currentMonth--;
-    }
-  });
-}
+  void _previousMonth() {
+    setState(() {
+      if (_currentMonth == 1) {
+        _currentMonth = 12;
+        _currentYear--;
+      } else {
+        _currentMonth--;
+      }
+    });
+  }
 
-void _nextMonth() {
-  setState(() {
-    if (_currentMonth == 12) {
-      _currentMonth = 1;
-      _currentYear++;
-    } else {
-      _currentMonth++;
-    }
-  });
-}
-void _showMonthYearPicker(BuildContext context) {
-  int selectedMonth = _currentMonth;
-  int selectedYear = _currentYear;
+  void _nextMonth() {
+    setState(() {
+      if (_currentMonth == 12) {
+        _currentMonth = 1;
+        _currentYear++;
+      } else {
+        _currentMonth++;
+      }
+    });
+  }
 
-  showModalBottomSheet(
-    context: context,
-    builder: (_) {
-      return StatefulBuilder(
-        builder: (context, setModalState) {
-          return Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Pilih Bulan & Tahun',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+  void _showMonthYearPicker(BuildContext context) {
+    int selectedMonth = _currentMonth;
+    int selectedYear = _currentYear;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Pilih Bulan & Tahun',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  DropdownButton<int>(
+                    value: selectedMonth,
+                    isExpanded: true,
+                    dropdownColor: Colors.white,
+                    style: const TextStyle(color: Colors.black87),
+                    items: List.generate(12, (index) {
+                      return DropdownMenuItem(
+                        value: index + 1,
+                        child: Text(_getMonthName(index + 1)),
+                      );
+                    }),
+                    onChanged: (value) {
+                      setModalState(() {
+                        selectedMonth = value!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  DropdownButton<int>(
+                    value: selectedYear,
+                    isExpanded: true,
+                    dropdownColor: Colors.white,
+                    style: const TextStyle(color: Colors.black87),
+                    items: List.generate(20, (index) {
+                      int year = 2020 + index;
+                      return DropdownMenuItem(
+                        value: year,
+                        child: Text(year.toString()),
+                      );
+                    }),
+                    onChanged: (value) {
+                      setModalState(() {
+                        selectedYear = value!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _currentMonth = selectedMonth;
+                        _currentYear = selectedYear;
+                      });
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF58A6F0),
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Pilih'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
-                const SizedBox(height: 20),
-
-                DropdownButton<int>(
-                  value: selectedMonth,
-                  isExpanded: true,
-                  items: List.generate(12, (index) {
-                    return DropdownMenuItem(
-                      value: index + 1,
-                      child: Text(_getMonthName(index + 1)),
-                    );
-                  }),
-                  onChanged: (value) {
-                    setModalState(() {
-                      selectedMonth = value!;
-                    });
-                  },
-                ),
-
-                const SizedBox(height: 10),
-
-                DropdownButton<int>(
-                  value: selectedYear,
-                  isExpanded: true,
-                  items: List.generate(20, (index) {
-                    int year = 2020 + index;
-
-                    return DropdownMenuItem(
-                      value: year,
-                      child: Text(year.toString()),
-                    );
-                  }),
-                  onChanged: (value) {
-                    setModalState(() {
-                      selectedYear = value!;
-                    });
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _currentMonth = selectedMonth;
-                      _currentYear = selectedYear;
-                    });
-
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Pilih'),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  );
-}
   String _getMonthName(int month) {
     const months = [
       'Januari',

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'mood.dart';
 
+// --- IMPORT KOMPONEN DRAWER KAMU DI SINI ---
+import 'components/app_drawer.dart';
+
 class CheckerSimpleScreen extends StatefulWidget {
   const CheckerSimpleScreen({Key? key}) : super(key: key);
 
@@ -47,13 +50,24 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
     
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      
+      // --- DRAWER DINAMIS ---
+      drawer: const CustomAppDrawer(),
+      drawerEdgeDragWidth: 100.0, // Pakai yang ini agar tidak error lagi
+      
       appBar: AppBar(
         backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
+        
+        // Tombol Back dipertahankan sesuai keinginanmu agar tidak tertimpa ikon hamburger otomatis
         leading: BackButton(color: isDarkMode ? Colors.white : Colors.black87),
+        
         title: Text(
           'Q-Checker',
-          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black87, 
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: SafeArea(
@@ -109,7 +123,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                       const SizedBox(width: 8),
                       Text(
                         '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
                     ],
                   ),
@@ -150,10 +164,12 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
               TextField(
                 controller: _controller,
                 maxLines: 4,
+                style: const TextStyle(color: Colors.black87),
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
                   hintText: 'Tulis cerita kamu di sini...',
+                  hintStyle: const TextStyle(color: Colors.grey),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide.none,
@@ -281,8 +297,8 @@ class _MoodCard extends StatelessWidget {
           color: selected
               ? Colors.white
               : (label == 'Baik'
-                    ? const Color(0xFFFFF7C2)
-                    : const Color(0xFFD7EAF8)),
+                  ? const Color(0xFFFFF7C2)
+                  : const Color(0xFFD7EAF8)),
           borderRadius: BorderRadius.circular(20),
           border: selected ? Border.all(color: Colors.blue, width: 2) : null,
           boxShadow: [
@@ -301,7 +317,10 @@ class _MoodCard extends StatelessWidget {
                 ),
               ),
             ),
-            Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              label, 
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+            ),
           ],
         ),
       ),

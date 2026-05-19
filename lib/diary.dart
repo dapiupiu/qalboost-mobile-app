@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+// Sesuaikan path import jika file kamu tidak berada di dalam folder 'components'
+import 'components/app_drawer.dart';
 
 class DiaryPage extends StatefulWidget {
   const DiaryPage({Key? key}) : super(key: key);
@@ -45,19 +47,71 @@ class _DiaryPageState extends State<DiaryPage> {
     super.dispose();
   }
 
+  Widget _tutorialItem(
+    IconData icon,
+    String title,
+    String desc,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: Colors.white,
+            child: Icon(
+              icon,
+              color: const Color(0xFF1976D2),
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  desc,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode
-          ? const Color(0xFF121212)
-          : const Color(0xFFF6E9E1),
+      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      
+      // --- DRAWER TETAP ADA AGAR BISA DI-DRAG DARI KIRI ---
+      drawer: const CustomAppDrawer(),
+      drawerEdgeDragWidth: 100.0, // Pakai yang ini agar tidak error lagi
+      
       appBar: AppBar(
-        backgroundColor: isDarkMode
-            ? const Color(0xFF1F1F1F)
-            : Colors.transparent,
+        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
+        
+        // --- KEMBALIKAN TOMBOL BACK DI SINI ---
+        // Karena ada leading, Flutter tidak akan memunculkan tombol Hamburger Menu otomatis
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
@@ -65,136 +119,126 @@ class _DiaryPageState extends State<DiaryPage> {
           ),
           onPressed: () => Navigator.maybePop(context),
         ),
+        
         title: Text(
           'Q-Diary',
           style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87),
         ),
         centerTitle: true,
         actions: [
-  Padding(
-    padding: const EdgeInsets.only(right: 12.0),
-    child: GestureDetector(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          backgroundColor: Colors.transparent,
-          isScrollControlled: true,
-          builder: (context) {
-            return Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 18,
-                vertical: 16,
-              ),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF6E9E1),
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(24),
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: GestureDetector(
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: Colors.transparent,
+                  isScrollControlled: true,
+                  builder: (context) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 16,
+                      ),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF6E9E1),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(24),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // garis atas
+                          Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.grey,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          // title
+                          Row(
+                            children: [
+                              const CircleAvatar(
+                                radius: 16,
+                                backgroundColor: Colors.orangeAccent,
+                                child: Icon(
+                                  Icons.menu_book,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'Tutorial Q-Diary',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 18),
+                          _tutorialItem(
+                            Icons.add,
+                            'Tambah Diary',
+                            'Tekan tombol + untuk membuat diary baru.',
+                          ),
+                          _tutorialItem(
+                            Icons.edit_note,
+                            'Tulis Perasaan',
+                            'Tuliskan cerita atau perasaanmu hari ini.',
+                          ),
+                          _tutorialItem(
+                            Icons.calendar_today,
+                            'Tanggal Diary',
+                            'Setiap diary memiliki tanggal penyimpanan.',
+                          ),
+                          _tutorialItem(
+                            Icons.lock,
+                            'Privasi Aman',
+                            'Diary kamu aman dan tidak dibagikan.',
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF1976D2),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text(
+                                'Mengerti',
+                                style: TextStyle(fontSize: 14, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Image.asset(
+                'assets/images/menu_quotes.png',
+                width: 28,
+                height: 28,
+                errorBuilder: (c, e, s) => Icon(
+                  Icons.info_outline,
+                  color: isDarkMode ? Colors.grey : Colors.black54,
                 ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-
-                  // garis atas
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // title
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.orangeAccent,
-                        child: const Icon(
-                          Icons.menu_book,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                      ),
-
-                      const SizedBox(width: 10),
-
-                      const Text(
-                        'Tutorial Q-Diary',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  _tutorialItem(
-                    Icons.add,
-                    'Tambah Diary',
-                    'Tekan tombol + untuk membuat diary baru.',
-                  ),
-
-                  _tutorialItem(
-                    Icons.edit_note,
-                    'Tulis Perasaan',
-                    'Tuliskan cerita atau perasaanmu hari ini.',
-                  ),
-
-                  _tutorialItem(
-                    Icons.calendar_today,
-                    'Tanggal Diary',
-                    'Setiap diary memiliki tanggal penyimpanan.',
-                  ),
-
-                  _tutorialItem(
-                    Icons.lock,
-                    'Privasi Aman',
-                    'Diary kamu aman dan tidak dibagikan.',
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1976D2),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Mengerti',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-      child: Image.asset(
-        'assets/images/menu_quotes.png',
-        width: 28,
-        height: 28,
-        errorBuilder: (c, e, s) => Icon(
-          Icons.info_outline,
-          color: isDarkMode ? Colors.grey : Colors.black54,
-        ),
-      ),
-    ),
-  ),
-],
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -213,12 +257,13 @@ class _DiaryPageState extends State<DiaryPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               Text(
                                 'Diary',
                                 style: TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.w800,
+                                  color: isDarkMode ? Colors.white : Colors.black87,
                                 ),
                               ),
                               Text(
@@ -226,6 +271,7 @@ class _DiaryPageState extends State<DiaryPage> {
                                 style: TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.w800,
+                                  color: isDarkMode ? Colors.white : Colors.black87,
                                 ),
                               ),
                             ],
@@ -234,7 +280,6 @@ class _DiaryPageState extends State<DiaryPage> {
                       ],
                     ),
                   ),
-                  // Add button positioned top-right of header (centered icon)
                   Positioned(
                     top: 8,
                     right: 8,
@@ -337,59 +382,7 @@ class _DiaryPageState extends State<DiaryPage> {
       ),
     );
   }
-  }
-
-  Widget _tutorialItem(
-    IconData icon,
-    String title,
-    String desc,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: Colors.white,
-            child: Icon(
-              icon,
-              color: const Color(0xFF1976D2),
-              size: 16,
-            ),
-          ),
-
-          const SizedBox(width: 10),
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 2),
-
-                Text(
-                  desc,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                    height: 1.3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+}
 
 class _DiaryCard extends StatelessWidget {
   final String title;
@@ -420,7 +413,11 @@ class _DiaryCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 16, 
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
           ),
           const SizedBox(height: 8),
           Text(content, style: const TextStyle(color: Colors.black87)),
@@ -436,5 +433,4 @@ class _DiaryCard extends StatelessWidget {
       ),
     );
   }
- 
 }
