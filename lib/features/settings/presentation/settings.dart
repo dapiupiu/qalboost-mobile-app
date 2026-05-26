@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'theme_service.dart';
+import '../../../core/theme/theme_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);

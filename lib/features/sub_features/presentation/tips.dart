@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'components/app_drawer.dart';
+import '../../../core/components/app_drawer.dart';
 
 
 class TipsPage extends StatelessWidget {

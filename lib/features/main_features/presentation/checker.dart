@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'mood.dart';
 
 // --- IMPORT KOMPONEN DRAWER KAMU DI SINI ---
-import 'components/app_drawer.dart';
+import '../../../core/components/app_drawer.dart';
 
 class CheckerSimpleScreen extends StatefulWidget {
   const CheckerSimpleScreen({Key? key}) : super(key: key);

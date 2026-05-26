@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 // --- IMPORT KOMPONEN DRAWER KAMU DI SINI ---
 // Sesuaikan path import jika folder penempatannya berbeda
-import 'components/app_drawer.dart';
+import '../../../core/components/app_drawer.dart';
 
 class ConsulPage extends StatefulWidget {
   const ConsulPage({Key? key}) : super(key: key);

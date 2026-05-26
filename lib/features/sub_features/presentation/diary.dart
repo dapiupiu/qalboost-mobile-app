@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 // Sesuaikan path import jika file kamu tidak berada di dalam folder 'components'
-import 'components/app_drawer.dart';
+import '../../../core/components/app_drawer.dart';
 
 class DiaryPage extends StatefulWidget {
   const DiaryPage({Key? key}) : super(key: key);
