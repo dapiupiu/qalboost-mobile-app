@@ -351,7 +351,7 @@ class TipsPage extends StatelessWidget {
                 children: [
                   _buildTabContent(
                     context,
-                    color: const Color(0xFFBDF2B8),
+                    color: const Color.fromARGB(255, 184, 218, 242),
                     intro:
                         'Wajar kok kalau sesekali merasa sedih. Jangan dipendam sendiri ya...',
                     ayatArab: 'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا',
@@ -417,7 +417,7 @@ class TipsPage extends StatelessWidget {
 
                   _buildTabContent(
                     context,
-                    color: const Color(0xFFBCDFF2),
+                    color: const Color.fromARGB(255, 188, 242, 205),
                     intro:
                         'Alhamdulillah, hati sedang tenang. Yuk, jaga momentum positif ini!',
                     ayatArab:

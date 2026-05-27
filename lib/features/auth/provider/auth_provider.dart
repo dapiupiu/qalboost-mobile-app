@@ -7,6 +7,10 @@ class AuthProvider extends ChangeNotifier {
   final AuthRepository _repository = AuthRepository();
   final AuthLocalData _localData = AuthLocalData();
 
+  // Tambahkan variabel ini untuk menyimpan email aktif di memori Provider
+  String? _currentUserEmail;
+  String? get currentUserEmail => _currentUserEmail;
+
   // Proses Registrasi
   Future<bool> register(String name, String email, String password) async {
     final user = UserModel(fullName: name, email: email, password: password);
@@ -15,21 +19,39 @@ class AuthProvider extends ChangeNotifier {
 
   // Proses Login
   Future<bool> login(String email, String password) async {
-    // === TAMBAHKAN LOGIKA AKUN ADMIN DI SINI ===
-    if (email == 'admin@gmail.com' && password == 'admin123') {
-      // Langsung simpan session ke local storage seperti login biasa
-      await _localData.saveSession(email); 
-      return true;
-    }
-    // ===========================================
+    bool loginSuccess = false;
 
-    // Jika bukan akun admin, jalankan proses login normal (cek database/API)
-    final user = await _repository.login(email, password);
-    if (user != null) {
-      // Simpan session dan data password ke local storage untuk keperluan Edit Profile
-      await _localData.saveSession(email); 
+    // 1. Logika Akun Admin
+    if (email == 'admin@gmail.com' && password == 'admin123') {
+      loginSuccess = true;
+    } else {
+      // 2. Logika Akun Normal
+      final user = await _repository.login(email, password);
+      if (user != null) {
+        loginSuccess = true;
+      }
+    }
+
+    // 3. JIKA LOGIN BERHASIL (Admin atau User Biasa)
+    if (loginSuccess) {
+      // Simpan ke SharedPreferences (Harddisk HP)
+      await _localData.saveSession(email);
+      
+      // Simpan ke variabel lokal (Memori RAM)
+      _currentUserEmail = email;
+      
+      // Beritahu semua halaman (termasuk Diary) bahwa login sukses
+      notifyListeners(); 
       return true;
     }
+
     return false;
+  }
+
+  // Tambahkan fungsi Logout di sini agar sinkron
+  Future<void> logout() async {
+    await _localData.clearSession();
+    _currentUserEmail = null;
+    notifyListeners();
   }
 }
