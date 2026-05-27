@@ -48,47 +48,28 @@ class _DiaryPageState extends State<DiaryPage> {
   }
 
   Widget _tutorialItem(IconData icon, String title, String desc) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: Colors.white,
-            child: Icon(icon, color: const Color(0xFF1976D2), size: 16),
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      children: [
+        Icon(icon, color: const Color(0xFF1976D2)),
+        const SizedBox(width: 15),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                desc,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title only for tutorial items. The three-dot menu
-                // (edit/delete/share) should only appear on diary cards,
-                // so we don't include the IconButton here.
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(desc, style: const TextStyle(color: Colors.black54)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -133,102 +114,71 @@ class _DiaryPageState extends State<DiaryPage> {
                   context: context,
                   backgroundColor: Colors.transparent,
                   isScrollControlled: true,
-                  builder: (context) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 16,
-                      ),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF6E9E1),
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(24),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // garis atas
-                          Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          // title
-                          Row(
-                            children: [
-                              const CircleAvatar(
-                                radius: 16,
-                                backgroundColor: Colors.orangeAccent,
-                                child: Icon(
-                                  Icons.menu_book,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              const Text(
-                                'Tutorial Q-Diary',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 18),
-                          _tutorialItem(
-                            Icons.add,
-                            'Tambah Diary',
-                            'Tekan tombol + untuk membuat diary baru.',
-                          ),
-                          _tutorialItem(
-                            Icons.edit_note,
-                            'Tulis Perasaan',
-                            'Tuliskan cerita atau perasaanmu hari ini.',
-                          ),
-                          _tutorialItem(
-                            Icons.calendar_today,
-                            'Tanggal Diary',
-                            'Setiap diary memiliki tanggal penyimpanan.',
-                          ),
-                          _tutorialItem(
-                            Icons.lock,
-                            'Privasi Aman',
-                            'Diary kamu aman dan tidak dibagikan.',
-                          ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1976D2),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text(
-                                'Mengerti',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                 builder: (context) {
+  return Container(
+    padding: const EdgeInsets.all(20),
+    decoration: const BoxDecoration(
+      color: Color(0xFFF6E9E1),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 40,
+          height: 4,
+          decoration: BoxDecoration(
+            color: Colors.grey[400],
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        const SizedBox(height: 15),
+        const Text(
+          'Cara Menggunakan Q-Diary',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 20),
+        _tutorialItem(
+          Icons.add,
+          'Tambah Diary',
+          'Tekan tombol + untuk membuat diary baru.',
+        ),
+        _tutorialItem(
+          Icons.edit_note,
+          'Tulis Perasaan',
+          'Tuliskan cerita atau perasaanmu hari ini.',
+        ),
+        _tutorialItem(
+          Icons.calendar_today,
+          'Tanggal Diary',
+          'Setiap diary memiliki tanggal penyimpanan.',
+        ),
+        _tutorialItem(
+          Icons.lock_outline,
+          'Privasi Aman',
+          'Diary kamu aman dan tidak dibagikan.',
+        ),
+        const SizedBox(height: 15),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1976D2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Mengerti',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+},
                 );
               },
               child: Image.asset(

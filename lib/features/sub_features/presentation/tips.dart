@@ -3,6 +3,96 @@ import '../../../core/components/app_drawer.dart';
 
 class TipsPage extends StatelessWidget {
   const TipsPage({super.key}); 
+  void _showTutorial(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    builder: (context) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Color(0xFFF6E9E1),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[400],
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            const SizedBox(height: 15),
+            const Text(
+              'Cara Menggunakan Q-Tips',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            _tutorialItem(
+              Icons.tab,
+              'Pilih Kategori',
+              'Gunakan tab Sedih, Marah, atau Tenang sesuai dengan kondisi perasaanmu.',
+            ),
+            _tutorialItem(
+              Icons.tips_and_updates_outlined,
+              'Baca Tips',
+              'Baca saran yang tersedia untuk membantu menenangkan hati dan pikiran.',
+            ),
+            _tutorialItem(
+              Icons.touch_app_outlined,
+              'Gunakan Pintasan',
+              'Tekan pintasan fitur untuk menuju halaman lain yang sesuai dengan kebutuhanmu.',
+            ),
+            const SizedBox(height: 15),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1976D2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Mengerti',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+Widget _tutorialItem(IconData icon, String title, String desc) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      children: [
+        Icon(icon, color: const Color(0xFF1976D2)),
+        const SizedBox(width: 15),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                desc,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   // --- WIDGET PINTASAN FITUR ---
   Widget _buildShortcutButton({
@@ -93,6 +183,18 @@ class TipsPage extends StatelessWidget {
         drawer: const CustomAppDrawer(),
         drawerEdgeDragWidth: 100.0,
         appBar: AppBar(
+          actions: [
+  Padding(
+    padding: const EdgeInsets.only(right: 12.0),
+    child: IconButton(
+      icon: Icon(
+        Icons.info_outline,
+        color: isDarkMode ? Colors.white70 : Colors.black54,
+      ),
+      onPressed: () => _showTutorial(context),
+    ),
+  ),
+],
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
