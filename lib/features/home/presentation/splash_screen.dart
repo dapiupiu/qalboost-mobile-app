@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import '../../auth/data/auth_local_data.dart'; // Import local data
 
 class VideoSplashScreen extends StatefulWidget {
   const VideoSplashScreen({super.key});
@@ -10,6 +11,7 @@ class VideoSplashScreen extends StatefulWidget {
 
 class _VideoSplashScreenState extends State<VideoSplashScreen> {
   late VideoPlayerController _controller;
+  final AuthLocalData _authLocalData = AuthLocalData();
 
   @override
   void initState() {
@@ -22,17 +24,31 @@ class _VideoSplashScreenState extends State<VideoSplashScreen> {
           _controller.play();
         })
         .catchError((error) {
-          // Fallback jika video gagal
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushReplacementNamed(context, '/home');
-          });
+          // Jika video gagal, jalankan pengecekan auth segera
+          _navigateToNext();
         });
 
     _controller.addListener(() {
+      // Jika video selesai
       if (_controller.value.position == _controller.value.duration) {
-        Navigator.pushReplacementNamed(context, '/home');
+        _navigateToNext();
       }
     });
+  }
+
+  // Fungsi cerdas untuk menentukan tujuan setelah splash
+  Future<void> _navigateToNext() async {
+    bool isValid = await _authLocalData.isSessionValid();
+    
+    if (mounted) {
+      if (isValid) {
+        // Jika belum 5 menit, langsung ke Home
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        // Jika sudah lebih 5 menit atau belum login, ke Login
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    }
   }
 
   @override

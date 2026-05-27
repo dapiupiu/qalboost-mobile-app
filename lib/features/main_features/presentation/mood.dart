@@ -1,29 +1,7 @@
 import 'package:flutter/material.dart';
-
-// --- IMPORT KOMPONEN DRAWER KAMU DI SINI ---
-// Sesuaikan path import jika folder penempatannya berbeda
+import '../provider/mood_provider.dart';
+import '../model/mood_model.dart';
 import '../../../core/components/app_drawer.dart';
-
-// Penyimpanan data mood dipindah ke file mood.dart agar tidak terjadi import sirkular
-class MoodStorage {
-  static final Map<String, Map<String, dynamic>> _moodData = {};
-
-  static void saveMood(DateTime date, String emoji, String catatan) {
-    final key =
-        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    _moodData[key] = {
-      'emoji': emoji,
-      'catatan': catatan,
-      'timestamp': DateTime.now(),
-    };
-  }
-
-  static Map<String, dynamic>? getMood(DateTime date) {
-    final key =
-        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    return _moodData[key];
-  }
-}
 
 class MoodPage extends StatefulWidget {
   const MoodPage({Key? key}) : super(key: key);
@@ -33,25 +11,30 @@ class MoodPage extends StatefulWidget {
 }
 
 class _MoodPageState extends State<MoodPage> {
-  late int _currentMonth;
-  late int _currentYear;
+  final MoodProvider _moodProvider = MoodProvider();
 
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
-    _currentMonth = now.month;
-    _currentYear = now.year;
+    _moodProvider.fetchMoods().then((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  // Helper Warna Kalender
+  Color _getDayColor(String? emoji) {
+    if (emoji == '😊') return Colors.green.shade100; // Baik
+    if (emoji == '😢') return Colors.red.shade100;   // Buruk
+    return Colors.white;
   }
 
   @override
   Widget build(BuildContext context) {
-    final firstDay = DateTime(_currentYear, _currentMonth, 1);
-    final lastDay = DateTime(_currentYear, _currentMonth + 1, 0);
-    final daysInMonth = lastDay.day;
-    final startWeekday = firstDay.weekday; // 1 = Senin, 7 = Minggu
-
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    final firstDay = DateTime(_moodProvider.currentYear, _moodProvider.currentMonth, 1);
+    final daysInMonth = DateTime(_moodProvider.currentYear, _moodProvider.currentMonth + 1, 0).day;
+    final startWeekday = firstDay.weekday;
 
     final List<int?> days = List.generate(42, (index) {
       final dayNum = index - (startWeekday - 1) + 1;
@@ -60,54 +43,19 @@ class _MoodPageState extends State<MoodPage> {
 
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
-      
-      // --- DRAWER BERHASIL DISISIPKAN ---
-      // Bisa diakses via swipe/drag dari tepi kiri layar
       drawer: const CustomAppDrawer(),
-      drawerEdgeDragWidth: 100.0, // Pakai yang ini agar tidak error lagi
-      
       appBar: AppBar(
         backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
-
-        // Tombol kembali dipertahankan di sini sesuai request kamu
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDarkMode ? Colors.white : Colors.black87,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-
+        leading: BackButton(color: isDarkMode ? Colors.white : Colors.black87),
         centerTitle: true,
-
-        // judul bulan & tahun
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              icon: Icon(Icons.chevron_left, color: isDarkMode ? Colors.white : Colors.black87),
-              onPressed: _previousMonth,
-            ),
-            GestureDetector(
-              onTap: () {
-                _showMonthYearPicker(context);
-              },
-              child: Text(
-                '${_getMonthName(_currentMonth)} $_currentYear',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: isDarkMode ? Colors.white : Colors.black87,
-                ),
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.chevron_right, color: isDarkMode ? Colors.white : Colors.black87),
-              onPressed: _nextMonth,
-            ),
+            IconButton(icon: const Icon(Icons.chevron_left), onPressed: () => setState(() => _moodProvider.previousMonth())),
+            Text('${_getMonthName(_moodProvider.currentMonth)} ${_moodProvider.currentYear}', 
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            IconButton(icon: const Icon(Icons.chevron_right), onPressed: () => setState(() => _moodProvider.nextMonth())),
           ],
         ),
       ),
@@ -115,45 +63,26 @@ class _MoodPageState extends State<MoodPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Header Hari
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: ['S', 'S', 'R', 'K', 'J', 'S', 'M']
-                  .map(
-                    (d) => Text(
-                      d,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
+            _buildWeekdayHeader(),
             const SizedBox(height: 10),
-
-            // Grid Kalender
             Expanded(
               child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, mainAxisSpacing: 8, crossAxisSpacing: 8),
                 itemCount: days.length,
                 itemBuilder: (context, index) {
                   final dayNum = days[index];
                   if (dayNum == null) return const SizedBox.shrink();
 
-                  final date = DateTime(_currentYear, _currentMonth, dayNum);
-                  final data = MoodStorage.getMood(date);
+                  final dateKey = "${_moodProvider.currentYear}-${_moodProvider.currentMonth.toString().padLeft(2, '0')}-${dayNum.toString().padLeft(2, '0')}";
+                  
+                  final MoodModel? moodData = _moodProvider.userMoods.cast<MoodModel?>().firstWhere(
+                    (m) => m?.dateKey == dateKey, orElse: () => null
+                  );
 
-                  return _buildDayCell(context, dayNum, data);
+                  return _buildDayCell(context, dayNum, moodData);
                 },
               ),
             ),
-
-            // Recap Hari Ini
             _buildTodayRecap(),
           ],
         ),
@@ -161,52 +90,23 @@ class _MoodPageState extends State<MoodPage> {
     );
   }
 
-  Widget _buildDayCell(
-    BuildContext context,
-    int day,
-    Map<String, dynamic>? data,
-  ) {
+  Widget _buildDayCell(BuildContext context, int day, MoodModel? data) {
     return GestureDetector(
       onTap: () {
-        if (data != null) {
-          showModalBottomSheet(
-            context: context,
-            builder: (_) => Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(data['emoji'], style: const TextStyle(fontSize: 50)),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Tanggal $day',
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(data['catatan'] ?? 'Tidak ada catatan', style: const TextStyle(color: Colors.black87)),
-                ],
-              ),
-            ),
-          );
-        }
+        if (data != null) _showMoodDetail(context, day, data);
       },
       child: Container(
         decoration: BoxDecoration(
-          color: data != null ? Colors.white : Colors.white24,
+          // Warna kotak mengikuti mood (Hijau/Merah)
+          color: data != null ? _getDayColor(data.emoji) : Colors.white24,
           borderRadius: BorderRadius.circular(8),
-          border: data != null
-              ? Border.all(color: Colors.blue.withOpacity(0.3))
-              : null,
+          border: data != null ? Border.all(color: data.emoji == '😊' ? Colors.green : Colors.red, width: 0.5) : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              '$day',
-              style: const TextStyle(fontSize: 12, color: Colors.black54),
-            ),
-            if (data != null)
-              Text(data['emoji'], style: const TextStyle(fontSize: 18)),
+            Text('$day', style: const TextStyle(fontSize: 10, color: Colors.black54)),
+            if (data != null) Text(data.emoji, style: const TextStyle(fontSize: 18)),
           ],
         ),
       ),
@@ -214,166 +114,57 @@ class _MoodPageState extends State<MoodPage> {
   }
 
   Widget _buildTodayRecap() {
-    final data = MoodStorage.getMood(DateTime.now());
+    final now = DateTime.now();
+    final todayKey = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    final MoodModel? data = _moodProvider.userMoods.cast<MoodModel?>().firstWhere((m) => m?.dateKey == todayKey, orElse: () => null);
+
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      width: double.infinity, padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: data != null ? _getDayColor(data.emoji) : Colors.white, 
         borderRadius: BorderRadius.circular(15),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)]
       ),
       child: data == null
-          ? const Text(
-              'Belum ada mood untuk hari ini.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.black54),
-            )
+          ? const Text('Belum ada mood untuk hari ini.', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54))
           : Row(
               children: [
-                Text(data['emoji'], style: const TextStyle(fontSize: 40)),
+                Text(data.emoji, style: const TextStyle(fontSize: 40)),
                 const SizedBox(width: 15),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Mood Hari Ini',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-                      ),
-                      Text(
-                        data['catatan'],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.black54),
-                      ),
-                    ],
-                  ),
-                ),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(data.emoji == '😊' ? 'Mood Baik' : 'Mood Buruk', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+                  Text(data.note, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.black54)),
+                ])),
               ],
             ),
     );
   }
 
-  void _previousMonth() {
-    setState(() {
-      if (_currentMonth == 1) {
-        _currentMonth = 12;
-        _currentYear--;
-      } else {
-        _currentMonth--;
-      }
-    });
-  }
-
-  void _nextMonth() {
-    setState(() {
-      if (_currentMonth == 12) {
-        _currentMonth = 1;
-        _currentYear++;
-      } else {
-        _currentMonth++;
-      }
-    });
-  }
-
-  void _showMonthYearPicker(BuildContext context) {
-    int selectedMonth = _currentMonth;
-    int selectedYear = _currentYear;
-
+  void _showMoodDetail(BuildContext context, int day, MoodModel data) {
     showModalBottomSheet(
       context: context,
-      builder: (_) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Pilih Bulan & Tahun',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  DropdownButton<int>(
-                    value: selectedMonth,
-                    isExpanded: true,
-                    dropdownColor: Colors.white,
-                    style: const TextStyle(color: Colors.black87),
-                    items: List.generate(12, (index) {
-                      return DropdownMenuItem(
-                        value: index + 1,
-                        child: Text(_getMonthName(index + 1)),
-                      );
-                    }),
-                    onChanged: (value) {
-                      setModalState(() {
-                        selectedMonth = value!;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  DropdownButton<int>(
-                    value: selectedYear,
-                    isExpanded: true,
-                    dropdownColor: Colors.white,
-                    style: const TextStyle(color: Colors.black87),
-                    items: List.generate(20, (index) {
-                      int year = 2020 + index;
-                      return DropdownMenuItem(
-                        value: year,
-                        child: Text(year.toString()),
-                      );
-                    }),
-                    onChanged: (value) {
-                      setModalState(() {
-                        selectedYear = value!;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _currentMonth = selectedMonth;
-                        _currentYear = selectedYear;
-                      });
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF58A6F0),
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text('Pilih'),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+      backgroundColor: _getDayColor(data.emoji),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text(data.emoji, style: const TextStyle(fontSize: 50)),
+          const SizedBox(height: 10),
+          Text('Tanggal $day ${_getMonthName(_moodProvider.currentMonth)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          const SizedBox(height: 10),
+          Text(data.note, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 20),
+        ]),
+      ),
     );
   }
 
+  Widget _buildWeekdayHeader() {
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: ['S', 'S', 'R', 'K', 'J', 'S', 'M'].map((d) => Text(d, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey))).toList());
+  }
+
   String _getMonthName(int month) {
-    const months = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     return months[month - 1];
   }
 }
