@@ -66,57 +66,114 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
           child: Column(
             children: [
               const SizedBox(height: 10),
-              Center(child: Image.asset('assets/images/moon_large.png', height: 120, errorBuilder: (c, e, s) => const Text('🌙', style: TextStyle(fontSize: 60)))),
+              
+              // --- LOGO UTAMA DENGAN HIGHLIGHT SHADOW ---
+              Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withValues(alpha: 0.2),
+                        blurRadius: 30,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Image.asset(
+                    'assets/images/checker.png', 
+                    height: 140,
+                    errorBuilder: (c, e, s) => const Text('🌙', style: TextStyle(fontSize: 60)),
+                  ),
+                ),
+              ),
+              
               const SizedBox(height: 15),
-              const Text('BAGAIMANA MOOD\nKAMU HARI INI?', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const Text(
+                'BAGAIMANA MOOD\nKAMU HARI INI?', 
+                textAlign: TextAlign.center, 
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)
+              ),
               const SizedBox(height: 20),
+              
               _buildDateTile(),
-              const SizedBox(height: 25),
+              const SizedBox(height: 35),
+
+              // --- PILIHAN MOOD DENGAN SOFT OUTLINE ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _MoodCard(
+                  _MoodSelector(
                     label: 'Baik',
-                    assetPath: 'assets/images/mood_baik.png',
+                    assetPath: 'assets/images/baik.png',
                     selected: _selectedMoodEmoji == '😊',
                     onTap: () => setState(() => _selectedMoodEmoji = '😊'),
+                    activeColor: Colors.green,
                   ),
-                  const SizedBox(width: 20),
-                  _MoodCard(
-                    label: 'Buruk', // Ganti dari Sedih ke Buruk
-                    assetPath: 'assets/images/mood_buruk.png',
+                  const SizedBox(width: 40),
+                  _MoodSelector(
+                    label: 'Buruk',
+                    assetPath: 'assets/images/buruk.png',
                     selected: _selectedMoodEmoji == '😢',
                     onTap: () => setState(() => _selectedMoodEmoji = '😢'),
+                    activeColor: Colors.red,
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
-              const Align(alignment: Alignment.centerLeft, child: Text('Apa yang kamu rasakan?', style: TextStyle(fontWeight: FontWeight.bold))),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _controller,
-                maxLines: 4,
-                style: const TextStyle(color: Colors.black87),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  hintText: 'Tulis cerita kamu di sini...',
-                  hintStyle: const TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
-                ),
+
+              const SizedBox(height: 40),
+              const Align(
+                alignment: Alignment.centerLeft, 
+                child: Padding(
+                  padding: EdgeInsets.only(left: 4, bottom: 8),
+                  child: Text('Apa yang kamu rasakan?', style: TextStyle(fontWeight: FontWeight.bold)),
+                )
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _handleSave,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF58A6F0),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Text('Simpan Mood Hari Ini'),
+              
+              // --- TEXTFIELD DENGAN BUTTON SIMPAN DI DALAM ---
+              Stack(
+                children: [
+                  TextField(
+                    controller: _controller,
+                    maxLines: 6,
+                    style: const TextStyle(color: Colors.black87),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Tulis cerita kamu di sini...',
+                      hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                      contentPadding: const EdgeInsets.all(16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15), 
+                        borderSide: BorderSide.none
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(color: Colors.blue.withValues(alpha: 0.3), width: 1),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    right: 10,
+                    child: SizedBox(
+                      height: 36,
+                      child: ElevatedButton(
+                        onPressed: _handleSave,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF58A6F0),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Text('Simpan', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 100),
+              const SizedBox(height: 50),
             ],
           ),
         ),
@@ -128,18 +185,36 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
   Widget _buildDateTile() {
     return GestureDetector(
       onTap: () async {
-        final picked = await showDatePicker(context: context, initialDate: _selectedDate, firstDate: DateTime(2024), lastDate: DateTime.now());
+        final picked = await showDatePicker(
+          context: context, 
+          initialDate: _selectedDate, 
+          firstDate: DateTime(2024), 
+          lastDate: DateTime.now()
+        );
         if (picked != null) setState(() => _selectedDate = picked);
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.white, 
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10, 
+              offset: const Offset(0, 4)
+            )
+          ]
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.calendar_today, size: 16, color: Colors.blue),
-            const SizedBox(width: 8),
-            Text('${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+            const Icon(Icons.calendar_month, size: 18, color: Color(0xFF58A6F0)),
+            const SizedBox(width: 10),
+            Text(
+              '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}', 
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)
+            ),
           ],
         ),
       ),
@@ -152,36 +227,63 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
   }
 }
 
-class _MoodCard extends StatelessWidget {
+class _MoodSelector extends StatelessWidget {
   final String label;
   final String assetPath;
   final bool selected;
   final VoidCallback onTap;
+  final Color activeColor;
 
-  const _MoodCard({super.key, required this.label, required this.assetPath, required this.selected, required this.onTap});
+  const _MoodSelector({
+    required this.label, 
+    required this.assetPath, 
+    required this.selected, 
+    required this.onTap,
+    required this.activeColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Tentukan warna seleksi berdasarkan label
-    Color selectionColor = label == 'Baik' ? Colors.green : Colors.red;
-    Color bgColor = label == 'Baik' ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE);
-
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 130, height: 150,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: selected ? Colors.white : bgColor,
-          borderRadius: BorderRadius.circular(20),
-          border: selected ? Border.all(color: selectionColor, width: 2) : null,
-          boxShadow: [if (selected) BoxShadow(color: selectionColor.withOpacity(0.2), blurRadius: 10)],
-        ),
+      child: AnimatedScale(
+        scale: selected ? 1.15 : 1.0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutBack,
         child: Column(
           children: [
-            Expanded(child: Image.asset(assetPath, errorBuilder: (c, e, s) => Text(label == 'Baik' ? '😊' : '😢', style: const TextStyle(fontSize: 40)))),
-            Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: selected ? selectionColor : Colors.black87)),
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                // Soft Outline: Menggunakan opacity lebih rendah dan border lebih tipis
+                border: selected 
+                    ? Border.all(color: activeColor.withValues(alpha: 0.3), width: 1.5) 
+                    : Border.all(color: Colors.transparent, width: 1.5),
+                boxShadow: selected ? [
+                  BoxShadow(
+                    color: activeColor.withValues(alpha: 0.15), 
+                    blurRadius: 12, 
+                    spreadRadius: 1
+                  )
+                ] : [],
+              ),
+              child: Image.asset(
+                assetPath, 
+                width: 85, 
+                height: 85,
+                errorBuilder: (c, e, s) => Text(label == 'Baik' ? '😊' : '😢', style: const TextStyle(fontSize: 40))
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label, 
+              style: TextStyle(
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal, 
+                color: selected ? activeColor : Colors.black54,
+                fontSize: 14,
+              )
+            ),
           ],
         ),
       ),

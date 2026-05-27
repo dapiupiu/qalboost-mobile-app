@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     if (emoji == '😊') {
       return Image.asset('assets/images/baik.png', width: 80, height: 80); // Maskot Baik
     } else if (emoji == '😢') {
-      return Image.asset('assets/images/buruk.png', width: 100, height: 100); // Maskot Buruk
+      return Image.asset('assets/images/buruk.png', width: 80, height: 80); // Maskot Buruk
     } else {
       return Image.asset('assets/images/b_aja.png', width: 80, height: 80, 
         errorBuilder: (c, e, s) => const Text('🌙', style: TextStyle(fontSize: 36)));
@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w800,
-                      color: isDarkMode ? Colors.white : const Color(0xFF1F1B18)),
+                      color: isDarkMode ? const Color.fromARGB(255, 255, 255, 255) : const Color(0xFF1F1B18)),
                 ),
               ),
               const SizedBox(height: 30),

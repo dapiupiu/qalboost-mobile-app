@@ -21,11 +21,38 @@ class _MoodPageState extends State<MoodPage> {
     });
   }
 
-  // Helper Warna Kalender
+  // Helper Warna Background Kotak Kalender
   Color _getDayColor(String? emoji) {
     if (emoji == '😊') return Colors.green.shade100; // Baik
     if (emoji == '😢') return Colors.red.shade100;   // Buruk
     return Colors.white;
+  }
+
+  // HELPER MASKOT: Digunakan untuk Recap (bawah) dan Detail (pop-up)
+  Widget _getMoodImage(String? emoji, {double size = 20}) {
+    if (emoji == '😊') {
+      return Image.asset('assets/images/baik.png', width: size, height: size);
+    } else if (emoji == '😢') {
+      return Image.asset('assets/images/buruk.png', width: size, height: size);
+    }
+    return const SizedBox.shrink();
+  }
+
+  // HELPER EMOJI: Digunakan khusus untuk Grid Kalender agar terlihat "Pop"
+  Widget _buildStyledEmoji(String emoji) {
+    return Text(
+      emoji,
+      style: TextStyle(
+        fontSize: 20,
+        shadows: [
+          Shadow(
+            blurRadius: 3.0,
+            color: Colors.black.withOpacity(0.15),
+            offset: const Offset(1, 1),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -52,10 +79,18 @@ class _MoodPageState extends State<MoodPage> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(icon: const Icon(Icons.chevron_left), onPressed: () => setState(() => _moodProvider.previousMonth())),
-            Text('${_getMonthName(_moodProvider.currentMonth)} ${_moodProvider.currentYear}', 
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            IconButton(icon: const Icon(Icons.chevron_right), onPressed: () => setState(() => _moodProvider.nextMonth())),
+            IconButton(
+              icon: const Icon(Icons.chevron_left), 
+              onPressed: () => setState(() => _moodProvider.previousMonth())
+            ),
+            Text(
+              '${_getMonthName(_moodProvider.currentMonth)} ${_moodProvider.currentYear}', 
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right), 
+              onPressed: () => setState(() => _moodProvider.nextMonth())
+            ),
           ],
         ),
       ),
@@ -67,7 +102,11 @@ class _MoodPageState extends State<MoodPage> {
             const SizedBox(height: 10),
             Expanded(
               child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, mainAxisSpacing: 8, crossAxisSpacing: 8),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 7, 
+                  mainAxisSpacing: 8, 
+                  crossAxisSpacing: 8
+                ),
                 itemCount: days.length,
                 itemBuilder: (context, index) {
                   final dayNum = days[index];
@@ -97,16 +136,20 @@ class _MoodPageState extends State<MoodPage> {
       },
       child: Container(
         decoration: BoxDecoration(
-          // Warna kotak mengikuti mood (Hijau/Merah)
-          color: data != null ? _getDayColor(data.emoji) : Colors.white24,
-          borderRadius: BorderRadius.circular(8),
-          border: data != null ? Border.all(color: data.emoji == '😊' ? Colors.green : Colors.red, width: 0.5) : null,
+          color: data != null ? _getDayColor(data.emoji) : Colors.white.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(10),
+          border: data != null 
+            ? Border.all(color: data.emoji == '😊' ? Colors.green.shade200 : Colors.red.shade200, width: 1) 
+            : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('$day', style: const TextStyle(fontSize: 10, color: Colors.black54)),
-            if (data != null) Text(data.emoji, style: const TextStyle(fontSize: 18)),
+            Text(
+              '$day', 
+              style: const TextStyle(fontSize: 10, color: Colors.black54, fontWeight: FontWeight.bold)
+            ),
+            if (data != null) _buildStyledEmoji(data.emoji), // Tetap Emoji di Kalender
           ],
         ),
       ),
@@ -129,11 +172,13 @@ class _MoodPageState extends State<MoodPage> {
           ? const Text('Belum ada mood untuk hari ini.', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54))
           : Row(
               children: [
-                Text(data.emoji, style: const TextStyle(fontSize: 40)),
+                _getMoodImage(data.emoji, size: 50), // Pakai Maskot di Recap
                 const SizedBox(width: 15),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(data.emoji == '😊' ? 'Mood Baik' : 'Mood Buruk', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
-                  Text(data.note, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.black54)),
+                  Text(data.emoji == '😊' ? 'Mood Baik' : 'Mood Buruk', 
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+                  Text(data.note, maxLines: 1, overflow: TextOverflow.ellipsis, 
+                    style: const TextStyle(color: Colors.black54)),
                 ])),
               ],
             ),
@@ -148,9 +193,10 @@ class _MoodPageState extends State<MoodPage> {
       builder: (_) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(data.emoji, style: const TextStyle(fontSize: 50)),
-          const SizedBox(height: 10),
-          Text('Tanggal $day ${_getMonthName(_moodProvider.currentMonth)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          _getMoodImage(data.emoji, size: 80), // Pakai Maskot di Detail
+          const SizedBox(height: 15),
+          Text('Tanggal $day ${_getMonthName(_moodProvider.currentMonth)}', 
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           const SizedBox(height: 10),
           Text(data.note, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 20),
@@ -160,7 +206,11 @@ class _MoodPageState extends State<MoodPage> {
   }
 
   Widget _buildWeekdayHeader() {
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: ['S', 'S', 'R', 'K', 'J', 'S', 'M'].map((d) => Text(d, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey))).toList());
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround, 
+      children: ['S', 'S', 'R', 'K', 'J', 'S', 'M'].map((d) => 
+        Text(d, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey))).toList()
+    );
   }
 
   String _getMonthName(int month) {

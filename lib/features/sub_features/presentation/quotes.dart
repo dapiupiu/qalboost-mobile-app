@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
-// --- IMPORT KOMPONEN DRAWER KAMU DI SINI ---
-// Sesuaikan path import jika folder penempatannya berbeda
-import '../../../core/components/app_drawer.dart';
+// --- DATA MODEL ---
+class QuoteModel {
+  final String videoPath;
+  final String contentText;
+  QuoteModel({required this.videoPath, required this.contentText});
+}
 
 class QuotesSimpleScreen extends StatefulWidget {
   final String headerTitle;
   final String headerSubtitle;
-  final String contentText;
 
   const QuotesSimpleScreen({
     Key? key,
     this.headerTitle = 'Hari ini...',
-    this.headerSubtitle = 'Pelan-pelan kita perbaiki ya dengerin dulu yuk...',
-    this.contentText =
-        'Orang itu wajar kalau sedih tapi ketika sudah sedih sepatutnya ia berdoa',
+    this.headerSubtitle = 'Pelan-pelan kita perbaiki ya...',
   }) : super(key: key);
 
   @override
@@ -22,54 +23,75 @@ class QuotesSimpleScreen extends StatefulWidget {
 }
 
 class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
-  double _position = 0.2;
-  bool _isPlaying = false;
+  final List<QuoteModel> _quotesData = [
+    QuoteModel(videoPath: 'assets/videos/quote_1.mp4', contentText: 'Orang itu wajar kalau sedih, tapi ketika sudah sedih sepatutnya ia berdoa.'),
+    QuoteModel(videoPath: 'assets/videos/quote_2.mp4', contentText: 'Jangan menyerah ketika doamu belum dikabulkan. Allah tahu waktu yang tepat.'),
+    QuoteModel(videoPath: 'assets/videos/quote_3.mp4', contentText: 'Kunci ketenangan hati adalah dengan selalu bersyukur atas apa yang dimiliki.'),
+  ];
 
-  void _togglePlay() => setState(() => _isPlaying = !_isPlaying);
+  late PageController _pageController;
 
-  // Fungsi tutorial dipindahkan ke dalam class agar terstruktur dengan benar
-  Widget _tutorialItem(
-    IconData icon,
-    String title,
-    String desc,
-  ) {
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: 1.0); 
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  // --- FUNGSI TUTORIAL MODAL ---
+  void _showTutorial(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: Color(0xFFF6E9E1),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(10))),
+              const SizedBox(height: 15),
+              const Text('Cara Menggunakan Q-Quotes', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              _tutorialItem(Icons.swipe_outlined, 'Swipe', 'Geser ke kanan atau kiri untuk melihat quotes video lainnya.'),
+              _tutorialItem(Icons.play_circle_outline, 'Play/Pause', 'Ketuk video untuk memulai atau menghentikan video.'),
+              _tutorialItem(Icons.replay_10_rounded, 'Replay', 'Gunakan tombol replay untuk mengulang 10 detik sebelumnya.'),
+              const SizedBox(height: 15),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1976D2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Mengerti', style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _tutorialItem(IconData icon, String title, String desc) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor: Colors.white,
-            child: Icon(
-              icon,
-              color: const Color(0xFF1976D2),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  desc,
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          Icon(icon, color: const Color(0xFF1976D2)),
+          const SizedBox(width: 15),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(desc, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          ])),
         ],
       ),
     );
@@ -79,362 +101,244 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final bg = isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1);
-    final accentBlue = const Color(0xFF1976D2);
 
     return Scaffold(
       backgroundColor: bg,
-      
-      // --- DRAWER DINAMIS BERHASIL DISISIPKAN ---
-      // Bisa diakses via swipe/drag dari tepi kiri layar
-      drawer: const CustomAppDrawer(),
-      drawerEdgeDragWidth: 100.0, // Pakai yang ini agar tidak error lagi
-      
       appBar: AppBar(
         backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
-        
-        // Tombol Back dipertahankan sesuai keinginanmu agar tidak tertimpa ikon hamburger otomatis
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black87),
           onPressed: () => Navigator.maybePop(context),
         ),
         title: Text('Q-Quotes', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold)),
         centerTitle: true,
+        // --- TOMBOL INFORMASI DI HEADER ---
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
-            child: GestureDetector(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.transparent,
-                  isScrollControlled: true,
-                  builder: (context) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 16,
-                      ),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF6E9E1),
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(24),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Row(
-                            children: const [
-                              CircleAvatar(
-                                radius: 16,
-                                backgroundColor: Colors.orangeAccent,
-                                child: Icon(
-                                  Icons.tips_and_updates,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Text(
-                                'Tutorial',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 18),
-                          _tutorialItem(
-                            Icons.play_circle_fill,
-                            'Play',
-                            'Tekan untuk memutar atau menghentikan audio quotes',
-                          ),
-                          _tutorialItem(
-                            Icons.swipe,
-                            'Swipe',
-                            'Geser layar kebawah untuk melihat quotes lain',
-                          ),
-                          _tutorialItem(
-                            Icons.download,
-                            'Download',
-                            'Simpan quotes ke perangkat',
-                          ),
-                          _tutorialItem(
-                            Icons.favorite,
-                            'Favorite',
-                            'Tambah ke favorit',
-                          ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1976D2),
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text(
-                                'Mengerti',
-                                style: TextStyle(fontSize: 14, color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-              child: Image.asset(
-                'assets/images/menu_quotes.png',
-                width: 28,
-                height: 28,
-                errorBuilder: (c, e, s) => Icon(
-                  Icons.info_outline,
-                  color: isDarkMode ? Colors.grey : Colors.black54,
-                ),
-              ),
+            child: IconButton(
+              icon: Icon(Icons.info_outline, color: isDarkMode ? Colors.white70 : Colors.black54),
+              onPressed: () => _showTutorial(context),
             ),
           ),
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          child: Column(
-            children: [
-              // Top area: large left heading and decorative moon on right
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          children: [
+            // HEADER AREA
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Row(
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          widget.headerTitle,
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w800,
-                            color: isDarkMode ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.headerSubtitle,
-                          style: TextStyle(fontSize: 18, height: 1.2, color: isDarkMode ? Colors.white70 : Colors.black87),
-                        ),
+                        Text(widget.headerTitle, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+                        Text(widget.headerSubtitle, style: const TextStyle(fontSize: 14, color: Colors.grey)),
                       ],
                     ),
                   ),
-                  SizedBox(
-                    width: 120,
-                    height: 120,
-                    child: Image.asset(
-                      'assets/images/moon_large.png',
-                      fit: BoxFit.contain,
-                      errorBuilder: (c, e, s) => const Center(
-                        child: Text('🌙', style: TextStyle(fontSize: 48)),
-                      ),
-                    ),
-                  ),
+                  Image.asset('assets/images/quotes.png', width: 80, height: 80),
                 ],
               ),
-
-              const SizedBox(height: 18),
-
-              // Main card
-              Expanded(
-                child: Center(
-                  child: Container(
-                    width: double.infinity,
-                    constraints: const BoxConstraints(maxWidth: 420),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 20,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Image area with rounded corners
-                        QHRect(
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(28),
-                            ),
-                            child: Container(
-                              color: Colors.grey.shade200,
-                              height: 320,
-                              width: double.infinity,
-                              child: Image.asset(
-                                'assets/images/ustadz_avatar.png',
-                                fit: BoxFit.cover,
-                                errorBuilder: (c, e, s) => const Center(
-                                  child: CircleAvatar(
-                                    radius: 56,
-                                    child: Text(
-                                      'U',
-                                      style: TextStyle(fontSize: 40),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Bottom blue control panel
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF1976D2),
-                            borderRadius: BorderRadius.vertical(
-                              bottom: Radius.circular(28),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                widget.contentText,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 12),
-
-                              // Controls
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: const [
-                                      Icon(
-                                        Icons.favorite_border,
-                                        color: Colors.white,
-                                      ),
-                                      SizedBox(width: 12),
-                                      Icon(
-                                        Icons.replay_10,
-                                        color: Colors.white,
-                                      ),
-                                    ],
-                                  ),
-
-                                  // Play button
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                        onPressed: () {},
-                                        icon: const Icon(
-                                          Icons.skip_previous,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: _togglePlay,
-                                        child: CircleAvatar(
-                                          radius: 26,
-                                          backgroundColor: Colors.white,
-                                          child: Icon(
-                                            _isPlaying
-                                                ? Icons.pause
-                                                : Icons.play_arrow,
-                                            color: accentBlue,
-                                            size: 30,
-                                          ),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        onPressed: () {},
-                                        icon: const Icon(
-                                          Icons.skip_next,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  const Icon(
-                                    Icons.file_download,
-                                    color: Colors.white,
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 8),
-                              // Progress slider
-                              Slider.adaptive(
-                                value: _position,
-                                onChanged: (v) => setState(() => _position = v),
-                                activeColor: Colors.white,
-                                inactiveColor: Colors.white30,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+            ),
+            
+            // --- PAGEVIEW AREA ---
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: _quotesData.length,
+                itemBuilder: (context, index) {
+                  return AnimatedBuilder(
+                    animation: _pageController,
+                    builder: (context, child) {
+                      double value = 1.0;
+                      if (_pageController.position.haveDimensions) {
+                        value = _pageController.page! - index;
+                        value = (1 - (value.abs() * 0.2)).clamp(0.0, 1.0);
+                      }
+                      return Transform.scale(
+                        scale: Curves.easeInOut.transform(value),
+                        child: child,
+                      );
+                    },
+                    child: QHVideoCard(quote: _quotesData[index]),
+                  );
+                },
               ),
+            ),
 
-              // swipe hint
-              Padding(
-                padding: const EdgeInsets.only(top: 16, bottom: 8),
-                child: Column(
-                  children: [
-                    Text(
-                      'swipe',
-                      style: TextStyle(fontSize: 12, color: isDarkMode ? Colors.grey : Colors.black54),
-                    ),
-                    const SizedBox(height: 6),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 15),
+              child: Text('← swipe left/right →', style: TextStyle(color: Colors.grey, fontSize: 12)),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// Widget Helper dummy untuk membungkus RRect jika diperlukan
-class QHRect extends StatelessWidget {
-  final Widget child;
-  const QHRect({Key? key, required this.child}) : super(key: key);
+class QHVideoCard extends StatefulWidget {
+  final QuoteModel quote;
+  const QHVideoCard({Key? key, required this.quote}) : super(key: key);
 
   @override
-  Widget build(BuildContext childContext) {
-    return child;
+  State<QHVideoCard> createState() => _QHVideoCardState();
+}
+
+class _QHVideoCardState extends State<QHVideoCard> {
+  late VideoPlayerController _controller;
+  late Future<void> _initializeVideoPlayerFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset(widget.quote.videoPath);
+    _initializeVideoPlayerFuture = _controller.initialize();
+    _controller.setLooping(true);
+    _controller.addListener(() { if (mounted) setState(() {}); });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _rewind10Seconds() {
+    final currentPos = _controller.value.position;
+    final newPos = currentPos - const Duration(seconds: 10);
+    _controller.seekTo(newPos < Duration.zero ? Duration.zero : newPos);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10))],
+      ),
+      child: Column(
+        children: [
+          // VIDEO AREA
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    FutureBuilder(
+                      future: _initializeVideoPlayerFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          return GestureDetector(
+                            onTap: () => _controller.value.isPlaying ? _controller.pause() : _controller.play(),
+                            child: FittedBox(
+                              fit: BoxFit.cover,
+                              child: SizedBox(
+                                width: _controller.value.size.width,
+                                height: _controller.value.size.height,
+                                child: VideoPlayer(_controller),
+                              ),
+                            ),
+                          );
+                        }
+                        return const Center(child: CircularProgressIndicator(color: Color(0xFF1976D2)));
+                      },
+                    ),
+                    if (!_controller.value.isPlaying)
+                      IgnorePointer(
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: const BoxDecoration(color: Colors.black26, shape: BoxShape.circle),
+                            child: const Icon(Icons.play_arrow_rounded, size: 60, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          
+          // CONTROL PANEL
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: const BoxDecoration(
+              color: Color(0xFF1976D2),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  widget.quote.contentText, 
+                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500), 
+                  textAlign: TextAlign.center
+                ),
+                const SizedBox(height: 10),
+                
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 3,
+                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                  ),
+                  child: Slider(
+                    value: _controller.value.position.inMilliseconds.toDouble(),
+                    max: _controller.value.duration.inMilliseconds.toDouble(),
+                    onChanged: (v) => _controller.seekTo(Duration(milliseconds: v.toInt())),
+                    activeColor: Colors.white,
+                    inactiveColor: Colors.white30,
+                  ),
+                ),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.replay_10_rounded, color: Colors.white, size: 28),
+                      onPressed: _rewind10Seconds,
+                    ),
+                    const SizedBox(width: 20),
+                    GestureDetector(
+                      onTap: () => _controller.value.isPlaying ? _controller.pause() : _controller.play(),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        radius: 25,
+                        child: Icon(
+                          _controller.value.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                          color: const Color(0xFF1976D2),
+                          size: 35,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    IconButton(
+                      icon: Icon(
+                        _controller.value.isLooping ? Icons.all_inclusive_rounded : Icons.arrow_right_alt_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                      onPressed: () => setState(() => _controller.setLooping(!_controller.value.isLooping)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -10,8 +10,14 @@ import 'features/settings/presentation/settings.dart';
 import 'features/main_features/presentation/mood.dart';
 import 'features/main_features/presentation/checker.dart';
 
+// --- IMPORT SUB FEATURES ---
+import 'features/sub_features/presentation/tips.dart';
+import 'features/sub_features/presentation/consul.dart';
+import 'features/sub_features/presentation/quotes.dart';
+// AKTIF: Baris import diary sudah dibuka
+import 'features/sub_features/presentation/diary.dart'; 
+
 void main() {
-  // Memastikan sistem framework siap sebelum menjalankan aplikasi
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
@@ -32,13 +38,18 @@ class MyApp extends StatelessWidget {
           themeMode: themeService.themeMode,
           
           theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF1E679F), 
+              brightness: Brightness.light,
+            ),
             useMaterial3: true,
             brightness: Brightness.light,
+            scaffoldBackgroundColor: const Color(0xFFF6E9E1),
           ),
+
           darkTheme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.blue,
+              seedColor: const Color(0xFF1E679F),
               brightness: Brightness.dark,
             ),
             useMaterial3: true,
@@ -52,13 +63,20 @@ class MyApp extends StatelessWidget {
 
           home: const VideoSplashScreen(),
           
+          // --- REGISTER SEMUA ALAMAT RUTE DI SINI ---
           routes: {
             '/login': (context) => const LoginPage(),
             '/register': (context) => const RegisterPage(),
             '/home': (context) => const HomePage(),
             '/settings': (context) => const SettingsPage(),
-            '/checker': (context) => const CheckerSimpleScreen(),
             '/mood': (context) => const MoodPage(),
+            '/tips': (context) => const TipsPage(),
+            '/checker': (context) => const CheckerSimpleScreen(),
+            '/consul': (context) => const ConsulPage(),
+            '/quotes': (context) => const QuotesSimpleScreen(),
+            
+            // AKTIF: Tanda // sudah dihapus, rute diary sekarang resmi terdaftar
+            '/diary': (context) => const DiaryPage(), 
           },
         );
       },
