@@ -40,7 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
     if (mounted) setState(() {});
   }
 
-  // --- LOGIKA NOTIFIKASI PRESENTASI (FIXED) ---
+  // --- LOGIKA NOTIFIKASI PRESENTASI ---
   Future<void> _toggleNotification(bool val) async {
     if (val) {
       var status = await Permission.notification.request();
@@ -52,7 +52,6 @@ class _SettingsPageState extends State<SettingsPage> {
         if (!mounted) return;
         setState(() => _notifAktif = true);
 
-        // FIX ERROR: Tambahkan parameter nama user
         String namaUser = _homeProvider.userName;
         if (namaUser == "Memuat..." || namaUser.isEmpty) {
           namaUser = "User";
@@ -90,7 +89,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:isDarkMode ? const Color(0xFF2B2420) : const Color(0xFFFFE0C6),
+      // --- BACKGROUND DISAMAKAN DENGAN CHECKER.DART ---
+      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
       appBar: AppBar(
         backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
@@ -98,7 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
           icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black87),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text('Settings', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87)),
+        title: Text('Settings', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: Padding(
@@ -137,7 +137,6 @@ class _SettingsPageState extends State<SettingsPage> {
                           title: const Text('Aktifkan Notifikasi'),
                           subtitle: const Text('Notifikasi akan muncul setiap 15 detik'),
                           value: _notifAktif,
-                          // FIX DEPRECATED: Gunakan activeTrackColor atau thumbColor
                           activeTrackColor: const Color(0xFF58A6F0),
                           onChanged: (val) => _toggleNotification(val),
                         ),
@@ -257,7 +256,6 @@ class _SettingsPageState extends State<SettingsPage> {
               await NotificationService().cancelAll();
               await prefs.clear();
               if (mounted) {
-                // Gunakan context yang valid
                 Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
               }
             },
