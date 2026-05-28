@@ -40,7 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      backgroundColor:isDarkMode ? const Color(0xFF2B2420) : const Color(0xFFFFE0C6),
       appBar: AppBar(
         backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
