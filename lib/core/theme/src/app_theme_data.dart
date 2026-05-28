@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
-import 'app_text_styles.dart';
+import 'package:qalboost/core/theme/src/app_colors.dart';
+import 'package:qalboost/core/theme/src/app_text_styles.dart';
 
 class AppThemeData {
   AppThemeData._();
@@ -12,8 +12,7 @@ class AppThemeData {
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.light,
-        background: AppColors.backgroundLight,
-        surface: AppColors.surfaceLight,
+        surface: AppColors.backgroundLight,
         primary: AppColors.primary,
         secondary: AppColors.secondary,
       ),
@@ -30,7 +29,7 @@ class AppThemeData {
           fontSize: 18,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surfaceLight,
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -46,8 +45,7 @@ class AppThemeData {
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.dark,
-        background: AppColors.backgroundDark,
-        surface: AppColors.surfaceDark,
+        surface: AppColors.backgroundDark,
         primary: AppColors.primary,
         secondary: AppColors.secondary,
       ),
@@ -64,12 +62,12 @@ class AppThemeData {
           fontSize: 18,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surfaceDark,
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
-      dividerTheme: DividerThemeData(color: Colors.white12, thickness: 1),
+      dividerTheme: const DividerThemeData(color: Colors.white12, thickness: 1),
     );
   }
 }

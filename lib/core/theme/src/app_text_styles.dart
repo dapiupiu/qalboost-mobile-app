@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
 
 class AppTextStyles {
   AppTextStyles._();
@@ -33,7 +32,7 @@ class AppTextStyles {
       ),
       labelSmall: TextStyle(
         fontSize: 10,
-        color: textColor.withOpacity(0.7),
+        color: textColor.withValues(alpha: 0.7),
       ),
     );
   }

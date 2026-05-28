@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/theme/theme_service.dart';
+import 'features/settings/data/notification_service.dart';
 
 import 'features/home/presentation/pages/splash_screen.dart';
 import 'features/home/presentation/pages/home_page.dart';
@@ -7,7 +8,13 @@ import 'features/settings/presentation/pages/settings_page.dart';
 import 'features/main_features/presentation/pages/mood_page.dart';
 import 'features/main_features/presentation/pages/checker_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inisialisasi Notification Service
+  final notificationService = NotificationService();
+  await notificationService.init();
+
   runApp(const MyApp());
 }
 
