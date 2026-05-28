@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../core/components/app_drawer.dart';
-import '../../sub_features/presentation/diary.dart';
-import '../../sub_features/presentation/tips.dart';
-import '../../sub_features/presentation/consul.dart';
-import '../../sub_features/presentation/quotes.dart';
+import '../../../../core/theme/theme_service.dart';
+import '../../../../core/components/app_drawer.dart';
+import '../../../../core/components/menu_button.dart';
+import '../../../sub_features/presentation/pages/diary_page.dart';
+import '../../../sub_features/presentation/pages/quotes_page.dart';
+import '../../../sub_features/presentation/pages/consul_page.dart';
+import '../../../main_features/presentation/pages/tips_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,17 +17,17 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
       drawer: const CustomAppDrawer(),
       drawerEdgeDragWidth: 100.0,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- HEADER ---
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -36,17 +38,18 @@ class _HomePageState extends State<HomePage> {
                       Builder(builder: (context) {
                         return GestureDetector(
                           onTap: () => Scaffold.of(context).openDrawer(),
-                          child: const CircleAvatar(child: Icon(Icons.person)),
+                          child: CircleAvatar(
+                            backgroundColor: colorScheme.primaryContainer,
+                            child: Icon(Icons.person, color: colorScheme.onPrimaryContainer),
+                          ),
                         );
                       }),
                       const SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Selamat Datang',
-                              style: TextStyle(color: isDarkMode ? Colors.grey[400] : Colors.black54)),
-                          Text('Pengguna QalBoost',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black87)),
+                          Text('Selamat Datang', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onBackground.withOpacity(0.6))),
+                          Text('Pengguna QalBoost', style: textTheme.titleLarge),
                         ],
                       ),
                     ],
@@ -54,28 +57,19 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(
                     width: 48,
                     height: 48,
-                    child: Image.asset('assets/images/app_logo.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (c, e, s) => const Icon(Icons.auto_awesome, color: Colors.blue)),
+                    child: Image.asset('assets/images/app_logo.png', fit: BoxFit.contain, errorBuilder: (c, e, s) => Icon(Icons.auto_awesome, color: colorScheme.primary)),
                   ),
                 ],
               ),
             ),
-
-            // --- TITLE ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Bagaimana Perasaan\nKamu Hari Ini?',
-                style: TextStyle(
-                    fontSize: 34,
-                    fontWeight: FontWeight.w800,
-                    color: isDarkMode ? Colors.white : const Color(0xFF1F1B18)),
+                style: textTheme.displayLarge,
               ),
             ),
             const SizedBox(height: 20),
-
-            // --- MENU BUTTONS ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -89,36 +83,32 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 30),
-
-            // --- HISTORY MOOD ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('History Mood', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('History Mood', style: textTheme.titleLarge?.copyWith(fontSize: 16)),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/mood'),
-                    child: const Text('Buka Kalender', style: TextStyle(fontSize: 12, color: Color(0xFF6B6B6B))),
+                    child: Text('Buka Kalender', style: textTheme.labelSmall?.copyWith(fontSize: 12)),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 12),
-            _buildMoodRow(),
-
+            _buildMoodRow(colorScheme),
             const SizedBox(height: 30),
-            _buildDailyPerasaan(),
+            _buildDailyPerasaan(colorScheme, textTheme),
             const SizedBox(height: 30),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(context),
+      bottomNavigationBar: _buildBottomNav(context, colorScheme),
     );
   }
 
-  // --- WIDGET HELPER (Agar code tidak terlalu panjang) ---
-  Widget _buildMoodRow() {
+  Widget _buildMoodRow(ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: SingleChildScrollView(
@@ -133,7 +123,7 @@ class _HomePageState extends State<HomePage> {
                   Container(
                     width: 40, height: 40,
                     decoration: BoxDecoration(
-                      color: isFirst ? const Color(0xFFFFEFD6) : const Color(0xFFD7EAF8),
+                      color: isFirst ? AppColors.cardLight : colorScheme.surfaceVariant, 
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(child: Text(isFirst ? '😞' : '')),
@@ -149,32 +139,29 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildDailyPerasaan() {
+  Widget _buildDailyPerasaan(ColorScheme colorScheme, TextTheme textTheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text('Perasaan Kamu Hari ini', style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
+        const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Perasaan Kamu Hari ini', style: TextStyle(fontWeight: FontWeight.bold))),
         const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFEFD6),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.cardLight, 
+              borderRadius: BorderRadius.circular(12), 
               boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
             ),
             child: Row(
               children: [
                 Image.asset('assets/images/moon_small.png', width: 80, height: 80, errorBuilder: (c, e, s) => const Text('🌙', style: TextStyle(fontSize: 36))),
                 const SizedBox(width: 16),
-                const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('"catatan kecil dari isi q-checker"', style: TextStyle(color: Color(0xFF2E2A28))),
-                  SizedBox(height: 12),
-                  Text('Kecewa', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('"catatan kecil dari isi q-checker"', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+                  const SizedBox(height: 12),
+                  Text('Kecewa', style: textTheme.headlineMedium?.copyWith(fontSize: 18)),
                 ])),
               ],
             ),
@@ -187,8 +174,11 @@ class _HomePageState extends State<HomePage> {
             onTap: () => Navigator.pushNamed(context, '/checker'),
             child: Container(
               width: double.infinity, padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade400), borderRadius: BorderRadius.circular(8)),
-              child: const Text('Tuliskan aktivitas atau perasaanmu hari ini...', style: TextStyle(color: Colors.grey)),
+              decoration: BoxDecoration(
+                border: Border.all(color: colorScheme.outline), 
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text('Tuliskan aktivitas atau perasaanmu hari ini...', style: textTheme.bodyMedium?.copyWith(color: colorScheme.outline)),
             ),
           ),
         ),
@@ -196,12 +186,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildBottomNav(BuildContext context) {
+  Widget _buildBottomNav(BuildContext context, ColorScheme colorScheme) {
     return SizedBox(
       height: 72,
       child: Stack(clipBehavior: Clip.none, children: [
         Container(
-          height: 72, color: const Color(0xFF58A6F0),
+          height: 72, color: colorScheme.primary,
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
             IconButton(icon: const Icon(Icons.home, color: Colors.white), onPressed: () {}),
             const SizedBox(width: 56),
@@ -215,7 +205,7 @@ class _HomePageState extends State<HomePage> {
               onTap: () => Navigator.pushNamed(context, '/checker'),
               child: Container(
                 width: 72, height: 72,
-                decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: colorScheme.surface),
                 child: Padding(padding: const EdgeInsets.all(6), child: Image.asset('assets/icons/moon_nav.png', errorBuilder: (c, e, s) => const Center(child: Text('🌙', style: TextStyle(fontSize: 28))))),
               ),
             ),
@@ -224,26 +214,4 @@ class _HomePageState extends State<HomePage> {
       ]),
     );
   }
-}
-
-// 🔥 REUSABLE BUTTON (Tetap di sini dulu sesuai requestmu)
-Widget menuButton(BuildContext context, {String? assetPath, required String label, required Widget page}) {
-  return Column(
-    children: [
-      Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => page)),
-          child: Container(
-            width: 80, height: 80,
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))]),
-            child: Center(child: Image.asset(assetPath!, width: 44, height: 44, errorBuilder: (c, e, s) => const Icon(Icons.extension))),
-          ),
-        ),
-      ),
-      const SizedBox(height: 8),
-      Text(label),
-    ],
-  );
 }

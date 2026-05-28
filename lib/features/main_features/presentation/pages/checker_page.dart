@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'mood.dart';
-
-// --- IMPORT KOMPONEN DRAWER KAMU DI SINI ---
-import '../../../core/components/app_drawer.dart';
+import 'mood_page.dart';
+import '../../data/mood_storage.dart';
+import '../../../../core/components/app_drawer.dart';
 
 class CheckerSimpleScreen extends StatefulWidget {
   const CheckerSimpleScreen({Key? key}) : super(key: key);
@@ -29,15 +28,10 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
       );
       return;
     }
-
     MoodStorage.saveMood(_selectedDate, _selectedMoodEmoji!, _controller.text);
-
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Mood tanggal ${_selectedDate.day} berhasil disimpan!'),
-      ),
+      SnackBar(content: Text('Mood tanggal ${_selectedDate.day} berhasil disimpan!')),
     );
-
     setState(() {
       _controller.clear();
       _selectedMoodEmoji = null;
@@ -50,24 +44,15 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
     
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
-      
-      // --- DRAWER DINAMIS ---
       drawer: const CustomAppDrawer(),
-      drawerEdgeDragWidth: 100.0, // Pakai yang ini agar tidak error lagi
-      
+      drawerEdgeDragWidth: 100.0,
       appBar: AppBar(
         backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
-        
-        // Tombol Back dipertahankan sesuai keinginanmu agar tidak tertimpa ikon hamburger otomatis
         leading: BackButton(color: isDarkMode ? Colors.white : Colors.black87),
-        
         title: Text(
           'Q-Checker',
-          style: TextStyle(
-            color: isDarkMode ? Colors.white : Colors.black87, 
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
         ),
       ),
       body: SafeArea(
@@ -80,8 +65,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                 child: Image.asset(
                   'assets/images/moon_large.png',
                   height: 120,
-                  errorBuilder: (c, e, s) =>
-                      const Text('🌙', style: TextStyle(fontSize: 60)),
+                  errorBuilder: (c, e, s) => const Text('🌙', style: TextStyle(fontSize: 60)),
                 ),
               ),
               const SizedBox(height: 15),
@@ -91,8 +75,6 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
-
-              // Pilih Tanggal
               GestureDetector(
                 onTap: () async {
                   final picked = await showDatePicker(
@@ -104,22 +86,12 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   if (picked != null) setState(() => _selectedDate = picked);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.calendar_today,
-                        size: 16,
-                        color: Colors.blue,
-                      ),
+                      const Icon(Icons.calendar_today, size: 16, color: Colors.blue),
                       const SizedBox(width: 8),
                       Text(
                         '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
@@ -129,10 +101,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 25),
-
-              // Mood Selection
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -151,15 +120,8 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 30),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Apa yang kamu rasakan?',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
+              const Align(alignment: Alignment.centerLeft, child: Text('Apa yang kamu rasakan?', style: TextStyle(fontWeight: FontWeight.bold))),
               const SizedBox(height: 10),
               TextField(
                 controller: _controller,
@@ -170,10 +132,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   fillColor: Colors.white,
                   hintText: 'Tulis cerita kamu di sini...',
                   hintStyle: const TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 20),
@@ -183,9 +142,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   backgroundColor: const Color(0xFF58A6F0),
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: const Text('Simpan Mood Hari Ini'),
               ),
@@ -212,8 +169,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.home, color: Colors.white),
-                  onPressed: () =>
-                      Navigator.popUntil(context, (route) => route.isFirst),
+                  onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
                 ),
                 const SizedBox(width: 56),
                 IconButton(
@@ -229,20 +185,12 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
             right: 0,
             child: Center(
               child: GestureDetector(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const MoodPage()),
-                ),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoodPage())),
                 child: Container(
                   width: 70,
                   height: 70,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Center(
-                    child: Text('🌙', style: TextStyle(fontSize: 30)),
-                  ),
+                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                  child: const Center(child: Text('🌙', style: TextStyle(fontSize: 30))),
                 ),
               ),
             ),
@@ -253,20 +201,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
   }
 
   String _getMonthName(int month) {
-    const months = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     return months[month - 1];
   }
 }
@@ -277,12 +212,7 @@ class _MoodCard extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _MoodCard({
-    required this.label,
-    required this.assetPath,
-    required this.selected,
-    required this.onTap,
-  });
+  const _MoodCard({required this.label, required this.assetPath, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -294,33 +224,20 @@ class _MoodCard extends StatelessWidget {
         height: 150,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: selected
-              ? Colors.white
-              : (label == 'Baik'
-                  ? const Color(0xFFFFF7C2)
-                  : const Color(0xFFD7EAF8)),
+          color: selected ? Colors.white : (label == 'Baik' ? const Color(0xFFFFF7C2) : const Color(0xFFD7EAF8)),
           borderRadius: BorderRadius.circular(20),
           border: selected ? Border.all(color: Colors.blue, width: 2) : null,
-          boxShadow: [
-            if (selected)
-              const BoxShadow(color: Colors.black12, blurRadius: 10),
-          ],
+          boxShadow: [if (selected) const BoxShadow(color: Colors.black12, blurRadius: 10)],
         ),
         child: Column(
           children: [
             Expanded(
               child: Image.asset(
                 assetPath,
-                errorBuilder: (c, e, s) => Text(
-                  label == 'Baik' ? '😊' : '😢',
-                  style: const TextStyle(fontSize: 40),
-                ),
+                errorBuilder: (c, e, s) => Text(label == 'Baik' ? '😊' : '😢', style: const TextStyle(fontSize: 40)),
               ),
             ),
-            Text(
-              label, 
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-            ),
+            Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
           ],
         ),
       ),
