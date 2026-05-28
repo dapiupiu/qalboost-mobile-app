@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/theme/theme_service.dart';
 import '../../../core/components/app_drawer.dart';
 import '../../../core/components/custom_bottom_nav.dart';
 import '../provider/home_provider.dart';
@@ -27,21 +29,25 @@ class _HomePageState extends State<HomePage> {
 
   final List<Map<String, String>> articles = [
     {
-      'title': 'Kenapa Gen Z Gampang Overthinking? Psikolog Ungkap Penyebab Utamanya',
+      'title':
+          'Kenapa Gen Z Gampang Overthinking? Psikolog Ungkap Penyebab Utamanya',
       'image': 'assets/images/article1.png',
-      'link': 'https://www.inews.id/lifestyle/health/kenapa-gen-z-gampang-overthinking-psikolog-ungkap-penyebab-utamanya?',
+      'link':
+          'https://www.inews.id/lifestyle/health/kenapa-gen-z-gampang-overthinking-psikolog-ungkap-penyebab-utamanya?',
     },
-
     {
-      'title': 'Manfaat Journaling bagi Kesehatan Mental yang Sayang untuk Dilewatkan',
+      'title':
+          'Manfaat Journaling bagi Kesehatan Mental yang Sayang untuk Dilewatkan',
       'image': 'assets/images/article2.png',
-      'link': 'https://www.alodokter.com/manfaat-journaling-bagi-kesehatan-mental-yang-sayang-untuk-dilewatkan',
+      'link':
+          'https://www.alodokter.com/manfaat-journaling-bagi-kesehatan-mental-yang-sayang-untuk-dilewatkan',
     },
-
     {
-      'title': 'Jangan Berlarut-larut, Ini Cara Bangkit dari Kesalahan di Masa Lalu',
+      'title':
+          'Jangan Berlarut-larut, Ini Cara Bangkit dari Kesalahan di Masa Lalu',
       'image': 'assets/images/article3.png',
-      'link': 'https://www.alodokter.com/jangan-berlarut-larut-ini-cara-bangkit-dari-kesalahan-di-masa-lalu',
+      'link':
+          'https://www.alodokter.com/jangan-berlarut-larut-ini-cara-bangkit-dari-kesalahan-di-masa-lalu',
     },
   ];
 
@@ -53,11 +59,8 @@ class _HomePageState extends State<HomePage> {
     _sliderTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
       if (!mounted) return;
 
-      if (_currentArticle < articles.length - 1) {
-        _currentArticle++;
-      } else {
-        _currentArticle = 0;
-      }
+      _currentArticle =
+          _currentArticle < articles.length - 1 ? _currentArticle + 1 : 0;
 
       _articleController.animateToPage(
         _currentArticle,
@@ -79,10 +82,20 @@ class _HomePageState extends State<HomePage> {
     if (mounted) setState(() {});
   }
 
-  Color _getMoodColor(String? emoji) {
-    if (emoji == '😊') return const Color(0xFFE8F5E9);
-    if (emoji == '😢') return const Color(0xFFFFEBEE);
-    return Colors.white;
+  Color _getMoodColor(String? emoji, ThemeService themeService) {
+    if (emoji == '😊') {
+      return themeService.isDarkMode
+          ? const Color(0xFF1B3D2A)
+          : const Color(0xFFE8F5E9);
+    }
+
+    if (emoji == '😢') {
+      return themeService.isDarkMode
+          ? const Color(0xFF4A1F1F)
+          : const Color(0xFFFFEBEE);
+    }
+
+    return themeService.homeMoodEmptyBoxColor;
   }
 
   Widget _getMoodImage(String? emoji) {
@@ -114,21 +127,22 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeService = Provider.of<ThemeService>(context);
 
     return Scaffold(
-      backgroundColor:
-          isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      backgroundColor: themeService.backgroundColor,
       drawer: const CustomAppDrawer(),
       drawerEdgeDragWidth: 100.0,
       body: RefreshIndicator(
+        color: themeService.primaryColor,
+        backgroundColor: themeService.cardColor,
         onRefresh: _refreshData,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(isDarkMode),
+              _buildHeader(themeService),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -137,9 +151,7 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(
                     fontSize: 34,
                     fontWeight: FontWeight.w800,
-                    color: isDarkMode
-                        ? Colors.white
-                        : const Color(0xFF1F1B18),
+                    color: themeService.textPrimaryColor,
                   ),
                 ),
               ),
@@ -177,13 +189,13 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 40),
 
-              _buildHistorySection(),
+              _buildHistorySection(themeService),
               const SizedBox(height: 12),
-              _buildMoodRow(),
+              _buildMoodRow(themeService),
               const SizedBox(height: 30),
-              _buildDailyPerasaan(),
+              _buildDailyPerasaan(themeService),
               const SizedBox(height: 30),
-              _buildArticleSection(),
+              _buildArticleSection(themeService),
               const SizedBox(height: 30),
             ],
           ),
@@ -195,11 +207,15 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildMenuItem(String path, String label, Widget page) {
     return Expanded(
-      child: AnimatedMenuButton(assetPath: path, label: label, page: page),
+      child: AnimatedMenuButton(
+        assetPath: path,
+        label: label,
+        page: page,
+      ),
     );
   }
 
-  Widget _buildHeader(bool isDarkMode) {
+  Widget _buildHeader(ThemeService themeService) {
     return Padding(
       padding: const EdgeInsets.only(top: 40, left: 16, right: 16, bottom: 16),
       child: Row(
@@ -211,9 +227,12 @@ class _HomePageState extends State<HomePage> {
                 builder: (context) {
                   return GestureDetector(
                     onTap: () => Scaffold.of(context).openDrawer(),
-                    child: const CircleAvatar(
-                      backgroundColor: Color(0xFF58A6F0),
-                      child: Icon(Icons.person, color: Colors.white),
+                    child: CircleAvatar(
+                      backgroundColor: themeService.primaryColor,
+                      child: Icon(
+                        Icons.person,
+                        color: themeService.buttonTextColor,
+                      ),
                     ),
                   );
                 },
@@ -225,7 +244,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     'Selamat Datang,',
                     style: TextStyle(
-                      color: isDarkMode ? Colors.grey[400] : Colors.black54,
+                      color: themeService.textSecondaryColor,
                     ),
                   ),
                   Text(
@@ -233,7 +252,7 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
-                      color: isDarkMode ? Colors.white : Colors.black87,
+                      color: themeService.textPrimaryColor,
                     ),
                   ),
                 ],
@@ -244,30 +263,9 @@ class _HomePageState extends State<HomePage> {
             'assets/images/app_logo.png',
             width: 48,
             height: 48,
-            errorBuilder: (c, e, s) =>
-                const Icon(Icons.auto_awesome, color: Colors.blue),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHistorySection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'History Mood',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          GestureDetector(
-            onTap: () =>
-                Navigator.pushNamed(context, '/mood').then((_) => _refreshData()),
-            child: const Text(
-              'Buka Kalender',
-              style: TextStyle(fontSize: 12, color: Color(0xFF6B6B6B)),
+            errorBuilder: (c, e, s) => Icon(
+              Icons.auto_awesome,
+              color: themeService.primaryColor,
             ),
           ),
         ],
@@ -275,7 +273,37 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildMoodRow() {
+  Widget _buildHistorySection(ThemeService themeService) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'History Mood',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: themeService.textPrimaryColor,
+            ),
+          ),
+          GestureDetector(
+            onTap: () =>
+                Navigator.pushNamed(context, '/mood').then((_) => _refreshData()),
+            child: Text(
+              'Buka Kalender',
+              style: TextStyle(
+                fontSize: 12,
+                color: themeService.textSecondaryColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMoodRow(ThemeService themeService) {
     final List<String> days = [
       'Senin',
       'Selasa',
@@ -296,7 +324,8 @@ class _HomePageState extends State<HomePage> {
           children: days.map((dayName) {
             final dayIndex = days.indexOf(dayName) + 1;
             final currentWeekDay = now.weekday;
-            final targetDate = now.add(Duration(days: dayIndex - currentWeekDay));
+            final targetDate =
+                now.add(Duration(days: dayIndex - currentWeekDay));
 
             final dateKey =
                 "${targetDate.year}-${targetDate.month.toString().padLeft(2, '0')}-${targetDate.day.toString().padLeft(2, '0')}";
@@ -319,15 +348,20 @@ class _HomePageState extends State<HomePage> {
                     height: 45,
                     decoration: BoxDecoration(
                       color: moodData != null
-                          ? _getMoodColor(moodData.emoji)
-                          : Colors.white,
+                          ? _getMoodColor(moodData.emoji, themeService)
+                          : themeService.homeMoodEmptyBoxColor,
                       borderRadius: BorderRadius.circular(12),
                       border: isToday
-                          ? Border.all(color: Colors.orange, width: 2)
+                          ? Border.all(
+                              color: themeService.homeMoodTodayBorderColor,
+                              width: 2,
+                            )
                           : null,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withOpacity(
+                            themeService.isDarkMode ? 0.25 : 0.05,
+                          ),
                           blurRadius: 4,
                         ),
                       ],
@@ -344,7 +378,9 @@ class _HomePageState extends State<HomePage> {
                     dayName,
                     style: TextStyle(
                       fontSize: 10,
-                      color: isToday ? Colors.orange : Colors.grey,
+                      color: isToday
+                          ? themeService.homeMoodTodayBorderColor
+                          : themeService.textSecondaryColor,
                       fontWeight:
                           isToday ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -358,17 +394,20 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildDailyPerasaan() {
+  Widget _buildDailyPerasaan(ThemeService themeService) {
     final todayMood = _homeProvider.todayMood;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'Perasaan Kamu Hari ini',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: themeService.textPrimaryColor,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -379,14 +418,16 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: todayMood != null
-                  ? _getMoodColor(todayMood.emoji)
-                  : const Color(0xFFFFEFD6),
+                  ? _getMoodColor(todayMood.emoji, themeService)
+                  : themeService.secondaryColor,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Colors.black12,
+                  color: Colors.black.withOpacity(
+                    themeService.isDarkMode ? 0.35 : 0.12,
+                  ),
                   blurRadius: 8,
-                  offset: Offset(0, 4),
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -402,8 +443,8 @@ class _HomePageState extends State<HomePage> {
                         todayMood != null
                             ? '"${todayMood.note}"'
                             : '"Belum ada catatan hari ini"',
-                        style: const TextStyle(
-                          color: Color(0xFF2E2A28),
+                        style: TextStyle(
+                          color: themeService.textPrimaryColor,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -412,9 +453,10 @@ class _HomePageState extends State<HomePage> {
                         todayMood != null
                             ? (todayMood.emoji == '😊' ? 'Baik' : 'Buruk')
                             : 'Kosong',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
+                          color: themeService.textPrimaryColor,
                         ),
                       ),
                     ],
@@ -430,18 +472,23 @@ class _HomePageState extends State<HomePage> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: GestureDetector(
-            onTap: () =>
-                Navigator.pushNamed(context, '/checker').then((_) => _refreshData()),
+            onTap: () => Navigator.pushNamed(context, '/checker')
+                .then((_) => _refreshData()),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade400),
+                color: themeService.cardColor,
+                border: Border.all(
+                  color: themeService.textSecondaryColor,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text(
+              child: Text(
                 'Tuliskan aktivitas atau perasaanmu hari ini...',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(
+                  color: themeService.textSecondaryColor,
+                ),
               ),
             ),
           ),
@@ -450,17 +497,18 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildArticleSection() {
+  Widget _buildArticleSection(ThemeService themeService) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'Hari Ini Ada Apa',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
+              color: themeService.textPrimaryColor,
             ),
           ),
         ),
@@ -487,12 +535,14 @@ class _HomePageState extends State<HomePage> {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
-                      color: Colors.white,
-                      boxShadow: const [
+                      color: themeService.cardColor,
+                      boxShadow: [
                         BoxShadow(
-                          color: Colors.black12,
+                          color: Colors.black.withOpacity(
+                            themeService.isDarkMode ? 0.35 : 0.12,
+                          ),
                           blurRadius: 8,
-                          offset: Offset(0, 4),
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -503,16 +553,16 @@ class _HomePageState extends State<HomePage> {
                           child: Container(
                             width: double.infinity,
                             height: double.infinity,
-                            color: const Color(0xFFD6EAF8),
+                            color: themeService.secondaryColor,
                             child: Image.asset(
                               article['image']!,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
-                                return const Center(
+                                return Center(
                                   child: Icon(
                                     Icons.image,
                                     size: 60,
-                                    color: Colors.white,
+                                    color: themeService.primaryColor,
                                   ),
                                 );
                               },
@@ -569,8 +619,8 @@ class _HomePageState extends State<HomePage> {
               height: 8,
               decoration: BoxDecoration(
                 color: _currentArticle == index
-                    ? Colors.orange
-                    : Colors.grey.shade400,
+                    ? themeService.primaryColor
+                    : themeService.textSecondaryColor.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
@@ -624,6 +674,8 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
 
   @override
   Widget build(BuildContext context) {
+    final themeService = Provider.of<ThemeService>(context);
+
     return GestureDetector(
       onTapDown: (_) => _controller.forward(),
       onTapUp: (_) {
@@ -642,13 +694,15 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
             width: 75,
             height: 75,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: themeService.homeMenuBoxColor,
               borderRadius: BorderRadius.circular(15),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Colors.black12,
+                  color: Colors.black.withOpacity(
+                    themeService.isDarkMode ? 0.35 : 0.12,
+                  ),
                   blurRadius: 6,
-                  offset: Offset(0, 3),
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -660,8 +714,10 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
                   child: Image.asset(
                     widget.assetPath,
                     fit: BoxFit.contain,
-                    errorBuilder: (c, e, s) =>
-                        const Icon(Icons.extension, color: Colors.blue),
+                    errorBuilder: (c, e, s) => Icon(
+                      Icons.extension,
+                      color: themeService.primaryColor,
+                    ),
                   ),
                 ),
               ),
@@ -671,9 +727,10 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
           Text(
             widget.label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
+              color: themeService.textPrimaryColor,
             ),
           ),
         ],

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../core/theme/theme_service.dart';
 import '../provider/mood_provider.dart';
 import '../../../core/components/app_drawer.dart';
 import '../../../core/components/custom_bottom_nav.dart';
@@ -30,15 +33,22 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
       return;
     }
 
-    await _moodProvider.saveMood(_selectedDate, _selectedMoodEmoji!, _controller.text);
+    await _moodProvider.saveMood(
+      _selectedDate,
+      _selectedMoodEmoji!,
+      _controller.text,
+    );
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Mood tanggal ${_selectedDate.day} berhasil disimpan!'),
+          content: Text(
+            'Mood tanggal ${_selectedDate.day} berhasil disimpan!',
+          ),
           backgroundColor: Colors.green,
         ),
       );
+
       setState(() {
         _controller.clear();
         _selectedMoodEmoji = null;
@@ -48,58 +58,81 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+    final themeService = Provider.of<ThemeService>(context);
+
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      backgroundColor: themeService.checkerBackgroundColor,
       drawer: const CustomAppDrawer(),
       drawerEdgeDragWidth: 100.0,
       appBar: AppBar(
-        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
+        backgroundColor: themeService.checkerAppBarColor,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: const BackButton(),
-        title: Text('Q-Checker', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold)),
+        leading: BackButton(
+          color: themeService.iconColor,
+        ),
+        title: Text(
+          'Q-Checker',
+          style: TextStyle(
+            color: themeService.checkerTitleColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
           child: Column(
             children: [
               const SizedBox(height: 10),
-              
-              // --- LOGO UTAMA DENGAN HIGHLIGHT SHADOW ---
+
               Center(
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blue.withValues(alpha: 0.2),
+                        color: themeService.primaryColor.withOpacity(0.20),
                         blurRadius: 30,
                         spreadRadius: 2,
                       ),
                     ],
                   ),
                   child: Image.asset(
-                    'assets/images/checker.png', 
+                    'assets/images/checker.png',
                     height: 140,
-                    errorBuilder: (c, e, s) => const Text('🌙', style: TextStyle(fontSize: 60)),
+                    errorBuilder: (c, e, s) => Text(
+                      '🌙',
+                      style: TextStyle(
+                        fontSize: 60,
+                        color: themeService.checkerTitleColor,
+                      ),
+                    ),
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 15),
-              const Text(
-                'BAGAIMANA MOOD\nKAMU HARI INI?', 
-                textAlign: TextAlign.center, 
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)
+
+              Text(
+                'BAGAIMANA MOOD\nKAMU HARI INI?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: themeService.checkerTitleColor,
+                ),
               ),
+
               const SizedBox(height: 20),
-              
-              _buildDateTile(),
+
+              _buildDateTile(themeService),
+
               const SizedBox(height: 35),
 
-              // --- PILIHAN MOOD DENGAN SOFT OUTLINE ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -108,7 +141,8 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                     assetPath: 'assets/images/baik.png',
                     selected: _selectedMoodEmoji == '😊',
                     onTap: () => setState(() => _selectedMoodEmoji = '😊'),
-                    activeColor: Colors.green,
+                    activeColor: themeService.checkerMoodGoodColor,
+                    normalTextColor: themeService.checkerMoodLabelColor,
                   ),
                   const SizedBox(width: 40),
                   _MoodSelector(
@@ -116,43 +150,62 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                     assetPath: 'assets/images/buruk.png',
                     selected: _selectedMoodEmoji == '😢',
                     onTap: () => setState(() => _selectedMoodEmoji = '😢'),
-                    activeColor: Colors.red,
+                    activeColor: themeService.checkerMoodBadColor,
+                    normalTextColor: themeService.checkerMoodLabelColor,
                   ),
                 ],
               ),
 
               const SizedBox(height: 40),
-              const Align(
-                alignment: Alignment.centerLeft, 
+
+              Align(
+                alignment: Alignment.centerLeft,
                 child: Padding(
-                  padding: EdgeInsets.only(left: 4, bottom: 8),
-                  child: Text('Apa yang kamu rasakan?', style: TextStyle(fontWeight: FontWeight.bold)),
-                )
+                  padding: const EdgeInsets.only(
+                    left: 4,
+                    bottom: 8,
+                  ),
+                  child: Text(
+                    'Apa yang kamu rasakan?',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: themeService.checkerTitleColor,
+                    ),
+                  ),
+                ),
               ),
-              
-              // --- TEXTFIELD DENGAN BUTTON SIMPAN DI DALAM ---
+
               Stack(
                 children: [
                   TextField(
                     controller: _controller,
                     maxLines: 6,
-                    style: const TextStyle(color: Colors.black87),
+                    style: TextStyle(
+                      color: themeService.checkerTextFieldTextColor,
+                    ),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: themeService.checkerTextFieldColor,
                       hintText: 'Tulis cerita kamu di sini...',
-                      hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                      hintStyle: TextStyle(
+                        color: themeService.checkerTextFieldHintColor,
+                        fontSize: 14,
+                      ),
                       contentPadding: const EdgeInsets.all(16),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15), 
-                        borderSide: BorderSide.none
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide.none,
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(color: Colors.blue.withValues(alpha: 0.3), width: 1),
+                        borderSide: BorderSide(
+                          color: themeService.primaryColor.withOpacity(0.45),
+                          width: 1,
+                        ),
                       ),
                     ),
                   ),
+
                   Positioned(
                     bottom: 10,
                     right: 10,
@@ -161,18 +214,33 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                       child: ElevatedButton(
                         onPressed: _handleSave,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF58A6F0),
-                          foregroundColor: Colors.white,
+                          backgroundColor:
+                              themeService.checkerSaveButtonColor,
+                          foregroundColor:
+                              themeService.checkerSaveButtonTextColor,
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                        child: const Text('Simpan', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          'Simpan',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                themeService.checkerSaveButtonTextColor,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 50),
             ],
           ),
@@ -182,38 +250,76 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
     );
   }
 
-  Widget _buildDateTile() {
+  Widget _buildDateTile(ThemeService themeService) {
     return GestureDetector(
       onTap: () async {
         final picked = await showDatePicker(
-          context: context, 
-          initialDate: _selectedDate, 
-          firstDate: DateTime(2024), 
-          lastDate: DateTime.now()
+          context: context,
+          initialDate: _selectedDate,
+          firstDate: DateTime(2024),
+          lastDate: DateTime.now(),
+          builder: (context, child) {
+            return Theme(
+              data: themeService.isDarkMode
+                  ? ThemeData.dark().copyWith(
+                      colorScheme: ColorScheme.dark(
+                        primary: themeService.primaryColor,
+                        surface: const Color(0xFF1E1E1E),
+                        onSurface: Colors.white,
+                      ),
+                    )
+                  : ThemeData.light().copyWith(
+                      colorScheme: ColorScheme.light(
+                        primary: themeService.primaryColor,
+                      ),
+                    ),
+              child: child!,
+            );
+          },
         );
-        if (picked != null) setState(() => _selectedDate = picked);
+
+        if (picked != null) {
+          setState(() => _selectedDate = picked);
+        }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        padding: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 20,
+        ),
         decoration: BoxDecoration(
-          color: Colors.white, 
+          color: themeService.checkerDateBoxColor,
           borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: themeService.isDarkMode
+                ? Colors.white.withOpacity(0.06)
+                : Colors.transparent,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10, 
-              offset: const Offset(0, 4)
-            )
-          ]
+              color: Colors.black.withOpacity(
+                themeService.isDarkMode ? 0.25 : 0.05,
+              ),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.calendar_month, size: 18, color: Color(0xFF58A6F0)),
+            Icon(
+              Icons.calendar_month,
+              size: 18,
+              color: themeService.primaryColor,
+            ),
             const SizedBox(width: 10),
             Text(
-              '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}', 
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)
+              '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: themeService.checkerDateTextColor,
+              ),
             ),
           ],
         ),
@@ -222,7 +328,21 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
   }
 
   String _getMonthName(int month) {
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+
     return months[month - 1];
   }
 }
@@ -233,13 +353,15 @@ class _MoodSelector extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   final Color activeColor;
+  final Color normalTextColor;
 
   const _MoodSelector({
-    required this.label, 
-    required this.assetPath, 
-    required this.selected, 
+    required this.label,
+    required this.assetPath,
+    required this.selected,
     required this.onTap,
     required this.activeColor,
+    required this.normalTextColor,
   });
 
   @override
@@ -256,33 +378,43 @@ class _MoodSelector extends StatelessWidget {
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                // Soft Outline: Menggunakan opacity lebih rendah dan border lebih tipis
-                border: selected 
-                    ? Border.all(color: activeColor.withValues(alpha: 0.3), width: 1.5) 
-                    : Border.all(color: Colors.transparent, width: 1.5),
-                boxShadow: selected ? [
-                  BoxShadow(
-                    color: activeColor.withValues(alpha: 0.15), 
-                    blurRadius: 12, 
-                    spreadRadius: 1
-                  )
-                ] : [],
+                border: selected
+                    ? Border.all(
+                        color: activeColor.withOpacity(0.35),
+                        width: 1.5,
+                      )
+                    : Border.all(
+                        color: Colors.transparent,
+                        width: 1.5,
+                      ),
+                boxShadow: selected
+                    ? [
+                        BoxShadow(
+                          color: activeColor.withOpacity(0.18),
+                          blurRadius: 12,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : [],
               ),
               child: Image.asset(
-                assetPath, 
-                width: 85, 
+                assetPath,
+                width: 85,
                 height: 85,
-                errorBuilder: (c, e, s) => Text(label == 'Baik' ? '😊' : '😢', style: const TextStyle(fontSize: 40))
+                errorBuilder: (c, e, s) => Text(
+                  label == 'Baik' ? '😊' : '😢',
+                  style: const TextStyle(fontSize: 40),
+                ),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              label, 
+              label,
               style: TextStyle(
-                fontWeight: selected ? FontWeight.bold : FontWeight.normal, 
-                color: selected ? activeColor : Colors.black54,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                color: selected ? activeColor : normalTextColor,
                 fontSize: 14,
-              )
+              ),
             ),
           ],
         ),

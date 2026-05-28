@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../core/theme/theme_service.dart';
 import '../../../core/components/app_drawer.dart';
 
 class TipsPage extends StatelessWidget {
   const TipsPage({super.key});
 
   void _showTutorial(BuildContext context) {
+    final themeService = Provider.of<ThemeService>(context, listen: false);
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            color: Color(0xFFF6E9E1),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: themeService.dialogBackgroundColor,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(24),
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -22,45 +29,54 @@ class TipsPage extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[400],
+                  color: themeService.textSecondaryColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               const SizedBox(height: 15),
-              const Text(
+              Text(
                 'Cara Menggunakan Q-Tips',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: themeService.textPrimaryColor,
+                ),
               ),
               const SizedBox(height: 20),
               _tutorialItem(
                 Icons.tab,
                 'Pilih Kategori',
                 'Gunakan tab Sedih, Marah, atau Tenang sesuai dengan kondisi perasaanmu.',
+                themeService,
               ),
               _tutorialItem(
                 Icons.tips_and_updates_outlined,
                 'Baca Tips',
                 'Baca saran yang tersedia untuk membantu menenangkan hati dan pikiran.',
+                themeService,
               ),
               _tutorialItem(
                 Icons.touch_app_outlined,
                 'Gunakan Pintasan',
                 'Tekan pintasan fitur untuk menuju halaman lain yang sesuai dengan kebutuhanmu.',
+                themeService,
               ),
               const SizedBox(height: 15),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1976D2),
+                    backgroundColor: themeService.primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text(
+                  child: Text(
                     'Mengerti',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: themeService.buttonTextColor,
+                    ),
                   ),
                 ),
               ),
@@ -71,21 +87,38 @@ class TipsPage extends StatelessWidget {
     );
   }
 
-  Widget _tutorialItem(IconData icon, String title, String desc) {
+  Widget _tutorialItem(
+    IconData icon,
+    String title,
+    String desc,
+    ThemeService themeService,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF1976D2)),
+          Icon(
+            icon,
+            color: themeService.primaryColor,
+          ),
           const SizedBox(width: 15),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: themeService.textPrimaryColor,
+                  ),
+                ),
                 Text(
                   desc,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: themeService.textSecondaryColor,
+                  ),
                 ),
               ],
             ),
@@ -97,11 +130,11 @@ class TipsPage extends StatelessWidget {
 
   Widget _buildShortcutButton({
     required BuildContext context,
+    required ThemeService themeService,
     required String title,
     required String desc,
     required IconData icon,
     required Color iconColor,
-    required Color bgColor,
     required String routeName,
   }) {
     return InkWell(
@@ -110,11 +143,18 @@ class TipsPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: themeService.tipsShortcutColor,
           borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: themeService.isDarkMode
+                ? Colors.white.withOpacity(0.08)
+                : Colors.transparent,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withOpacity(
+                themeService.isDarkMode ? 0.25 : 0.05,
+              ),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -124,8 +164,12 @@ class TipsPage extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: bgColor,
-              child: Icon(icon, color: iconColor, size: 18),
+              backgroundColor: themeService.tipsShortcutIconBg,
+              child: Icon(
+                icon,
+                color: themeService.isDarkMode ? Colors.white : iconColor,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -134,28 +178,40 @@ class TipsPage extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: themeService.textPrimaryColor,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     desc,
-                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: themeService.textSecondaryColor,
+                    ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 12,
+              color: themeService.textSecondaryColor,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTipPoint(String text, IconData icon, Color color) {
+  Widget _buildTipPoint(
+    String text,
+    IconData icon,
+    Color color,
+    ThemeService themeService,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -166,10 +222,10 @@ class TipsPage extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 height: 1.4,
-                color: Colors.black87,
+                color: themeService.textPrimaryColor,
               ),
             ),
           ),
@@ -179,6 +235,7 @@ class TipsPage extends StatelessWidget {
   }
 
   Widget _buildAyatCard({
+    required ThemeService themeService,
     required String arab,
     required String arti,
     required String sumber,
@@ -187,11 +244,18 @@ class TipsPage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.78),
+        color: themeService.tipsAyatCardColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: themeService.isDarkMode
+              ? Colors.white.withOpacity(0.08)
+              : Colors.transparent,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withOpacity(
+              themeService.isDarkMode ? 0.25 : 0.04,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -203,11 +267,13 @@ class TipsPage extends StatelessWidget {
           Text(
             arab,
             textAlign: TextAlign.right,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 21,
               fontWeight: FontWeight.bold,
               height: 1.8,
-              color: Color(0xFF4E342E),
+              color: themeService.isDarkMode
+                  ? const Color(0xFFFFD8C2)
+                  : const Color(0xFF4E342E),
             ),
           ),
           const SizedBox(height: 10),
@@ -216,11 +282,11 @@ class TipsPage extends StatelessWidget {
             child: Text(
               arti,
               textAlign: TextAlign.left,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontStyle: FontStyle.italic,
                 height: 1.5,
-                color: Colors.black87,
+                color: themeService.textPrimaryColor,
               ),
             ),
           ),
@@ -229,10 +295,10 @@ class TipsPage extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               sumber,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey,
+                color: themeService.textSecondaryColor,
               ),
             ),
           ),
@@ -243,23 +309,23 @@ class TipsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeService = Provider.of<ThemeService>(context);
     final primaryBlue = const Color(0xFF1E679F);
 
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor:
-            isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+        backgroundColor: themeService.backgroundColor,
         drawer: const CustomAppDrawer(),
         drawerEdgeDragWidth: 100.0,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back,
-              color: isDarkMode ? Colors.white : Colors.black87,
+              color: themeService.iconColor,
               size: 22,
             ),
             onPressed: () => Navigator.maybePop(context),
@@ -267,7 +333,7 @@ class TipsPage extends StatelessWidget {
           title: Text(
             'Q-Tips',
             style: TextStyle(
-              color: isDarkMode ? Colors.white : Colors.black87,
+              color: themeService.textPrimaryColor,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
@@ -279,16 +345,18 @@ class TipsPage extends StatelessWidget {
               child: IconButton(
                 icon: Icon(
                   Icons.info_outline,
-                  color: isDarkMode ? Colors.white70 : Colors.black54,
+                  color: themeService.textSecondaryColor,
                 ),
                 onPressed: () => _showTutorial(context),
               ),
             ),
           ],
           bottom: TabBar(
-            labelColor: primaryBlue,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: primaryBlue,
+            labelColor:
+                themeService.isDarkMode ? themeService.primaryColor : primaryBlue,
+            unselectedLabelColor: themeService.textSecondaryColor,
+            indicatorColor:
+                themeService.isDarkMode ? themeService.primaryColor : primaryBlue,
             indicatorSize: TabBarIndicatorSize.label,
             indicatorWeight: 3,
             labelStyle: const TextStyle(
@@ -309,11 +377,13 @@ class TipsPage extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFEFD6),
+                color: themeService.tipsHeaderCardColor,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withOpacity(
+                      themeService.isDarkMode ? 0.25 : 0.05,
+                    ),
                     blurRadius: 10,
                   ),
                 ],
@@ -321,14 +391,16 @@ class TipsPage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Harus\nNgapain Sih\nKalau Lagi...',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
                         height: 1.1,
-                        color: Color(0xFF4E342E),
+                        color: themeService.isDarkMode
+                            ? Colors.white
+                            : const Color(0xFF4E342E),
                       ),
                     ),
                   ),
@@ -336,22 +408,22 @@ class TipsPage extends StatelessWidget {
                     'assets/images/tips.png',
                     width: 65,
                     height: 65,
-                    errorBuilder: (context, error, stackTrace) => Image.asset(
-                      'assets/images/tips.png',
-                      width: 65,
-                      height: 65,
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      Icons.tips_and_updates,
+                      size: 55,
+                      color: themeService.primaryColor,
                     ),
                   ),
                 ],
               ),
             ),
-
             Expanded(
               child: TabBarView(
                 children: [
                   _buildTabContent(
                     context,
-                    color: const Color.fromARGB(255, 184, 218, 242),
+                    themeService: themeService,
+                    color: themeService.tipsIntroSadColor,
                     intro:
                         'Wajar kok kalau sesekali merasa sedih. Jangan dipendam sendiri ya...',
                     ayatArab: 'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا',
@@ -363,16 +435,19 @@ class TipsPage extends StatelessWidget {
                         'Menangis secukupnya untuk melepaskan beban emosi yang menyesak.',
                         Icons.water_drop,
                         Colors.blue,
+                        themeService,
                       ),
                       _buildTipPoint(
                         'Ambil air wudhu dan ceritakan segalanya kepada Allah dalam sujud.',
                         Icons.self_improvement,
                         Colors.green,
+                        themeService,
                       ),
                       _buildTipPoint(
                         'Cari udara segar atau jalan kaki santai selama 5-10 menit.',
                         Icons.directions_walk,
                         Colors.orange,
+                        themeService,
                       ),
                     ],
                     shortcutTitle: 'Tulis di (Q-Diary)',
@@ -381,10 +456,10 @@ class TipsPage extends StatelessWidget {
                     shortcutIcon: Icons.menu_book_rounded,
                     routeName: '/diary',
                   ),
-
                   _buildTabContent(
                     context,
-                    color: const Color(0xFFF2BDC3),
+                    themeService: themeService,
+                    color: themeService.tipsIntroAngryColor,
                     intro:
                         'Marah itu api. Yuk, kita dinginkan perlahan agar tidak melukai diri sendiri.',
                     ayatArab:
@@ -396,17 +471,20 @@ class TipsPage extends StatelessWidget {
                       _buildTipPoint(
                         'Diam sejenak. Jangan mengambil keputusan atau bicara saat emosi meluap.',
                         Icons.timer,
-                        Colors.red,
+                        Colors.redAccent,
+                        themeService,
                       ),
                       _buildTipPoint(
                         'Ubah posisi; jika marah saat berdiri maka duduklah, jika duduk maka berbaringlah.',
                         Icons.airline_seat_legroom_extra,
                         Colors.brown,
+                        themeService,
                       ),
                       _buildTipPoint(
                         'Tarik napas dalam (4 detik), tahan (4 detik), dan buang perlahan (4 detik).',
                         Icons.air,
                         Colors.blueGrey,
+                        themeService,
                       ),
                     ],
                     shortcutTitle: 'Konsultasi (Q-Konsul)',
@@ -414,10 +492,10 @@ class TipsPage extends StatelessWidget {
                     shortcutIcon: Icons.person_rounded,
                     routeName: '/consul',
                   ),
-
                   _buildTabContent(
                     context,
-                    color: const Color.fromARGB(255, 188, 242, 205),
+                    themeService: themeService,
+                    color: themeService.tipsIntroCalmColor,
                     intro:
                         'Alhamdulillah, hati sedang tenang. Yuk, jaga momentum positif ini!',
                     ayatArab:
@@ -430,16 +508,19 @@ class TipsPage extends StatelessWidget {
                         'Lakukan dzikir pagi atau petang untuk mengunci ketenangan hati.',
                         Icons.vibration,
                         Colors.blue,
+                        themeService,
                       ),
                       _buildTipPoint(
                         'Baca kembali catatan diary lamamu untuk melihat sejauh mana kamu berkembang.',
                         Icons.history_edu,
                         Colors.purple,
+                        themeService,
                       ),
                       _buildTipPoint(
                         'Bagikan energi positifmu dengan memberikan bantuan atau senyuman pada orang lain.',
                         Icons.volunteer_activism,
                         Colors.pink,
+                        themeService,
                       ),
                     ],
                     shortcutTitle: 'Cek Mood (Q-Checker)',
@@ -458,6 +539,7 @@ class TipsPage extends StatelessWidget {
 
   Widget _buildTabContent(
     BuildContext context, {
+    required ThemeService themeService,
     required Color color,
     required String intro,
     required String ayatArab,
@@ -483,50 +565,53 @@ class TipsPage extends StatelessWidget {
             ),
             child: Text(
               intro,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 height: 1.4,
-                color: Colors.black87,
+                color: themeService.isDarkMode
+                    ? Colors.white
+                    : Colors.black87,
               ),
             ),
           ),
           const SizedBox(height: 12),
           _buildAyatCard(
+            themeService: themeService,
             arab: ayatArab,
             arti: ayatArti,
             sumber: ayatSumber,
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'TIPS UNTUKMU',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
-              color: Colors.grey,
+              color: themeService.textSecondaryColor,
               letterSpacing: 1.0,
             ),
           ),
           const SizedBox(height: 12),
           ...tips,
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'PINTASAN FITUR',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
-              color: Colors.grey,
+              color: themeService.textSecondaryColor,
               letterSpacing: 1.0,
             ),
           ),
           const SizedBox(height: 10),
           _buildShortcutButton(
             context: context,
+            themeService: themeService,
             title: shortcutTitle,
             desc: shortcutDesc,
             icon: shortcutIcon,
             iconColor: const Color(0xFF1E679F),
-            bgColor: const Color(0xFFE3F2FD),
             routeName: routeName,
           ),
         ],

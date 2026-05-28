@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../core/theme/theme_service.dart';
 import '../provider/auth_provider.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -9,23 +12,35 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _nameController =
+      TextEditingController();
+
+  final TextEditingController _emailController =
+      TextEditingController();
+
+  final TextEditingController _passwordController =
+      TextEditingController();
+
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   bool _isLoading = false;
 
   Future<void> _handleRegister() async {
-    if (_passwordController.text != _confirmPasswordController.text) {
+    if (_passwordController.text !=
+        _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password tidak cocok!')),
+        const SnackBar(
+          content: Text('Password tidak cocok!'),
+        ),
       );
       return;
     }
 
     setState(() => _isLoading = true);
+
     final authProvider = AuthProvider();
-    
+
     bool success = await authProvider.register(
       _nameController.text.trim(),
       _emailController.text.trim(),
@@ -37,14 +52,23 @@ class _RegisterPageState extends State<RegisterPage> {
     if (success) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Akun berhasil dibuat! Silakan Login.')),
+          const SnackBar(
+            content: Text(
+              'Akun berhasil dibuat! Silakan Login.',
+            ),
+          ),
         );
-        Navigator.pop(context); 
+
+        Navigator.pop(context);
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registrasi gagal! Email mungkin sudah digunakan.')),
+          const SnackBar(
+            content: Text(
+              'Registrasi gagal! Email mungkin sudah digunakan.',
+            ),
+          ),
         );
       }
     }
@@ -52,131 +76,239 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Mengecek apakah keyboard sedang aktif
-    final bool isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0;
+    final themeService =
+        Provider.of<ThemeService>(context);
+
+    final bool isKeyboardVisible =
+        MediaQuery.of(context).viewInsets.bottom != 0;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.white,
+      backgroundColor: themeService.isDarkMode
+          ? const Color(0xFF121212)
+          : Colors.white,
       body: Stack(
         children: [
-          // --- 1. BACKGROUND CONTAINER PEACH (MENGISI PENUH KE BAWAH) ---
+          // BACKGROUND
           Positioned(
-            top: 200, // Mulai melengkung di sini
+            top: 200,
             left: 0,
             right: 0,
-            bottom: 0, // Ini yang bikin dia penuh sampai bawah layar
+            bottom: 0,
             child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFFFE5D1),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              decoration: BoxDecoration(
+                color: themeService.isDarkMode
+                    ? const Color(0xFF1E1E1E)
+                    : const Color(0xFFFFE5D1),
+                borderRadius:
+                    const BorderRadius.vertical(
+                  top: Radius.circular(30),
+                ),
               ),
             ),
           ),
 
-          // --- 2. KONTEN UTAMA ---
           GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
+            onTap: () =>
+                FocusScope.of(context).unfocus(),
             child: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
+              physics:
+                  const ClampingScrollPhysics(),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 60),
-                  
-                  // Logo MIX
+
+                  // LOGO
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20),
                     child: Image.asset(
-                      'assets/images/mix.png', 
-                      width: 140, 
+                      'assets/images/mix.png',
+                      width: 140,
                       fit: BoxFit.contain,
                     ),
                   ),
 
-                  // GAMBAR REGIS (Bulan) yang menimpa garis pembatas
+                  // MASKOT
                   AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    height: isKeyboardVisible ? 0 : 140,
+                    duration: const Duration(
+                        milliseconds: 200),
+                    height:
+                        isKeyboardVisible ? 0 : 140,
                     alignment: Alignment.centerRight,
-                    child: isKeyboardVisible 
-                      ? const SizedBox() 
-                      : Transform.translate(
-                          offset: const Offset(0, 55),
-                          child: Image.asset(
-                            'assets/images/regis.png', 
-                            height: 140,
+                    child: isKeyboardVisible
+                        ? const SizedBox()
+                        : Transform.translate(
+                            offset:
+                                const Offset(0, 55),
+                            child: Image.asset(
+                              'assets/images/regis.png',
+                              height: 140,
+                            ),
                           ),
-                        ),
                   ),
 
-                  // FORM INPUT
+                  // FORM
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    padding:
+                        const EdgeInsets.symmetric(
+                            horizontal: 30),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Buat Akun', 
-                          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)
-                        ),
-                        const SizedBox(height: 10),
-                        
-                        _labelInput('Masukan Nama Lengkap'),
-                        _buildField(_nameController),
-                        
-                        _labelInput('Masukan Email'),
-                        _buildField(_emailController),
-                        
-                        _labelInput('Masukan Password'),
-                        _buildField(_passwordController, isPassword: true),
-                        
-                        _labelInput('Ulangi Password'),
-                        _buildField(_confirmPasswordController, isPassword: true),
-                        
-                        const SizedBox(height: 30),
-                        
-                        // TOMBOL DAFTAR
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _handleRegister,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1E679F),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              elevation: 5,
-                            ),
-                            child: _isLoading 
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : const Text('Buat Akun', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(
+                          'Buat Akun',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight:
+                                FontWeight.bold,
+                            color: themeService
+                                .textPrimaryColor,
                           ),
                         ),
-                        
+
+                        const SizedBox(height: 10),
+
+                        _labelInput(
+                          'Masukan Nama Lengkap',
+                          themeService,
+                        ),
+
+                        _buildField(
+                          themeService,
+                          _nameController,
+                        ),
+
+                        _labelInput(
+                          'Masukan Email',
+                          themeService,
+                        ),
+
+                        _buildField(
+                          themeService,
+                          _emailController,
+                        ),
+
+                        _labelInput(
+                          'Masukan Password',
+                          themeService,
+                        ),
+
+                        _buildField(
+                          themeService,
+                          _passwordController,
+                          isPassword: true,
+                        ),
+
+                        _labelInput(
+                          'Ulangi Password',
+                          themeService,
+                        ),
+
+                        _buildField(
+                          themeService,
+                          _confirmPasswordController,
+                          isPassword: true,
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // BUTTON
+                        SizedBox(
+                          width: double.infinity,
+                          height: 55,
+                          child: ElevatedButton(
+                            onPressed: _isLoading
+                                ? null
+                                : _handleRegister,
+                            style: ElevatedButton
+                                .styleFrom(
+                              backgroundColor:
+                                  const Color(
+                                      0xFF1E679F),
+                              elevation: themeService
+                                      .isDarkMode
+                                  ? 0
+                                  : 5,
+                              shadowColor:
+                                  const Color(
+                                          0xFF1E679F)
+                                      .withOpacity(
+                                          0.35),
+                              shape:
+                                  RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius
+                                        .circular(
+                                            16),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? const CircularProgressIndicator(
+                                    color:
+                                        Colors.white,
+                                  )
+                                : const Text(
+                                    'Buat Akun',
+                                    style:
+                                        TextStyle(
+                                      color: Colors
+                                          .white,
+                                      fontWeight:
+                                          FontWeight
+                                              .bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                          ),
+                        ),
+
                         const SizedBox(height: 20),
-                        
+
                         Center(
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment:
+                                MainAxisAlignment
+                                    .center,
                             children: [
-                              const Text("Sudah punya akun?", style: TextStyle(color: Colors.black54)),
+                              Text(
+                                "Sudah punya akun?",
+                                style: TextStyle(
+                                  color: themeService
+                                      .textSecondaryColor,
+                                ),
+                              ),
                               TextButton(
-                                onPressed: () => Navigator.pop(context),
+                                onPressed: () =>
+                                    Navigator.pop(
+                                        context),
                                 child: const Text(
                                   "Login",
                                   style: TextStyle(
-                                    color: Color(0xFF1E679F),
-                                    fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
+                                    color: Color(
+                                        0xFF1E679F),
+                                    fontWeight:
+                                        FontWeight
+                                            .bold,
+                                    decoration:
+                                        TextDecoration
+                                            .underline,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        
-                        // Padding bawah dinamis agar scroll enak saat keyboard aktif
-                        SizedBox(height: isKeyboardVisible ? 150 : 80), 
+
+                        SizedBox(
+                          height:
+                              isKeyboardVisible
+                                  ? 150
+                                  : 80,
+                        ),
                       ],
                     ),
                   ),
@@ -189,19 +321,43 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _labelInput(String label) => Padding(
-    padding: const EdgeInsets.only(bottom: 6, top: 12),
-    child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87)),
-  );
+  Widget _labelInput(
+    String label,
+    ThemeService themeService,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        bottom: 6,
+        top: 12,
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: themeService
+              .textPrimaryColor,
+        ),
+      ),
+    );
+  }
 
-  Widget _buildField(TextEditingController controller, {bool isPassword = false}) {
+  Widget _buildField(
+    ThemeService themeService,
+    TextEditingController controller, {
+    bool isPassword = false,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 2),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(
+              themeService.isDarkMode
+                  ? 0.18
+                  : 0.05,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -211,12 +367,27 @@ class _RegisterPageState extends State<RegisterPage> {
         controller: controller,
         obscureText: isPassword,
         textInputAction: TextInputAction.next,
+        style: TextStyle(
+          color: themeService
+              .textPrimaryColor,
+        ),
         decoration: InputDecoration(
-          fillColor: Colors.white,
+          fillColor: themeService.isDarkMode
+              ? const Color(0xFF2A2A2A)
+              : Colors.white,
           filled: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+          contentPadding:
+              const EdgeInsets.symmetric(
+            horizontal: 15,
+            vertical: 14,
+          ),
+          hintStyle: TextStyle(
+            color:
+                themeService.hintTextColor,
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius:
+                BorderRadius.circular(16),
             borderSide: BorderSide.none,
           ),
         ),

@@ -4,6 +4,9 @@ import '../../auth/data/auth_local_data.dart';
 import '../data/diary_repository.dart'; 
 import '../../../core/components/app_drawer.dart';
 
+import 'package:provider/provider.dart';
+import '../../../core/theme/theme_service.dart';
+
 class DiaryPage extends StatefulWidget {
   const DiaryPage({super.key});
 
@@ -68,72 +71,138 @@ class _DiaryPageState extends State<DiaryPage> {
     }
   }
 
-  void _openDiaryDialog({int? index}) {
-    final isEdit = index != null;
-    final titleController = TextEditingController(text: isEdit ? _entries[index]['title'] : '');
-    final contentController = TextEditingController(text: isEdit ? _entries[index]['content'] : '');
+ void _openDiaryDialog({int? index}) {
+  final themeService = Provider.of<ThemeService>(context, listen: false);
 
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '',
-      barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (context, anim1, anim2) => const SizedBox(),
-      transitionBuilder: (context, anim1, anim2, child) {
-        return BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-          child: ScaleTransition(
-            scale: anim1,
-            child: AlertDialog(
-              backgroundColor: const Color(0xFFF6E9E1),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              title: Text(isEdit ? 'Lihat & Edit Diary' : 'Tulis Ceritamu', 
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: titleController,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                    decoration: const InputDecoration(hintText: 'Judul Diary'),
+  final isEdit = index != null;
+  final titleController = TextEditingController(
+    text: isEdit ? _entries[index]['title'] : '',
+  );
+  final contentController = TextEditingController(
+    text: isEdit ? _entries[index]['content'] : '',
+  );
+
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: '',
+    barrierColor: Colors.black54,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, anim1, anim2) => const SizedBox(),
+    transitionBuilder: (context, anim1, anim2, child) {
+      return BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+        child: ScaleTransition(
+          scale: anim1,
+          child: AlertDialog(
+            backgroundColor: themeService.dialogBackgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Text(
+              isEdit ? 'Lihat & Edit Diary' : 'Tulis Ceritamu',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: themeService.textPrimaryColor,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: themeService.textPrimaryColor,
                   ),
-                  const SizedBox(height: 15),
-                  TextField(
-                    controller: contentController,
-                    maxLines: 6,
-                    decoration: const InputDecoration(
-                      hintText: 'Apa yang kamu rasakan hari ini?',
-                      border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: 'Judul Diary',
+                    hintStyle: TextStyle(
+                      color: themeService.hintTextColor,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: themeService.inputBorderColor,
+                      ),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: themeService.primaryColor,
+                        width: 2,
+                      ),
                     ),
                   ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Tutup', style: TextStyle(color: Colors.grey)),
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1976D2),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: contentController,
+                  maxLines: 6,
+                  style: TextStyle(
+                    color: themeService.textPrimaryColor,
                   ),
-                  onPressed: () {
-                    if (titleController.text.isNotEmpty) {
-                      _saveEntry(titleController.text, contentController.text, index: index);
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text('Simpan', style: TextStyle(color: Colors.white)),
+                  decoration: InputDecoration(
+                    hintText: 'Apa yang kamu rasakan hari ini?',
+                    hintStyle: TextStyle(
+                      color: themeService.hintTextColor,
+                    ),
+                    filled: true,
+                    fillColor: themeService.inputFillColor,
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: themeService.inputBorderColor,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: themeService.primaryColor,
+                        width: 2,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Tutup',
+                  style: TextStyle(
+                    color: themeService.textSecondaryColor,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: themeService.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  if (titleController.text.isNotEmpty) {
+                    _saveEntry(
+                      titleController.text,
+                      contentController.text,
+                      index: index,
+                    );
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text(
+                  'Simpan',
+                  style: TextStyle(
+                    color: themeService.buttonTextColor,
+                  ),
+                ),
+              ),
+            ],
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
   void _saveEntry(String title, String content, {int? index}) async {
     final now = DateTime.now();
@@ -174,57 +243,142 @@ class _DiaryPageState extends State<DiaryPage> {
     }
   }
 
-  void _showTutorial(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Color(0xFFF6E9E1),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+void _showTutorial(BuildContext context) {
+  final themeService = Provider.of<ThemeService>(context, listen: false);
+
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (context) => Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: themeService.infoSheetBackground,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(24),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(10))),
-            const SizedBox(height: 15),
-            const Text('Cara Menggunakan Q-Diary', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            _tutRow(Icons.add, 'Tambah', 'Gunakan tombol + untuk menulis diary baru.'),
-            _tutRow(Icons.edit_note, 'Lihat & Edit', 'Ketuk kartu diary untuk membaca atau mengubah isinya.'),
-            _tutRow(Icons.delete_outline, 'Hapus', 'Klik ikon sampah di dalam menu kartu untuk menghapus.'),
-            const SizedBox(height: 15),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1976D2), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Mengerti', style: TextStyle(color: Colors.white)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: themeService.textSecondaryColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+
+          const SizedBox(height: 15),
+
+          Text(
+            'Cara Menggunakan Q-Diary',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: themeService.textPrimaryColor,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          _tutRow(
+            Icons.add,
+            'Tambah',
+            'Gunakan tombol + untuk menulis diary baru.',
+            themeService,
+          ),
+
+          _tutRow(
+            Icons.edit_note,
+            'Lihat & Edit',
+            'Ketuk kartu diary untuk membaca atau mengubah isinya.',
+            themeService,
+          ),
+
+          _tutRow(
+            Icons.delete_outline,
+            'Hapus',
+            'Klik ikon sampah di dalam menu kartu untuk menghapus.',
+            themeService,
+          ),
+
+          const SizedBox(height: 15),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: themeService.infoSheetButtonColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Mengerti',
+                style: TextStyle(
+                  color: themeService.infoSheetButtonText,
+                ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _tutRow(IconData icon, String title, String desc) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color(0xFF1976D2)),
-          const SizedBox(width: 15),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(desc, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-          ])),
+          ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
+Widget _tutRow(
+  IconData icon,
+  String title,
+  String desc,
+  ThemeService themeService,
+) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 14),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          color: themeService.infoSheetIconColor,
+          size: 22,
+        ),
+
+        const SizedBox(width: 15),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: themeService.textPrimaryColor,
+                ),
+              ),
+
+              const SizedBox(height: 3),
+
+              Text(
+                desc,
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.4,
+                  color: themeService.textSecondaryColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
