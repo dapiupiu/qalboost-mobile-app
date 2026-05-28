@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart'; 
 import '../../../core/theme/theme_service.dart';
 import '../../../core/components/custom_bottom_nav.dart';
+import '../../../core/notifications/notification_service.dart'; 
 import '../../home/provider/home_provider.dart';
-import 'edit_profile_page.dart'; // Import halaman edit profil baru
+import 'edit_profile_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -16,7 +18,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final HomeProvider _homeProvider = HomeProvider();
   String _userEmail = "Memuat...";
 
-  bool _notifAktif = true;
+  bool _notifAktif = false; 
   bool _isDarkMode = false;
 
   @override
@@ -27,12 +29,60 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    
     setState(() {
       _userEmail = prefs.getString('user_email') ?? "email@gmail.com";
       _isDarkMode = Theme.of(context).brightness == Brightness.dark;
+      _notifAktif = prefs.getBool('notif_active') ?? false;
     });
     await _homeProvider.loadUserData();
     if (mounted) setState(() {});
+  }
+
+  // --- LOGIKA NOTIFIKASI PRESENTASI (FIXED) ---
+  Future<void> _toggleNotification(bool val) async {
+    if (val) {
+      var status = await Permission.notification.request();
+
+      if (status.isGranted) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('notif_active', true);
+        
+        if (!mounted) return;
+        setState(() => _notifAktif = true);
+
+        // FIX ERROR: Tambahkan parameter nama user
+        String namaUser = _homeProvider.userName;
+        if (namaUser == "Memuat..." || namaUser.isEmpty) {
+          namaUser = "User";
+        }
+        
+        await NotificationService().schedulePresentationNotifs(namaUser);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Halo $namaUser, simulasi dimulai!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Izin notifikasi ditolak.')),
+          );
+        }
+        await openAppSettings();
+      }
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('notif_active', false);
+      if (!mounted) return;
+      setState(() => _notifAktif = false);
+      await NotificationService().cancelAll();
+    }
   }
 
   @override
@@ -55,15 +105,11 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // --- Profile Card ---
               _buildProfileCard(isDarkMode),
-
               const SizedBox(height: 16),
-
               Expanded(
                 child: ListView(
                   children: [
-                    // --- FAQ Section (Dropdown Berjenjang) ---
                     _roundedExpansion(
                       icon: Icons.question_answer,
                       title: 'FAQ',
@@ -83,23 +129,21 @@ class _SettingsPageState extends State<SettingsPage> {
                       ],
                     ),
                     const SizedBox(height: 8),
-
-                    // --- Notifikasi ---
                     _roundedExpansion(
                       icon: Icons.notifications,
                       title: 'Notifikasi',
                       children: [
                         SwitchListTile(
                           title: const Text('Aktifkan Notifikasi'),
-                          subtitle: const Text('Dapatkan pengingat untuk mengisi mood harian'),
+                          subtitle: const Text('Notifikasi akan muncul setiap 15 detik'),
                           value: _notifAktif,
-                          onChanged: (val) => setState(() => _notifAktif = val),
+                          // FIX DEPRECATED: Gunakan activeTrackColor atau thumbColor
+                          activeTrackColor: const Color(0xFF58A6F0),
+                          onChanged: (val) => _toggleNotification(val),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
-
-                    // --- Preferensi (Dark Mode) ---
                     _roundedExpansion(
                       icon: Icons.palette,
                       title: 'Preferensi',
@@ -107,6 +151,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         SwitchListTile(
                           title: const Text('Mode Malam (Dark Mode)'),
                           value: _isDarkMode,
+                          activeTrackColor: const Color(0xFF58A6F0),
                           onChanged: (val) {
                             setState(() => _isDarkMode = val);
                             ThemeService().setThemeMode(val ? ThemeMode.dark : ThemeMode.light);
@@ -114,10 +159,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ],
                     ),
-                    
                     const SizedBox(height: 30),
-                    
-                    // --- Logout Button ---
                     _buildLogoutButton(),
                     const SizedBox(height: 40),
                   ],
@@ -131,7 +173,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // Widget FAQ dengan dropdown di dalam dropdown
   Widget _buildNestedFAQ(String question, String answer) {
     return ExpansionTile(
       title: Text(question, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
@@ -167,11 +208,10 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 12),
           ElevatedButton.icon(
             onPressed: () {
-              // Navigasi ke halaman Edit Profile
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const EditProfilePage()),
-              ).then((_) => _loadSettings()); // Refresh data saat kembali dari edit
+              ).then((_) => _loadSettings());
             },
             icon: const Icon(Icons.edit, size: 16),
             label: const Text('Edit Profil'),
@@ -214,8 +254,12 @@ class _SettingsPageState extends State<SettingsPage> {
           TextButton(
             onPressed: () async {
               final prefs = await SharedPreferences.getInstance();
+              await NotificationService().cancelAll();
               await prefs.clear();
-              if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+              if (mounted) {
+                // Gunakan context yang valid
+                Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+              }
             },
             child: const Text('Ya, Keluar', style: TextStyle(color: Colors.red)),
           ),

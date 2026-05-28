@@ -11,6 +11,9 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // AKTIFKAN DESUGARING UNTUK NOTIFIKASI
+        isCoreLibraryDesugaringEnabled = true 
+        
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -20,20 +23,19 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.qalboost"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        // MinSdk minimal 21 untuk desugaring, tapi Flutter biasanya sudah 21+
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Tambahkan ini jika build masih berat
+        multiDexEnabled = true
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -41,4 +43,9 @@ android {
 
 flutter {
     source = "../.."
+}
+
+// TAMBAHKAN BLOK DEPENDENCIES INI DI PALING BAWAH
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
