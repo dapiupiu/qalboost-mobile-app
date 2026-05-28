@@ -15,6 +15,7 @@ dependencies:
   shared_preferences: ^2.5.5
   path_provider: ^2.1.5
   url_launcher: ^6.2.5
+  provider: ^6.1.5+1
 
 dev_dependencies:
   flutter_test:
@@ -37,3 +38,31 @@ flutter_launcher_icons:
   min_sdk_android: 21
   adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "assets/images/app_logo.png"
+
+# Trik "Invisible Splash" agar Android menampilkan layar putih polos sebelum video
+# Trik "Invisible Splash" agar Android menampilkan layar putih polos sebelum video
+# Kita tambahkan konfigurasi mode gelap agar Android 12+ tidak bingung.
+flutter_native_splash:
+  # Konfigurasi Utama (Sistem Lama & Base)
+  color: "#FFFFFF"
+  image: "assets/images/blank.png"
+  # Menghapus logo yang curi start di Android 12+
+  # Trik pamungkas: kasih gambar yang sama dengan background
+  image_android_adaptive: "assets/images/blank.png"
+  fullscreen: true
+
+  # Konfigurasi Khusus Android 12+ (Ini Jurus Utama Kita)
+  android_12:
+    color: "#FFFFFF"
+    image: "assets/images/blank.png"
+    # Menghapus logo sistem yang nempel di tengah
+    icon_background_color: "#FFFFFF" # Ikon sistem jadi putih polos juga
+
+  # Menambahkan Konfigurasi Mode Gelap untuk "Menipu" OS
+  dark_color: "#FFFFFF" # Tetap Putih walau HP pakai Mode Gelap
+  dark_image: "assets/images/blank.png"
+  
+  # Konfigurasi Khusus Mode Gelap Android 12+
+  dark_android_12:
+    color: "#FFFFFF"
+    image: "assets/images/blank.png"
