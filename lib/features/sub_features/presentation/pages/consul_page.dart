@@ -6,20 +6,21 @@ class ConsulPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      backgroundColor: colorScheme.background,
       drawer: const CustomAppDrawer(),
       drawerEdgeDragWidth: 100.0,
       appBar: AppBar(
-        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(color: isDarkMode ? Colors.white : Colors.black87),
-        title: Text('Q-Konsul', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold)),
+        leading: BackButton(color: colorScheme.onBackground),
+        title: Text('Q-Konsul', style: TextStyle(color: colorScheme.onBackground, fontWeight: FontWeight.bold)),
       ),
-      body: const Center(
-        child: Text('Halaman Konsultasi akan segera hadir!'),
+      body: Center(
+        child: Text('Halaman Konsultasi akan segera hadir!', style: TextStyle(color: colorScheme.onBackground.withOpacity(0.6))),
       ),
     );
   }
