@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import '../../../core/components/app_drawer.dart'; // Pastikan path impor drawer ini sesuai struktur project-mu
 
 // --- DATA MODEL ---
 class QuoteModel {
@@ -23,6 +24,9 @@ class QuotesSimpleScreen extends StatefulWidget {
 }
 
 class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
+  // GlobalKey untuk mengontrol buka-tutup drawer secara programatik
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   final List<QuoteModel> _quotesData = [
     QuoteModel(videoPath: 'assets/videos/quote_1.mp4', contentText: 'Orang itu wajar kalau sedih, tapi ketika sudah sedih sepatutnya ia berdoa.'),
     QuoteModel(videoPath: 'assets/videos/quote_2.mp4', contentText: 'Jangan menyerah ketika doamu belum dikabulkan. Allah tahu waktu yang tepat.'),
@@ -101,22 +105,30 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final bg = isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1);
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      key: _scaffoldKey, // Daftarkan key scaffold di sini
       backgroundColor: bg,
+      drawer: const CustomAppDrawer(), // Memasang drawer kustom buatanmu
+      
+      // Mengaktifkan drag natural 15% dari lebar HP user
+      drawerEnableOpenDragGesture: true,
+      drawerEdgeDragWidth: screenWidth * 0.15,
+
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back,
+            Icons.arrow_back, // Memakai tombol back asli pilihanmu
             color: isDarkMode ? Colors.white : Colors.black87,
             size: 22,
           ),
           onPressed: () => Navigator.maybePop(context),
         ),
         title: Text(
-          'Q-Checker',
+          'Q-Quotes', // Diubah menjadi Q-Quotes agar sinkron dengan nama fitur
           style: TextStyle(
             color: isDarkMode ? Colors.white : Colors.black87,
             fontWeight: FontWeight.bold,
@@ -129,67 +141,77 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
             padding: const EdgeInsets.only(right: 12.0),
             child: IconButton(
               icon: Icon(Icons.info_outline, color: isDarkMode ? Colors.white70 : Colors.black54),
-              onPressed: () {
-                // Panggil fungsi tutorial checker kamu di sini jika ada
-              },
+              onPressed: () => _showTutorial(context), // Mengaktifkan fungsi tutorial yang sempat kosong
             ),
           ),
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            // HEADER AREA
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(widget.headerTitle, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
-                        Text(widget.headerSubtitle, style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                      ],
+        // GestureDetector membungkus seluruh body untuk mengamankan fitur drag out (menutup laci)
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragUpdate: (details) {
+            // Jika laci drawer sedang terbuka, seretan jempol balik ke kiri akan menutup laci secara fleksibel
+            if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+              if (details.delta.dx < -2) {
+                Navigator.pop(context);
+              }
+            }
+          },
+          child: Column(
+            children: [
+              // HEADER AREA
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(widget.headerTitle, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+                          Text(widget.headerSubtitle, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                        ],
+                      ),
                     ),
-                  ),
-                  Image.asset('assets/images/quotes.png', width: 80, height: 80),
-                ],
+                    Image.asset('assets/images/quotes.png', width: 80, height: 80),
+                  ],
+                ),
               ),
-            ),
-            
-            // --- PAGEVIEW AREA ---
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: _quotesData.length,
-                itemBuilder: (context, index) {
-                  return AnimatedBuilder(
-                    animation: _pageController,
-                    builder: (context, child) {
-                      double value = 1.0;
-                      if (_pageController.position.haveDimensions) {
-                        value = _pageController.page! - index;
-                        value = (1 - (value.abs() * 0.2)).clamp(0.0, 1.0);
-                      }
-                      return Transform.scale(
-                        scale: Curves.easeInOut.transform(value),
-                        child: child,
-                      );
-                    },
-                    child: QHVideoCard(quote: _quotesData[index]),
-                  );
-                },
+              
+              // --- PAGEVIEW AREA ---
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: _quotesData.length,
+                  itemBuilder: (context, index) {
+                    return AnimatedBuilder(
+                      animation: _pageController,
+                      builder: (context, child) {
+                        double value = 1.0;
+                        if (_pageController.position.haveDimensions) {
+                          value = _pageController.page! - index;
+                          value = (1 - (value.abs() * 0.2)).clamp(0.0, 1.0);
+                        }
+                        return Transform.scale(
+                          scale: Curves.easeInOut.transform(value),
+                          child: child,
+                        );
+                      },
+                      child: QHVideoCard(quote: _quotesData[index]),
+                    );
+                  },
+                ),
               ),
-            ),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 15),
-              child: Text('← swipe left/right →', style: TextStyle(color: Colors.grey, fontSize: 12)),
-            ),
-          ],
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 15),
+                child: Text('← swipe left/right →', style: TextStyle(color: Colors.grey, fontSize: 12)),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -212,7 +234,10 @@ class _QHVideoCardState extends State<QHVideoCard> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.asset(widget.quote.videoPath);
-    _initializeVideoPlayerFuture = _controller.initialize();
+    _initializeVideoPlayerFuture = _controller.initialize().then((_) {
+      // Memastikan video langsung me-render frame pertama setelah beres inisialisasi
+      if (mounted) setState(() {});
+    });
     _controller.setLooping(true);
     _controller.addListener(() { if (mounted) setState(() {}); });
   }

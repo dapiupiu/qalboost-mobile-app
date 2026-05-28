@@ -71,6 +71,8 @@ class _MoodPageState extends State<MoodPage> {
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
       drawer: const CustomAppDrawer(),
+      // Kita kembalikan ke TRUE agar Scaffold internal mengizinkan drawer terbuka secara programatik
+      drawerEnableOpenDragGesture: true, 
       appBar: AppBar(
         backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
         elevation: 0,
@@ -110,7 +112,6 @@ class _MoodPageState extends State<MoodPage> {
                         crossAxisCount: 7, 
                         mainAxisSpacing: 8, 
                         crossAxisSpacing: 8,
-                        // Diubah ke 0.82 agar kotak sedikit ceper dan muat di layar pendek tanpa overflow
                         childAspectRatio: 0.82, 
                       ),
                       itemCount: days.length,
@@ -130,7 +131,27 @@ class _MoodPageState extends State<MoodPage> {
                   },
                 ),
               ),
-              const SizedBox(height: 10), 
+              
+              // CARA AGRESIF: Menggunakan Dismissible sebagai trigger swipe buatan
+              Builder(
+                builder: (innerContext) {
+                  return Dismissible(
+                    key: UniqueKey(),
+                    direction: DismissDirection.startToEnd, // Hanya deteksi geser ke kanan
+                    confirmDismiss: (direction) async {
+                      // Begitu digeser, langsung panggil drawer dan batalkan efek 'dismiss' visualnya
+                      Scaffold.of(innerContext).openDrawer();
+                      return false; // Return false agar widget area kosong tidak hilang dari layar
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 80, // Area sensor dipertebal jadi 80px agar sangat nyaman ditarik
+                      color: Colors.transparent, // Tetap transparan agar visual tidak berubah
+                    ),
+                  );
+                },
+              ),
+
               _buildTodayRecap(),
             ],
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // 1. WAJIB TAMBAHKAN IMPORT INI
 import '../provider/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -16,7 +17,9 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _handleLogin() async {
     setState(() => _isLoading = true);
 
-    final authProvider = AuthProvider(); 
+    // REVISI UTAMA: Menggunakan provider global dari context, bukan membuat instansi baru
+    final authProvider = context.read<AuthProvider>(); 
+    
     bool success = await authProvider.login(
       _emailController.text.trim(),
       _passwordController.text.trim(),
@@ -26,7 +29,8 @@ class _LoginPageState extends State<LoginPage> {
 
     if (success) {
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+        // REVISI NAVIGASI: Bersihkan stack halaman login agar aplikasi segar saat masuk ke Home
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       }
     } else {
       if (mounted) {
@@ -35,6 +39,14 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    // Best practice: Selalu dispose controller untuk mencegah memory leak
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -52,14 +64,14 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const SizedBox(height: 60),
               
-              // 1. LOGO TEXT (MIX.PNG diperbesar manual)
+              // 1. LOGO TEXT
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Image.asset(
                     'assets/images/mix.png', 
-                    width: 130, // Ukuran diperbesar manual
+                    width: 130, 
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -67,10 +79,10 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 20),
 
-              // 2. MASKOT UTAMA (REGIS.PNG menggantikan matahari)
+              // 2. MASKOT UTAMA
               AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                height: isKeyboardVisible ? 100 : 180, // Mengecil saat ngetik
+                height: isKeyboardVisible ? 100 : 180, 
                 child: Image.asset(
                   'assets/images/regis.png', 
                   fit: BoxFit.contain,
@@ -154,7 +166,7 @@ class _LoginPageState extends State<LoginPage> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05), // Memperbaiki format pemanggilan opacity
             blurRadius: 10,
             offset: const Offset(0, 4),
           )

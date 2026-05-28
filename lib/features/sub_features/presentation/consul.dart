@@ -100,7 +100,8 @@ class _ConsulPageState extends State<ConsulPage> {
     return Scaffold(
       backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
       drawer: const CustomAppDrawer(),
-      drawerEdgeDragWidth: 100.0,
+      // Ubah dari 30 menjadi dinamis (berdasarkan persentase lebar layar HP kamu)
+      drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.15,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

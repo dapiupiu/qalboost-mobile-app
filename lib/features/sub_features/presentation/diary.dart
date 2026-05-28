@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../auth/data/auth_local_data.dart';
-// MENGGUNAKAN REPOSITORY BARU SPERTI FITUR MOOD
 import '../data/diary_repository.dart'; 
 import '../../../core/components/app_drawer.dart';
 
@@ -14,9 +13,11 @@ class DiaryPage extends StatefulWidget {
 
 class _DiaryPageState extends State<DiaryPage> {
   final AuthLocalData _authLocal = AuthLocalData();
-  // REVISI: Menggunakan DiaryRepository menggantikan DiaryLocalData
   final DiaryRepository _diaryRepo = DiaryRepository(); 
   final ScrollController _scrollController = ScrollController();
+  
+  // Key utama untuk mengontrol state Scaffold dari widget child di dalamnya
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   
   List<Map<String, String>> _entries = [];
   String? currentUserEmail;
@@ -41,16 +42,13 @@ class _DiaryPageState extends State<DiaryPage> {
     super.dispose();
   }
 
-  // --- REVISI: FUNGSI SINKRONISASI DATA BERDASARKAN EMAIL ---
   Future<void> _refreshDiaryData() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
 
-    // Ambil email session aktif
     final email = await _authLocal.getEmail(); 
     
     if (email != null) {
-      // PANGGIL REPO BARU (Sistem File berbasis Email)
       final data = await _diaryRepo.getDiaryByEmail(email);
       if (mounted) {
         setState(() {
@@ -61,7 +59,6 @@ class _DiaryPageState extends State<DiaryPage> {
         print("DEBUG_UI: Diary berhasil ditampilkan. Jumlah: ${_entries.length}");
       }
     } else {
-      // Jika session email tidak ditemukan
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -71,7 +68,6 @@ class _DiaryPageState extends State<DiaryPage> {
     }
   }
 
-  // --- FUNGSI DIALOG (UNTUK TAMBAH & EDIT) ---
   void _openDiaryDialog({int? index}) {
     final isEdit = index != null;
     final titleController = TextEditingController(text: isEdit ? _entries[index]['title'] : '');
@@ -139,7 +135,6 @@ class _DiaryPageState extends State<DiaryPage> {
     );
   }
 
-  // --- REVISI: FUNGSI SIMPAN MENGGUNAKAN REPO BARU ---
   void _saveEntry(String title, String content, {int? index}) async {
     final now = DateTime.now();
     final dateString = "${now.day} ${_getMonth(now.month)} ${now.year}";
@@ -160,7 +155,6 @@ class _DiaryPageState extends State<DiaryPage> {
       }
     });
     
-    // Simpan permanen ke file storage menggunakan repo berdasarkan email aktif
     if (currentUserEmail != null) {
       await _diaryRepo.saveDiary(currentUserEmail!, _entries);
     }
@@ -171,7 +165,6 @@ class _DiaryPageState extends State<DiaryPage> {
     return months[month - 1];
   }
 
-  // --- REVISI: FUNGSI HAPUS MENGGUNAKAN REPO BARU ---
   void _deleteEntry(int index) async {
     setState(() {
       _entries.removeAt(index);
@@ -238,14 +231,21 @@ class _DiaryPageState extends State<DiaryPage> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      key: _scaffoldKey, 
       backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
       drawer: const CustomAppDrawer(),
+      
+      // Mengaktifkan gesture bawaan sistem agar laci ditarik presisi nempel jempol
+      drawerEnableOpenDragGesture: true, 
+      // Ubah dari 30 menjadi dinamis (berdasarkan persentase lebar layar HP kamu)
+      drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.15,
+
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back,
+            Icons.arrow_back, // Tetap mempertahankan tombol back asli request kamu
             color: isDarkMode ? Colors.white : Colors.black87,
             size: 22,
           ),
@@ -273,59 +273,72 @@ class _DiaryPageState extends State<DiaryPage> {
       body: _isLoading 
       ? const Center(child: CircularProgressIndicator())
       : SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragUpdate: (details) {
+              // Jika drawer terdeteksi sedang terbuka, usapan jempol ke kiri (< -2) akan menutup laci secara natural (drag out)
+              if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+                if (details.delta.dx < -2) {
+                  Navigator.pop(context); 
+                }
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Diary\nKamu', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w800, height: 1.1)),
-                  FloatingActionButton.small(
-                    heroTag: 'add_diary',
-                    onPressed: () => _openDiaryDialog(),
-                    backgroundColor: const Color(0xFF58A6F0),
-                    child: const Icon(Icons.add, color: Colors.white),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Diary\nKamu', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w800, height: 1.1)),
+                      FloatingActionButton.small(
+                        heroTag: 'add_diary',
+                        onPressed: () => _openDiaryDialog(),
+                        backgroundColor: const Color(0xFF58A6F0),
+                        child: const Icon(Icons.add, color: Colors.white),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 10),
+                  Divider(color: Colors.grey.withOpacity(0.3)),
+                  Expanded(
+                    child: _entries.isEmpty 
+                      ? const Center(child: Text('Belum ada catatan hari ini.'))
+                      : ListView.separated(
+                          controller: _scrollController,
+                          // BouncingScrollPhysics wajib agar scroll list tidak menelan event horizontal drag milik drawer
+                          physics: const BouncingScrollPhysics(), 
+                          itemCount: _entries.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 15),
+                          itemBuilder: (context, index) {
+                            final e = _entries[index];
+                            return GestureDetector(
+                              onTap: () => _openDiaryDialog(index: index), 
+                              child: _DiaryCard(
+                                title: e['title']!,
+                                content: e['content']!,
+                                date: e['date']!,
+                                onDelete: () => _deleteEntry(index),
+                              ),
+                            );
+                          },
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Center(
+                    child: Chip(
+                      avatar: Icon(Icons.lock, size: 16, color: Colors.green),
+                      label: Text('Privasi Kamu Aman', style: TextStyle(fontSize: 12)),
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                 ],
               ),
-              const SizedBox(height: 10),
-              Divider(color: Colors.grey.withOpacity(0.3)),
-              Expanded(
-                child: _entries.isEmpty 
-                  ? const Center(child: Text('Belum ada catatan hari ini.'))
-                  : ListView.separated(
-                      controller: _scrollController,
-                      itemCount: _entries.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 15),
-                      itemBuilder: (context, index) {
-                        final e = _entries[index];
-                        return GestureDetector(
-                          onTap: () => _openDiaryDialog(index: index), 
-                          child: _DiaryCard(
-                            title: e['title']!,
-                            content: e['content']!,
-                            date: e['date']!,
-                            onDelete: () => _deleteEntry(index),
-                          ),
-                        );
-                      },
-                    ),
-              ),
-              const SizedBox(height: 10),
-              const Center(
-                child: Chip(
-                  avatar: Icon(Icons.lock, size: 16, color: Colors.green),
-                  label: Text('Privasi Kamu Aman', style: TextStyle(fontSize: 12)),
-                  backgroundColor: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 10),
-            ],
+            ),
           ),
         ),
-      ),
       floatingActionButton: _showBackToTop
           ? FloatingActionButton(
               onPressed: () => _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeOut),

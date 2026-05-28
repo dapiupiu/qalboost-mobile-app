@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // IMPORT PROVIDER UNTUK MENGAKSES STATE MANAGEMENT
 import 'package:video_player/video_player.dart';
-import '../../auth/data/auth_local_data.dart'; // Import local data
+import '../../auth/data/auth_local_data.dart'; 
+import '../../auth/provider/auth_provider.dart'; // IMPORT AUTH_PROVIDER
 
 class VideoSplashScreen extends StatefulWidget {
   const VideoSplashScreen({super.key});
@@ -24,36 +26,45 @@ class _VideoSplashScreenState extends State<VideoSplashScreen> {
           _controller.play();
         })
         .catchError((error) {
-          // Jika video gagal, jalankan pengecekan auth segera
+          // Jika video gagal dimuat/error, jalankan pengecekan auth segera agar aplikasi tidak stuck
           _navigateToNext();
         });
 
     _controller.addListener(() {
-      // Jika video selesai
+      // Jika durasi video sudah habis/selesai diputar
       if (_controller.value.position == _controller.value.duration) {
         _navigateToNext();
       }
     });
   }
 
-  // Fungsi cerdas untuk menentukan tujuan setelah splash
+  // Fungsi penentu arah navigasi sekaligus pemulih kondisi state user
   Future<void> _navigateToNext() async {
+    // Memeriksa kevalidan durasi token/sesi yang tersimpan di local storage HP
     bool isValid = await _authLocalData.isSessionValid();
     
     if (mounted) {
       if (isValid) {
-        // Jika belum 5 menit, langsung ke Home
-        Navigator.pushReplacementNamed(context, '/home');
+        // TAHAP PENTING: Mengisi kembali data user dari local ke RAM Provider sebelum masuk ke HomePage
+        await context.read<AuthProvider>().restoreSession();
+
+        // Pastikan widget masih aktif di dalam struktur widget tree sebelum pindah halaman
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       } else {
-        // Jika sudah lebih 5 menit atau belum login, ke Login
-        Navigator.pushReplacementNamed(context, '/login');
+        // Jika sesi kadaluarsa/belum login, bersihkan sisa instans lalu arahkan ke login
+        await context.read<AuthProvider>().logout();
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       }
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller.dispose(); // Mematikan controller video agar tidak memicu memory leak
     super.dispose();
   }
 
