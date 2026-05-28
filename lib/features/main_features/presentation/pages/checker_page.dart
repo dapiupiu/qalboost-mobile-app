@@ -40,39 +40,48 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      backgroundColor: colorScheme.background,
       drawer: const CustomAppDrawer(),
       drawerEdgeDragWidth: 100.0,
       appBar: AppBar(
-        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(color: isDarkMode ? Colors.white : Colors.black87),
+        leading: BackButton(color: colorScheme.onBackground),
         title: Text(
           'Q-Checker',
-          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
+          style: TextStyle(color: colorScheme.onBackground, fontWeight: FontWeight.bold),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             children: [
               const SizedBox(height: 10),
               Center(
-                child: Image.asset(
-                  'assets/images/moon_large.png',
-                  height: 120,
-                  errorBuilder: (c, e, s) => const Text('🌙', style: TextStyle(fontSize: 60)),
+                child: Hero(
+                  tag: 'mood_moon',
+                  child: Image.asset(
+                    'assets/images/moon_large.png',
+                    height: 120,
+                    errorBuilder: (c, e, s) => const Text('🌙', style: TextStyle(fontSize: 60)),
+                  ),
                 ),
               ),
               const SizedBox(height: 15),
-              const Text(
+              Text(
                 'BAGAIMANA MOOD\nKAMU HARI INI?',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 22, 
+                  fontWeight: FontWeight.bold, 
+                  color: colorScheme.onBackground
+                ),
               ),
               const SizedBox(height: 20),
               GestureDetector(
@@ -86,16 +95,26 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   if (picked != null) setState(() => _selectedDate = picked);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface, 
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.calendar_today, size: 16, color: Colors.blue),
+                      Icon(Icons.calendar_today, size: 16, color: colorScheme.primary),
                       const SizedBox(width: 8),
                       Text(
                         '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+                        style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onSurface),
                       ),
                     ],
                   ),
@@ -121,76 +140,103 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                 ],
               ),
               const SizedBox(height: 30),
-              const Align(alignment: Alignment.centerLeft, child: Text('Apa yang kamu rasakan?', style: TextStyle(fontWeight: FontWeight.bold))),
+              Align(
+                alignment: Alignment.centerLeft, 
+                child: Text(
+                  'Apa yang kamu rasakan?', 
+                  style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onBackground)
+                )
+              ),
               const SizedBox(height: 10),
               TextField(
                 controller: _controller,
                 maxLines: 4,
-                style: const TextStyle(color: Colors.black87),
+                style: TextStyle(color: colorScheme.onSurface),
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: colorScheme.surface,
                   hintText: 'Tulis cerita kamu di sini...',
-                  hintStyle: const TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+                  hintStyle: TextStyle(color: colorScheme.onSurfaceVariant.withOpacity(0.5)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15), 
+                    borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.2))
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15), 
+                    borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.1))
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _handleSave,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF58A6F0),
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 2,
                 ),
-                child: const Text('Simpan Mood Hari Ini'),
+                child: const Text('Simpan Mood Hari Ini', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
-              const SizedBox(height: 100),
+              const SizedBox(height: 40),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(context),
+      bottomNavigationBar: _buildBottomNav(context, colorScheme),
     );
   }
 
-  Widget _buildBottomNav(BuildContext context) {
-    return SizedBox(
+  Widget _buildBottomNav(BuildContext context, ColorScheme colorScheme) {
+    return Container(
       height: 72,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(top: BorderSide(color: colorScheme.outline.withOpacity(0.1), width: 1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04), 
+            blurRadius: 10, 
+            offset: const Offset(0, -4)
+          )
+        ],
+      ),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Container(
-            height: 72,
-            color: const Color(0xFF58A6F0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.home, color: Colors.white),
-                  onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
-                ),
-                const SizedBox(width: 56),
-                IconButton(
-                  icon: const Icon(Icons.settings, color: Colors.white),
-                  onPressed: () => Navigator.pushNamed(context, '/settings'),
-                ),
-              ],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                icon: Icon(Icons.home_rounded, color: colorScheme.onSurfaceVariant),
+                onPressed: () => Navigator.popUntil(context, (route) => route.isFirst),
+              ),
+              const SizedBox(width: 64),
+              IconButton(
+                icon: Icon(Icons.settings_rounded, color: colorScheme.onSurfaceVariant),
+                onPressed: () => Navigator.pushNamed(context, '/settings'),
+              ),
+            ],
           ),
           Positioned(
-            top: -22,
+            top: -30,
             left: 0,
             right: 0,
             child: Center(
               child: GestureDetector(
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoodPage())),
                 child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: const Center(child: Text('🌙', style: TextStyle(fontSize: 30))),
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary, 
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: colorScheme.primary.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
+                    ],
+                  ),
+                  child: const Center(child: Text('🌙', style: TextStyle(fontSize: 28))),
                 ),
               ),
             ),
@@ -216,28 +262,36 @@ class _MoodCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 130,
-        height: 150,
-        padding: const EdgeInsets.all(12),
+        width: 140,
+        height: 160,
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: selected ? Colors.white : (label == 'Baik' ? const Color(0xFFFFF7C2) : const Color(0xFFD7EAF8)),
-          borderRadius: BorderRadius.circular(20),
-          border: selected ? Border.all(color: Colors.blue, width: 2) : null,
-          boxShadow: [if (selected) const BoxShadow(color: Colors.black12, blurRadius: 10)],
+          color: selected 
+              ? colorScheme.primaryContainer 
+              : (isDarkMode ? colorScheme.surfaceVariant.withOpacity(0.2) : (label == 'Baik' ? const Color(0xFFFFF7C2) : const Color(0xFFD7EAF8))),
+          borderRadius: BorderRadius.circular(24),
+          border: selected ? Border.all(color: colorScheme.primary, width: 2) : Border.all(color: colorScheme.outline.withOpacity(0.1)),
+          boxShadow: [
+            if (selected) BoxShadow(color: colorScheme.primary.withOpacity(0.2), blurRadius: 15, offset: const Offset(0, 8))
+          ],
         ),
         child: Column(
           children: [
             Expanded(
               child: Image.asset(
                 assetPath,
-                errorBuilder: (c, e, s) => Text(label == 'Baik' ? '😊' : '😢', style: const TextStyle(fontSize: 40)),
+                errorBuilder: (c, e, s) => Text(label == 'Baik' ? '😊' : '😢', style: const TextStyle(fontSize: 48)),
               ),
             ),
-            Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+            const SizedBox(height: 12),
+            Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: selected ? colorScheme.onPrimaryContainer : colorScheme.onSurface)),
           ],
         ),
       ),

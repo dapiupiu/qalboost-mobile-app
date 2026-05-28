@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../../core/components/app_drawer.dart';
-import '../../data/mood_storage.dart';
+import 'package:qalboost/core/components/app_drawer.dart';
+import 'package:qalboost/features/main_features/data/mood_storage.dart';
 
+/// [MoodPage] menampilkan kalender riwayat catatan mood bulanan pengguna.
+///
+/// Rationale: Memungkinkan pengguna melakukan refleksi kesehatan mental secara visual
+/// dengan membaca rekap data historis dari [MoodStorage].
 class MoodPage extends StatefulWidget {
-  const MoodPage({Key? key}) : super(key: key);
+  const MoodPage({super.key});
 
   @override
   State<MoodPage> createState() => _MoodPageState();
@@ -28,7 +32,8 @@ class _MoodPageState extends State<MoodPage> {
     final daysInMonth = lastDay.day;
     final startWeekday = firstDay.weekday;
 
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     final List<int?> days = List.generate(42, (index) {
       final dayNum = index - (startWeekday - 1) + 1;
@@ -36,14 +41,14 @@ class _MoodPageState extends State<MoodPage> {
     });
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      backgroundColor: colorScheme.background, // 🚀 PERBAIKAN: Menggunakan warna background dinamis dari tema global
       drawer: const CustomAppDrawer(),
       drawerEdgeDragWidth: 100.0,
       appBar: AppBar(
-        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black87),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onBackground),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
@@ -51,105 +56,143 @@ class _MoodPageState extends State<MoodPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: Icon(Icons.chevron_left, color: isDarkMode ? Colors.white : Colors.black87),
+              icon: Icon(Icons.chevron_left, color: colorScheme.onBackground),
               onPressed: _previousMonth,
             ),
             GestureDetector(
               onTap: () => _showMonthYearPicker(context),
               child: Text(
                 '${_getMonthName(_currentMonth)} $_currentYear',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: isDarkMode ? Colors.white : Colors.black87),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: colorScheme.onBackground),
               ),
             ),
             IconButton(
-              icon: Icon(Icons.chevron_right, color: isDarkMode ? Colors.white : Colors.black87),
+              icon: Icon(Icons.chevron_right, color: colorScheme.onBackground),
               onPressed: _nextMonth,
             ),
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: ['S', 'S', 'R', 'K', 'J', 'S', 'M']
-                  .map((d) => Text(d, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)))
-                  .toList(),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
+      // 🚀 PERBAIKAN OVERFLOW: Memastikan area body aman menggunakan ScrollPhysics yang responsif
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: ['S', 'S', 'R', 'K', 'J', 'S', 'M']
+                      .map((d) => Text(d, style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onBackground.withOpacity(0.5))))
+                      .toList(),
                 ),
-                itemCount: days.length,
-                itemBuilder: (context, index) {
-                  final dayNum = days[index];
-                  if (dayNum == null) return const SizedBox.shrink();
-                  final date = DateTime(_currentYear, _currentMonth, dayNum);
-                  final data = MoodStorage.getMood(date);
-                  return _buildDayCell(context, dayNum, data);
-                },
-              ),
+                const SizedBox(height: 16),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                  ),
+                  itemCount: days.length,
+                  itemBuilder: (context, index) {
+                    final dayNum = days[index];
+                    if (dayNum == null) return const SizedBox.shrink();
+                    final date = DateTime(_currentYear, _currentMonth, dayNum);
+                    final data = MoodStorage.getMood(date);
+                    return _buildDayCell(context, dayNum, data);
+                  },
+                ),
+                const SizedBox(height: 24),
+                _buildTodayRecap(colorScheme),
+                const SizedBox(height: 20),
+              ],
             ),
-            _buildTodayRecap(),
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildDayCell(BuildContext context, int day, Map<String, dynamic>? data) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () {
         if (data != null) {
           showModalBottomSheet(
             context: context,
+            backgroundColor: Colors.transparent,
             builder: (_) => Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(data['emoji'], style: const TextStyle(fontSize: 50)),
-                  const SizedBox(height: 10),
-                  Text('Tanggal $day', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
-                  const SizedBox(height: 10),
-                  Text(data['catatan'] ?? 'Tidak ada catatan', style: const TextStyle(color: Colors.black87)),
+                  Container(width: 40, height: 4, decoration: BoxDecoration(color: colorScheme.outline.withOpacity(0.2), borderRadius: BorderRadius.circular(10))),
+                  const SizedBox(height: 24),
+                  Text(data['emoji'], style: const TextStyle(fontSize: 64)),
+                  const SizedBox(height: 16),
+                  Text('Tanggal $day ${_getMonthName(_currentMonth)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: colorScheme.onSurface)),
+                  const SizedBox(height: 12),
+                  Text(
+                    data['catatan'] ?? 'Tidak ada catatan', 
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 15),
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
           );
         }
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
-          color: data != null ? Colors.white : Colors.white24,
-          borderRadius: BorderRadius.circular(8),
-          border: data != null ? Border.all(color: Colors.blue.withOpacity(0.3)) : null,
+          color: data != null ? colorScheme.primaryContainer : colorScheme.surface.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(12),
+          border: data != null ? Border.all(color: colorScheme.primary.withOpacity(0.5)) : Border.all(color: colorScheme.outline.withOpacity(0.1)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('$day', style: const TextStyle(fontSize: 12, color: Colors.black54)),
-            if (data != null) Text(data['emoji'], style: const TextStyle(fontSize: 18)),
+            Text('$day', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: data != null ? colorScheme.onPrimaryContainer : colorScheme.onSurface.withOpacity(0.5))),
+            if (data != null) const SizedBox(height: 2),
+            if (data != null) Text(data['emoji'], style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTodayRecap() {
-    final data = MoodStorage.getMood(DateTime.now());
+  Widget _buildTodayRecap(ColorScheme colorScheme) {
+    final now = DateTime.now();
+    final data = MoodStorage.getMood(DateTime(now.year, now.month, now.day));
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colorScheme.surface, 
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
       child: data == null
-          ? const Text('Belum ada mood untuk hari ini.', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54))
+          ? Row(
+              children: [
+                Icon(Icons.info_outline, color: colorScheme.primary),
+                const SizedBox(width: 12),
+                Expanded(child: Text('Belum ada mood untuk hari ini.', style: TextStyle(color: colorScheme.onSurfaceVariant))),
+              ],
+            )
           : Row(
               children: [
                 Text(data['emoji'], style: const TextStyle(fontSize: 40)),
@@ -158,8 +201,9 @@ class _MoodPageState extends State<MoodPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Mood Hari Ini', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
-                      Text(data['catatan'], maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.black54)),
+                      Text('Mood Hari Ini', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: colorScheme.onSurface)),
+                      const SizedBox(height: 4),
+                      Text(data['catatan'], maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: colorScheme.onSurfaceVariant)),
                     ],
                   ),
                 ),
@@ -193,39 +237,43 @@ class _MoodPageState extends State<MoodPage> {
   void _showMonthYearPicker(BuildContext context) {
     int selectedMonth = _currentMonth;
     int selectedYear = _currentYear;
+    final colorScheme = Theme.of(context).colorScheme;
+
     showModalBottomSheet(
       context: context,
+      backgroundColor: colorScheme.surface, // 🚀 PERBAIKAN: Modal background adaptif
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Pilih Bulan & Tahun', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
+                  Text('Pilih Bulan & Tahun', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
                   const SizedBox(height: 20),
                   DropdownButton<int>(
                     value: selectedMonth,
                     isExpanded: true,
-                    dropdownColor: Colors.white,
-                    style: const TextStyle(color: Colors.black87),
+                    dropdownColor: colorScheme.surface,
+                    style: TextStyle(color: colorScheme.onSurface, fontSize: 16),
                     items: List.generate(12, (index) => DropdownMenuItem(value: index + 1, child: Text(_getMonthName(index + 1)))),
                     onChanged: (value) => setModalState(() => selectedMonth = value!),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   DropdownButton<int>(
                     value: selectedYear,
                     isExpanded: true,
-                    dropdownColor: Colors.white,
-                    style: const TextStyle(color: Colors.black87),
+                    dropdownColor: colorScheme.surface,
+                    style: TextStyle(color: colorScheme.onSurface, fontSize: 16),
                     items: List.generate(20, (index) {
                       int year = 2020 + index;
                       return DropdownMenuItem(value: year, child: Text(year.toString()));
                     }),
                     onChanged: (value) => setModalState(() => selectedYear = value!),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -234,8 +282,13 @@ class _MoodPageState extends State<MoodPage> {
                       });
                       Navigator.pop(context);
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF58A6F0), foregroundColor: Colors.white),
-                    child: const Text('Pilih'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.primary, 
+                      foregroundColor: colorScheme.onPrimary,
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('Pilih', style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
