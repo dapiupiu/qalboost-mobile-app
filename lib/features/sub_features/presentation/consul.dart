@@ -102,20 +102,33 @@ class _ConsulPageState extends State<ConsulPage> {
       drawer: const CustomAppDrawer(),
       drawerEdgeDragWidth: 100.0,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
-        title: Text('Q-Qonsul', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDarkMode ? Colors.white : Colors.black87,
+            size: 22,
+          ),
+          onPressed: () => Navigator.maybePop(context),
+        ),
+        title: Text(
+          'Q-Konsul',
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        centerTitle: true,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
-            child: GestureDetector(
-              onTap: () => showModalBottomSheet(context: context, backgroundColor: Colors.transparent, builder: (context) => _buildTutorialSheet()),
-              child: Image.asset('assets/images/menu_quotes.png', width: 28, height: 28, errorBuilder: (c, e, s) => Icon(Icons.info_outline, color: isDarkMode ? Colors.grey : Colors.black54)),
+            child: IconButton(
+              icon: Icon(Icons.info_outline, color: isDarkMode ? Colors.white70 : Colors.black54),
+              onPressed: () {
+                // Panggil fungsi tutorial konsul kamu di sini jika ada
+              },
             ),
           ),
         ],
@@ -363,17 +376,12 @@ Widget _tutorialItem(IconData icon, String title, String desc) {
   );
 }
 
-  Widget _buildPrivacyBanner() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade700)),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.lock_outline, size: 16, color: Colors.green),
-          SizedBox(width: 8),
-          Text('Privasi Kamu Aman dan Terjaga', style: TextStyle(color: Colors.black87)),
-        ],
+ Widget _buildPrivacyBanner() {
+    return const Center(
+      child: Chip(
+        avatar: Icon(Icons.lock, size: 16, color: Colors.green),
+        label: Text('Privasi Kamu Aman', style: TextStyle(fontSize: 12, color: Colors.black87)),
+        backgroundColor: Colors.white,
       ),
     );
   }

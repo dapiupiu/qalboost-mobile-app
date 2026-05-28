@@ -94,36 +94,46 @@ class _MoodPageState extends State<MoodPage> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildWeekdayHeader(),
-            const SizedBox(height: 10),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7, 
-                  mainAxisSpacing: 8, 
-                  crossAxisSpacing: 8
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              _buildWeekdayHeader(),
+              const SizedBox(height: 10),
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return GridView.builder(
+                      physics: const ClampingScrollPhysics(), 
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 7, 
+                        mainAxisSpacing: 8, 
+                        crossAxisSpacing: 8,
+                        // Diubah ke 0.82 agar kotak sedikit ceper dan muat di layar pendek tanpa overflow
+                        childAspectRatio: 0.82, 
+                      ),
+                      itemCount: days.length,
+                      itemBuilder: (context, index) {
+                        final dayNum = days[index];
+                        if (dayNum == null) return const SizedBox.shrink();
+
+                        final dateKey = "${_moodProvider.currentYear}-${_moodProvider.currentMonth.toString().padLeft(2, '0')}-${dayNum.toString().padLeft(2, '0')}";
+                        
+                        final MoodModel? moodData = _moodProvider.userMoods.cast<MoodModel?>().firstWhere(
+                          (m) => m?.dateKey == dateKey, orElse: () => null
+                        );
+
+                        return _buildDayCell(context, dayNum, moodData);
+                      },
+                    );
+                  },
                 ),
-                itemCount: days.length,
-                itemBuilder: (context, index) {
-                  final dayNum = days[index];
-                  if (dayNum == null) return const SizedBox.shrink();
-
-                  final dateKey = "${_moodProvider.currentYear}-${_moodProvider.currentMonth.toString().padLeft(2, '0')}-${dayNum.toString().padLeft(2, '0')}";
-                  
-                  final MoodModel? moodData = _moodProvider.userMoods.cast<MoodModel?>().firstWhere(
-                    (m) => m?.dateKey == dateKey, orElse: () => null
-                  );
-
-                  return _buildDayCell(context, dayNum, moodData);
-                },
               ),
-            ),
-            _buildTodayRecap(),
-          ],
+              const SizedBox(height: 10), 
+              _buildTodayRecap(),
+            ],
+          ),
         ),
       ),
     );
@@ -149,7 +159,7 @@ class _MoodPageState extends State<MoodPage> {
               '$day', 
               style: const TextStyle(fontSize: 10, color: Colors.black54, fontWeight: FontWeight.bold)
             ),
-            if (data != null) _buildStyledEmoji(data.emoji), // Tetap Emoji di Kalender
+            if (data != null) _buildStyledEmoji(data.emoji), 
           ],
         ),
       ),
@@ -172,7 +182,7 @@ class _MoodPageState extends State<MoodPage> {
           ? const Text('Belum ada mood untuk hari ini.', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54))
           : Row(
               children: [
-                _getMoodImage(data.emoji, size: 50), // Pakai Maskot di Recap
+                _getMoodImage(data.emoji, size: 50), 
                 const SizedBox(width: 15),
                 Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(data.emoji == '😊' ? 'Mood Baik' : 'Mood Buruk', 
@@ -193,7 +203,7 @@ class _MoodPageState extends State<MoodPage> {
       builder: (_) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          _getMoodImage(data.emoji, size: 80), // Pakai Maskot di Detail
+          _getMoodImage(data.emoji, size: 80), 
           const SizedBox(height: 15),
           Text('Tanggal $day ${_getMonthName(_moodProvider.currentMonth)}', 
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),

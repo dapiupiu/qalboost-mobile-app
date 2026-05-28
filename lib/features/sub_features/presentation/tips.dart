@@ -254,18 +254,6 @@ class TipsPage extends StatelessWidget {
         drawer: const CustomAppDrawer(),
         drawerEdgeDragWidth: 100.0,
         appBar: AppBar(
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 12.0),
-              child: IconButton(
-                icon: Icon(
-                  Icons.info_outline,
-                  color: isDarkMode ? Colors.white70 : Colors.black54,
-                ),
-                onPressed: () => _showTutorial(context),
-              ),
-            ),
-          ],
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
@@ -285,6 +273,18 @@ class TipsPage extends StatelessWidget {
             ),
           ),
           centerTitle: true,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.info_outline,
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
+                ),
+                onPressed: () => _showTutorial(context),
+              ),
+            ),
+          ],
           bottom: TabBar(
             labelColor: primaryBlue,
             unselectedLabelColor: Colors.grey,

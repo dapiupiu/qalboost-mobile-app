@@ -241,18 +241,32 @@ class _DiaryPageState extends State<DiaryPage> {
       backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
       drawer: const CustomAppDrawer(),
       appBar: AppBar(
-        backgroundColor: isDarkMode ? const Color(0xFF1F1F1F) : Colors.transparent,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black87),
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDarkMode ? Colors.white : Colors.black87,
+            size: 22,
+          ),
           onPressed: () => Navigator.maybePop(context),
         ),
-        title: Text('Q-Diary', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold)),
+        title: Text(
+          'Q-Diary',
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: Icon(Icons.info_outline, color: isDarkMode ? Colors.white70 : Colors.black54),
-            onPressed: () => _showTutorial(context),
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: IconButton(
+              icon: Icon(Icons.info_outline, color: isDarkMode ? Colors.white70 : Colors.black54),
+              onPressed: () => _showTutorial(context),
+            ),
           ),
         ],
       ),
