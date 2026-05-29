@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 
 import '../theme/theme_service.dart';
@@ -13,6 +14,7 @@ class CustomAppDrawer extends StatelessWidget {
     BuildContext context,
     ThemeService themeService,
   ) {
+    HapticFeedback.selectionClick();
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -37,11 +39,7 @@ class CustomAppDrawer extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(
                     'Tentang QalBoost',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                      color: themeService.textPrimaryColor,
-                    ),
+                    style: AppTextStyles.titleLarge(context).copyWith(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -52,10 +50,7 @@ class CustomAppDrawer extends StatelessWidget {
                   children: [
                     Text(
                       'Aplikasi ini dikembangkan dengan dedikasi penuh oleh Tim Developer kami:',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: themeService.textSecondaryColor,
-                      ),
+                      style: AppTextStyles.bodySmall(context),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
@@ -64,21 +59,25 @@ class CustomAppDrawer extends StatelessWidget {
                       '1',
                       'Kaka Davi Dharmawan',
                       themeService,
+                      context,
                     ),
                     _buildDeveloperTile(
                       '2',
                       'Dodyk Fahlome',
                       themeService,
+                      context,
                     ),
                     _buildDeveloperTile(
                       '3',
                       'Dea Alya',
                       themeService,
+                      context,
                     ),
                     _buildDeveloperTile(
                       '4',
                       'Nazwa Aliya Muthmainnah Hasibuan',
                       themeService,
+                      context,
                     ),
 
                     const SizedBox(height: 10),
@@ -89,10 +88,7 @@ class CustomAppDrawer extends StatelessWidget {
                     Center(
                       child: Text(
                         '© 2026 Kelompok 1 - IK-4.',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: themeService.drawerSubTextColor,
-                        ),
+                        style: AppTextStyles.bodySmall(context).copyWith(fontSize: 11),
                       ),
                     ),
                   ],
@@ -112,7 +108,10 @@ class CustomAppDrawer extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.pop(context);
+                    },
                     child: const Text(
                       'Tutup',
                       style: TextStyle(
@@ -134,6 +133,7 @@ class CustomAppDrawer extends StatelessWidget {
     String number,
     String name,
     ThemeService themeService,
+    BuildContext context,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
@@ -148,7 +148,7 @@ class CustomAppDrawer extends StatelessWidget {
             ),
             child: Text(
               number,
-              style: TextStyle(
+              style: AppTextStyles.bodySmall(context).copyWith(
                 fontWeight: FontWeight.bold,
                 color: themeService.drawerDeveloperNumberColor,
                 fontSize: 12,
@@ -161,11 +161,7 @@ class CustomAppDrawer extends StatelessWidget {
               padding: const EdgeInsets.only(top: 4.0),
               child: Text(
                 name,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: themeService.drawerTextColor,
-                ),
+                style: AppTextStyles.bodyMedium(context).copyWith(fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -188,12 +184,12 @@ class CustomAppDrawer extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: TextStyle(
-          color: themeService.drawerTextColor,
-          fontWeight: FontWeight.w500,
-        ),
+        style: AppTextStyles.bodyMedium(context).copyWith(fontWeight: FontWeight.w500),
       ),
-      onTap: onTap,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
     );
   }
 
@@ -210,114 +206,124 @@ class CustomAppDrawer extends StatelessWidget {
     return Drawer(
       elevation: 16.0,
       backgroundColor: themeService.drawerBackgroundColor,
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          UserAccountsDrawerHeader(
-            decoration: BoxDecoration(
-              color: themeService.drawerHeaderColor,
+      child: AnimationLimiter(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          physics: const BouncingScrollPhysics(),
+          children: AnimationConfiguration.toStaggeredList(
+            duration: const Duration(milliseconds: 375),
+            childAnimationBuilder: (widget) => SlideAnimation(
+              horizontalOffset: 50.0,
+              child: FadeInAnimation(child: widget),
             ),
-            accountName: Text(
-              displayName,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Colors.white,
+            children: [
+              UserAccountsDrawerHeader(
+                decoration: BoxDecoration(
+                  color: themeService.drawerHeaderColor,
+                ),
+                accountName: Text(
+                  displayName,
+                  style: AppTextStyles.titleMedium(context).copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                accountEmail: Text(
+                  displayEmail,
+                  style: AppTextStyles.bodySmall(context).copyWith(
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                ),
+                currentAccountPicture: CircleAvatar(
+                  backgroundColor: themeService.drawerAvatarBackground,
+                  child: Icon(
+                    Icons.person,
+                    size: 40,
+                    color: themeService.drawerAvatarIconColor,
+                  ),
+                ),
               ),
-            ),
-            accountEmail: Text(
-              displayEmail,
-              style: const TextStyle(
-                color: Colors.white70,
+
+              _drawerItem(
+                context: context,
+                themeService: themeService,
+                icon: Icons.home_outlined,
+                title: 'Beranda',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushReplacementNamed(context, '/home');
+                },
               ),
-            ),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: themeService.drawerAvatarBackground,
-              child: Icon(
-                Icons.person,
-                size: 40,
-                color: themeService.drawerAvatarIconColor,
+
+              _drawerItem(
+                context: context,
+                themeService: themeService,
+                icon: Icons.mood_outlined,
+                title: 'History Mood',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/mood');
+                },
               ),
-            ),
-          ),
 
-          _drawerItem(
-            context: context,
-            themeService: themeService,
-            icon: Icons.home_outlined,
-            title: 'Beranda',
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, '/home');
-            },
-          ),
-
-          _drawerItem(
-            context: context,
-            themeService: themeService,
-            icon: Icons.mood_outlined,
-            title: 'History Mood',
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/mood');
-            },
-          ),
-
-          _drawerItem(
-            context: context,
-            themeService: themeService,
-            icon: Icons.fact_check_outlined,
-            title: 'Q-Checker',
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/checker');
-            },
-          ),
-
-          _drawerItem(
-            context: context,
-            themeService: themeService,
-            icon: Icons.settings_outlined,
-            title: 'Pengaturan',
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/settings');
-            },
-          ),
-
-          Divider(
-            color: themeService.drawerDividerColor,
-          ),
-
-          _drawerItem(
-            context: context,
-            themeService: themeService,
-            icon: Icons.info_outline,
-            title: 'Tentang QalBoost',
-            onTap: () {
-              Navigator.pop(context);
-              _showAboutDialog(context, themeService);
-            },
-          ),
-
-          ListTile(
-            leading: Icon(
-              Icons.power_settings_new,
-              color: themeService.drawerExitColor,
-            ),
-            title: Text(
-              'Keluar Aplikasi',
-              style: TextStyle(
-                color: themeService.drawerExitColor,
-                fontWeight: FontWeight.w600,
+              _drawerItem(
+                context: context,
+                themeService: themeService,
+                icon: Icons.fact_check_outlined,
+                title: 'Q-Checker',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/checker');
+                },
               ),
-            ),
-            onTap: () {
-              Navigator.pop(context);
-              SystemNavigator.pop();
-            },
+
+              _drawerItem(
+                context: context,
+                themeService: themeService,
+                icon: Icons.settings_outlined,
+                title: 'Pengaturan',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/settings');
+                },
+              ),
+
+              Divider(
+                color: themeService.drawerDividerColor,
+              ),
+
+              _drawerItem(
+                context: context,
+                themeService: themeService,
+                icon: Icons.info_outline,
+                title: 'Tentang QalBoost',
+                onTap: () {
+                  Navigator.pop(context);
+                  _showAboutDialog(context, themeService);
+                },
+              ),
+
+              ListTile(
+                leading: Icon(
+                  Icons.power_settings_new,
+                  color: themeService.drawerExitColor,
+                ),
+                title: Text(
+                  'Keluar Aplikasi',
+                  style: AppTextStyles.bodyMedium(context).copyWith(
+                    color: themeService.drawerExitColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                onTap: () {
+                  HapticFeedback.heavyImpact();
+                  Navigator.pop(context);
+                  SystemNavigator.pop();
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

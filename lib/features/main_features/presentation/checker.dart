@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/theme_service.dart';
@@ -26,6 +27,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
   }
 
   void _handleSave() async {
+    HapticFeedback.mediumImpact();
     if (_selectedMoodEmoji == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Pilih mood terlebih dahulu!')),
@@ -70,13 +72,14 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
         elevation: 0,
         leading: BackButton(
           color: themeService.iconColor,
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.pop(context);
+          },
         ),
         title: Text(
           'Q-Checker',
-          style: TextStyle(
-            color: themeService.checkerTitleColor,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: SafeArea(
@@ -95,7 +98,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: themeService.primaryColor.withOpacity(0.20),
+                        color: themeService.primaryColor.withValues(alpha: 0.20),
                         blurRadius: 30,
                         spreadRadius: 2,
                       ),
@@ -106,10 +109,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                     height: 140,
                     errorBuilder: (c, e, s) => Text(
                       '🌙',
-                      style: TextStyle(
-                        fontSize: 60,
-                        color: themeService.checkerTitleColor,
-                      ),
+                      style: AppTextStyles.titleLarge(context).copyWith(fontSize: 60),
                     ),
                   ),
                 ),
@@ -120,10 +120,9 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
               Text(
                 'BAGAIMANA MOOD\nKAMU HARI INI?',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.titleLarge(context).copyWith(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: themeService.checkerTitleColor,
                 ),
               ),
 
@@ -140,7 +139,10 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                     label: 'Baik',
                     assetPath: 'assets/images/baik.png',
                     selected: _selectedMoodEmoji == '😊',
-                    onTap: () => setState(() => _selectedMoodEmoji = '😊'),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedMoodEmoji = '😊');
+                    },
                     activeColor: themeService.checkerMoodGoodColor,
                     normalTextColor: themeService.checkerMoodLabelColor,
                   ),
@@ -149,7 +151,10 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                     label: 'Buruk',
                     assetPath: 'assets/images/buruk.png',
                     selected: _selectedMoodEmoji == '😢',
-                    onTap: () => setState(() => _selectedMoodEmoji = '😢'),
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedMoodEmoji = '😢');
+                    },
                     activeColor: themeService.checkerMoodBadColor,
                     normalTextColor: themeService.checkerMoodLabelColor,
                   ),
@@ -167,10 +172,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   ),
                   child: Text(
                     'Apa yang kamu rasakan?',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: themeService.checkerTitleColor,
-                    ),
+                    style: AppTextStyles.bodyMedium(context).copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -180,14 +182,12 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                   TextField(
                     controller: _controller,
                     maxLines: 6,
-                    style: TextStyle(
-                      color: themeService.checkerTextFieldTextColor,
-                    ),
+                    style: AppTextStyles.bodyMedium(context),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: themeService.checkerTextFieldColor,
                       hintText: 'Tulis cerita kamu di sini...',
-                      hintStyle: TextStyle(
+                      hintStyle: AppTextStyles.bodyMedium(context).copyWith(
                         color: themeService.checkerTextFieldHintColor,
                         fontSize: 14,
                       ),
@@ -199,7 +199,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
                         borderSide: BorderSide(
-                          color: themeService.primaryColor.withOpacity(0.45),
+                          color: themeService.primaryColor.withValues(alpha: 0.45),
                           width: 1,
                         ),
                       ),
@@ -228,11 +228,9 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
                         ),
                         child: Text(
                           'Simpan',
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: AppTextStyles.bodySmall(context).copyWith(
                             fontWeight: FontWeight.bold,
-                            color:
-                                themeService.checkerSaveButtonTextColor,
+                            color: themeService.checkerSaveButtonTextColor,
                           ),
                         ),
                       ),
@@ -253,6 +251,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
   Widget _buildDateTile(ThemeService themeService) {
     return GestureDetector(
       onTap: () async {
+        HapticFeedback.lightImpact();
         final picked = await showDatePicker(
           context: context,
           initialDate: _selectedDate,
@@ -282,7 +281,8 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
           setState(() => _selectedDate = picked);
         }
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(
           vertical: 10,
           horizontal: 20,
@@ -292,13 +292,13 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
           borderRadius: BorderRadius.circular(25),
           border: Border.all(
             color: themeService.isDarkMode
-                ? Colors.white.withOpacity(0.06)
+                ? Colors.white.withValues(alpha: 0.06)
                 : Colors.transparent,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(
-                themeService.isDarkMode ? 0.25 : 0.05,
+              color: Colors.black.withValues(
+                alpha: themeService.isDarkMode ? 0.25 : 0.05,
               ),
               blurRadius: 10,
               offset: const Offset(0, 4),
@@ -316,10 +316,7 @@ class _CheckerSimpleScreenState extends State<CheckerSimpleScreen> {
             const SizedBox(width: 10),
             Text(
               '${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: themeService.checkerDateTextColor,
-              ),
+              style: AppTextStyles.bodyMedium(context).copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -380,7 +377,7 @@ class _MoodSelector extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: selected
                     ? Border.all(
-                        color: activeColor.withOpacity(0.35),
+                        color: activeColor.withValues(alpha: 0.35),
                         width: 1.5,
                       )
                     : Border.all(
@@ -390,7 +387,7 @@ class _MoodSelector extends StatelessWidget {
                 boxShadow: selected
                     ? [
                         BoxShadow(
-                          color: activeColor.withOpacity(0.18),
+                          color: activeColor.withValues(alpha: 0.18),
                           blurRadius: 12,
                           spreadRadius: 1,
                         ),
@@ -401,6 +398,7 @@ class _MoodSelector extends StatelessWidget {
                 assetPath,
                 width: 85,
                 height: 85,
+                cacheWidth: 255,
                 errorBuilder: (c, e, s) => Text(
                   label == 'Baik' ? '😊' : '😢',
                   style: const TextStyle(fontSize: 40),
@@ -410,10 +408,9 @@ class _MoodSelector extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyMedium(context).copyWith(
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                 color: selected ? activeColor : normalTextColor,
-                fontSize: 14,
               ),
             ),
           ],

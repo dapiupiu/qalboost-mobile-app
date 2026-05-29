@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/theme_service.dart';
@@ -129,6 +131,7 @@ class _ConsulPageState extends State<ConsulPage> {
 
   void _showPremiumDialog(String name) {
     final themeService = Provider.of<ThemeService>(context, listen: false);
+    HapticFeedback.heavyImpact();
 
     showDialog(
       context: context,
@@ -140,10 +143,7 @@ class _ConsulPageState extends State<ConsulPage> {
         title: Text(
           '💎 Fitur Sultan Premium',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: themeService.textPrimaryColor,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -151,25 +151,22 @@ class _ConsulPageState extends State<ConsulPage> {
             Text(
               'Akses eksklusif konsultasi dengan:',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: themeService.textPrimaryColor,
-              ),
+              style: AppTextStyles.bodyMedium(context),
             ),
             const SizedBox(height: 8),
             Text(
               name,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTextStyles.titleMedium(context).copyWith(
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
                 color: themeService.primaryColor,
               ),
             ),
             const SizedBox(height: 15),
-            const Text(
+            Text(
               'Biaya Langganan:\n\$100.000.000 USD\n(Sekitar Rp 1,5 Triliun)',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTextStyles.bodyLarge(context).copyWith(
                 color: Colors.red,
                 fontWeight: FontWeight.bold,
               ),
@@ -178,17 +175,18 @@ class _ConsulPageState extends State<ConsulPage> {
             Text(
               'Saldo Anda tidak cukup.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
+              style: AppTextStyles.bodySmall(context).copyWith(
                 fontStyle: FontStyle.italic,
-                color: themeService.textSecondaryColor,
               ),
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.pop(context);
+            },
             child: Text(
               'Selesaikan Cicilan 100 Tahun',
               style: TextStyle(
@@ -202,6 +200,7 @@ class _ConsulPageState extends State<ConsulPage> {
   }
 
   void _showTutorial(BuildContext context) {
+    HapticFeedback.selectionClick();
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -228,15 +227,14 @@ class _ConsulPageState extends State<ConsulPage> {
             color: themeService.iconColor,
             size: 22,
           ),
-          onPressed: () => Navigator.maybePop(context),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.maybePop(context);
+          },
         ),
         title: Text(
           'Q-Konsul',
-          style: TextStyle(
-            color: themeService.textPrimaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -264,32 +262,44 @@ class _ConsulPageState extends State<ConsulPage> {
               const SizedBox(height: 16),
               Text(
                 'Pilih Ustadz untuk Konsultasi',
-                style: TextStyle(
-                  color: themeService.textPrimaryColor,
-                ),
+                style: AppTextStyles.bodyMedium(context),
               ),
               const SizedBox(height: 12),
               Expanded(
                 child: _filteredAdvisors.isNotEmpty
-                    ? GridView.builder(
-                        controller: _scrollController,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 0.78,
-                        ),
-                        itemCount: _filteredAdvisors.length,
-                        itemBuilder: (context, index) => _buildAdvisorCard(
-                          _filteredAdvisors[index],
-                          themeService,
+                    ? AnimationLimiter(
+                        child: GridView.builder(
+                          controller: _scrollController,
+                          physics: const BouncingScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 0.78,
+                          ),
+                          itemCount: _filteredAdvisors.length,
+                          itemBuilder: (context, index) =>
+                              AnimationConfiguration.staggeredGrid(
+                            position: index,
+                            duration: const Duration(milliseconds: 375),
+                            columnCount: 2,
+                            child: SlideAnimation(
+                              verticalOffset: 50.0,
+                              child: FadeInAnimation(
+                                child: _buildAdvisorCard(
+                                  _filteredAdvisors[index],
+                                  themeService,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       )
                     : Center(
                         child: Text(
                           'Ustadz tidak ditemukan...',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyMedium(context).copyWith(
                             color: themeService.textSecondaryColor,
                           ),
                         ),
@@ -312,10 +322,7 @@ class _ConsulPageState extends State<ConsulPage> {
         Expanded(
           child: Text(
             'Kamu bisa ngobrol dan bertanya dengan ustadz di sini',
-            style: TextStyle(
-              fontSize: 18,
-              color: themeService.textPrimaryColor,
-            ),
+            style: AppTextStyles.titleMedium(context),
           ),
         ),
         SizedBox(
@@ -324,13 +331,11 @@ class _ConsulPageState extends State<ConsulPage> {
           child: Image.asset(
             'assets/images/consul.png',
             fit: BoxFit.contain,
+            cacheWidth: 288,
             errorBuilder: (c, e, s) => Center(
               child: Text(
                 '🌙',
-                style: TextStyle(
-                  fontSize: 42,
-                  color: themeService.textPrimaryColor,
-                ),
+                style: AppTextStyles.titleLarge(context).copyWith(fontSize: 42),
               ),
             ),
           ),
@@ -340,7 +345,8 @@ class _ConsulPageState extends State<ConsulPage> {
   }
 
   Widget _buildSearchBox(ThemeService themeService) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       decoration: BoxDecoration(
         color: themeService.consulSearchColor,
         borderRadius: BorderRadius.circular(28),
@@ -355,12 +361,10 @@ class _ConsulPageState extends State<ConsulPage> {
       child: TextField(
         controller: _searchController,
         onChanged: (value) => _runFilter(value),
-        style: TextStyle(
-          color: themeService.textPrimaryColor,
-        ),
+        style: AppTextStyles.bodyMedium(context),
         decoration: InputDecoration(
           hintText: 'Cari Ustadz di sini',
-          hintStyle: TextStyle(
+          hintStyle: AppTextStyles.bodyMedium(context).copyWith(
             color: themeService.hintTextColor,
           ),
           border: InputBorder.none,
@@ -378,7 +382,8 @@ class _ConsulPageState extends State<ConsulPage> {
     Map<String, String> a,
     ThemeService themeService,
   ) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         color: themeService.consulCardColor,
         borderRadius: BorderRadius.circular(12),
@@ -412,9 +417,8 @@ class _ConsulPageState extends State<ConsulPage> {
                   children: [
                     Text(
                       a['name']!,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyMedium(context).copyWith(
                         fontWeight: FontWeight.bold,
-                        color: themeService.textPrimaryColor,
                         fontSize: 13,
                       ),
                       maxLines: 2,
@@ -422,9 +426,8 @@ class _ConsulPageState extends State<ConsulPage> {
                     ),
                     Text(
                       a['title']!,
-                      style: TextStyle(
+                      style: AppTextStyles.bodySmall(context).copyWith(
                         fontSize: 11,
-                        color: themeService.textSecondaryColor,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -439,15 +442,12 @@ class _ConsulPageState extends State<ConsulPage> {
             children: [
               Text(
                 'Status:',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: themeService.textSecondaryColor,
-                ),
+                style: AppTextStyles.bodySmall(context).copyWith(fontSize: 11),
               ),
               const SizedBox(width: 4),
               Text(
                 a['status']!,
-                style: TextStyle(
+                style: AppTextStyles.bodySmall(context).copyWith(
                   fontSize: 11,
                   color: themeService.textPrimaryColor,
                 ),
@@ -471,17 +471,15 @@ class _ConsulPageState extends State<ConsulPage> {
               const SizedBox(width: 6),
               Text(
                 a['percent']!,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: themeService.textPrimaryColor,
-                ),
+                style: AppTextStyles.bodySmall(context).copyWith(fontSize: 12),
               ),
             ],
           ),
           const Spacer(),
           SizedBox(
             width: double.infinity,
-            child: Container(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
               decoration: BoxDecoration(
                 color: themeService.consulButtonColor,
                 borderRadius: BorderRadius.circular(8),
@@ -490,8 +488,8 @@ class _ConsulPageState extends State<ConsulPage> {
                 onPressed: () => _showPremiumDialog(a['name']!),
                 child: Text(
                   'Mulai Konsultasi',
-                  style: TextStyle(
-                    color: themeService.textPrimaryColor,
+                  style: AppTextStyles.bodySmall(context).copyWith(
+                    fontWeight: FontWeight.bold,
                     fontSize: 11,
                   ),
                 ),
@@ -528,11 +526,7 @@ class _ConsulPageState extends State<ConsulPage> {
           const SizedBox(height: 15),
           Text(
             'Cara Menggunakan Q-Qonsul',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: themeService.textPrimaryColor,
-            ),
+            style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
           _tutorialItem(
@@ -563,7 +557,10 @@ class _ConsulPageState extends State<ConsulPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.pop(context);
+              },
               child: Text(
                 'Mengerti',
                 style: TextStyle(
@@ -598,17 +595,11 @@ class _ConsulPageState extends State<ConsulPage> {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: themeService.textPrimaryColor,
-                  ),
+                  style: AppTextStyles.bodyMedium(context).copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
                   desc,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: themeService.textSecondaryColor,
-                  ),
+                  style: AppTextStyles.bodySmall(context).copyWith(fontSize: 12),
                 ),
               ],
             ),
@@ -628,10 +619,7 @@ class _ConsulPageState extends State<ConsulPage> {
         ),
         label: Text(
           'Privasi Kamu Aman',
-          style: TextStyle(
-            fontSize: 12,
-            color: themeService.textPrimaryColor,
-          ),
+          style: AppTextStyles.bodySmall(context).copyWith(fontSize: 12),
         ),
         backgroundColor: themeService.cardColor,
       ),
@@ -643,11 +631,14 @@ class _ConsulPageState extends State<ConsulPage> {
       opacity: _showBackToTop ? 1.0 : 0.0,
       duration: const Duration(milliseconds: 260),
       child: FloatingActionButton(
-        onPressed: () => _scrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 420),
-          curve: Curves.easeOut,
-        ),
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 420),
+            curve: Curves.easeOut,
+          );
+        },
         backgroundColor: themeService.primaryColor,
         child: Icon(
           Icons.arrow_upward,

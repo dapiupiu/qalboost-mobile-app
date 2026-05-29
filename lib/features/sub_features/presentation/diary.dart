@@ -1,5 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../../auth/data/auth_local_data.dart';
 import '../data/diary_repository.dart'; 
 import '../../../core/components/app_drawer.dart';
@@ -59,7 +61,6 @@ class _DiaryPageState extends State<DiaryPage> {
           _entries = data;
           _isLoading = false;
         });
-        print("DEBUG_UI: Diary berhasil ditampilkan. Jumlah: ${_entries.length}");
       }
     } else {
       if (mounted) {
@@ -86,7 +87,7 @@ class _DiaryPageState extends State<DiaryPage> {
     context: context,
     barrierDismissible: true,
     barrierLabel: '',
-    barrierColor: Colors.black54,
+    barrierColor: Colors.black.withValues(alpha: 0.54),
     transitionDuration: const Duration(milliseconds: 300),
     pageBuilder: (context, anim1, anim2) => const SizedBox(),
     transitionBuilder: (context, anim1, anim2, child) {
@@ -101,23 +102,17 @@ class _DiaryPageState extends State<DiaryPage> {
             ),
             title: Text(
               isEdit ? 'Lihat & Edit Diary' : 'Tulis Ceritamu',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: themeService.textPrimaryColor,
-              ),
+              style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: titleController,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: themeService.textPrimaryColor,
-                  ),
+                  style: AppTextStyles.bodyLarge(context).copyWith(fontWeight: FontWeight.bold),
                   decoration: InputDecoration(
                     hintText: 'Judul Diary',
-                    hintStyle: TextStyle(
+                    hintStyle: AppTextStyles.bodyLarge(context).copyWith(
                       color: themeService.hintTextColor,
                     ),
                     enabledBorder: UnderlineInputBorder(
@@ -137,12 +132,10 @@ class _DiaryPageState extends State<DiaryPage> {
                 TextField(
                   controller: contentController,
                   maxLines: 6,
-                  style: TextStyle(
-                    color: themeService.textPrimaryColor,
-                  ),
+                  style: AppTextStyles.bodyMedium(context),
                   decoration: InputDecoration(
                     hintText: 'Apa yang kamu rasakan hari ini?',
-                    hintStyle: TextStyle(
+                    hintStyle: AppTextStyles.bodyMedium(context).copyWith(
                       color: themeService.hintTextColor,
                     ),
                     filled: true,
@@ -164,10 +157,13 @@ class _DiaryPageState extends State<DiaryPage> {
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                },
                 child: Text(
                   'Tutup',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyMedium(context).copyWith(
                     color: themeService.textSecondaryColor,
                   ),
                 ),
@@ -180,6 +176,7 @@ class _DiaryPageState extends State<DiaryPage> {
                   ),
                 ),
                 onPressed: () {
+                  HapticFeedback.mediumImpact();
                   if (titleController.text.isNotEmpty) {
                     _saveEntry(
                       titleController.text,
@@ -245,6 +242,7 @@ class _DiaryPageState extends State<DiaryPage> {
 
 void _showTutorial(BuildContext context) {
   final themeService = Provider.of<ThemeService>(context, listen: false);
+  HapticFeedback.selectionClick();
 
   showModalBottomSheet(
     context: context,
@@ -274,11 +272,7 @@ void _showTutorial(BuildContext context) {
 
           Text(
             'Cara Menggunakan Q-Diary',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: themeService.textPrimaryColor,
-            ),
+            style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 20),
@@ -315,7 +309,10 @@ void _showTutorial(BuildContext context) {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.pop(context);
+              },
               child: Text(
                 'Mengerti',
                 style: TextStyle(
@@ -355,22 +352,14 @@ Widget _tutRow(
             children: [
               Text(
                 title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: themeService.textPrimaryColor,
-                ),
+                style: AppTextStyles.bodyMedium(context).copyWith(fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 3),
 
               Text(
                 desc,
-                style: TextStyle(
-                  fontSize: 13,
-                  height: 1.4,
-                  color: themeService.textSecondaryColor,
-                ),
+                style: AppTextStyles.bodySmall(context),
               ),
             ],
           ),
@@ -382,11 +371,11 @@ Widget _tutRow(
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeService = Provider.of<ThemeService>(context);
 
     return Scaffold(
       key: _scaffoldKey, 
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFF6E9E1),
+      backgroundColor: themeService.backgroundColor,
       drawer: const CustomAppDrawer(),
       
       // Mengaktifkan gesture bawaan sistem agar laci ditarik presisi nempel jempol
@@ -400,25 +389,24 @@ Widget _tutRow(
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back, // Tetap mempertahankan tombol back asli request kamu
-            color: isDarkMode ? Colors.white : Colors.black87,
+            color: themeService.iconColor,
             size: 22,
           ),
-          onPressed: () => Navigator.maybePop(context),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.maybePop(context);
+          },
         ),
         title: Text(
           'Q-Diary',
-          style: TextStyle(
-            color: isDarkMode ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
             child: IconButton(
-              icon: Icon(Icons.info_outline, color: isDarkMode ? Colors.white70 : Colors.black54),
+              icon: Icon(Icons.info_outline, color: themeService.textSecondaryColor),
               onPressed: () => _showTutorial(context),
             ),
           ),
@@ -445,46 +433,66 @@ Widget _tutRow(
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Diary\nKamu', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w800, height: 1.1)),
+                      Text('Diary\nKamu', style: AppTextStyles.titleLarge(context).copyWith(fontSize: 36, fontWeight: FontWeight.w800, height: 1.1)),
                       FloatingActionButton.small(
                         heroTag: 'add_diary',
-                        onPressed: () => _openDiaryDialog(),
+                        onPressed: () {
+                          HapticFeedback.mediumImpact();
+                          _openDiaryDialog();
+                        },
                         backgroundColor: const Color(0xFF58A6F0),
                         child: const Icon(Icons.add, color: Colors.white),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Divider(color: Colors.grey.withOpacity(0.3)),
+                  Divider(color: Colors.grey.withValues(alpha: 0.3)),
                   Expanded(
                     child: _entries.isEmpty 
-                      ? const Center(child: Text('Belum ada catatan hari ini.'))
-                      : ListView.separated(
-                          controller: _scrollController,
-                          // BouncingScrollPhysics wajib agar scroll list tidak menelan event horizontal drag milik drawer
-                          physics: const BouncingScrollPhysics(), 
-                          itemCount: _entries.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 15),
-                          itemBuilder: (context, index) {
-                            final e = _entries[index];
-                            return GestureDetector(
-                              onTap: () => _openDiaryDialog(index: index), 
-                              child: _DiaryCard(
-                                title: e['title']!,
-                                content: e['content']!,
-                                date: e['date']!,
-                                onDelete: () => _deleteEntry(index),
-                              ),
-                            );
-                          },
+                      ? Center(child: Text('Belum ada catatan hari ini.', style: AppTextStyles.bodyMedium(context)))
+                      : AnimationLimiter(
+                          child: ListView.separated(
+                            controller: _scrollController,
+                            // BouncingScrollPhysics wajib agar scroll list tidak menelan event horizontal drag milik drawer
+                            physics: const BouncingScrollPhysics(), 
+                            itemCount: _entries.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 15),
+                            itemBuilder: (context, index) {
+                              final e = _entries[index];
+                              return AnimationConfiguration.staggeredList(
+                                position: index,
+                                duration: const Duration(milliseconds: 375),
+                                child: SlideAnimation(
+                                  verticalOffset: 50.0,
+                                  child: FadeInAnimation(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        HapticFeedback.lightImpact();
+                                        _openDiaryDialog(index: index);
+                                      }, 
+                                      child: _DiaryCard(
+                                        title: e['title']!,
+                                        content: e['content']!,
+                                        date: e['date']!,
+                                        onDelete: () {
+                                          HapticFeedback.mediumImpact();
+                                          _deleteEntry(index);
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
                   ),
                   const SizedBox(height: 10),
-                  const Center(
+                  Center(
                     child: Chip(
-                      avatar: Icon(Icons.lock, size: 16, color: Colors.green),
-                      label: Text('Privasi Kamu Aman', style: TextStyle(fontSize: 12)),
-                      backgroundColor: Colors.white,
+                      avatar: const Icon(Icons.lock, size: 16, color: Colors.green),
+                      label: Text('Privasi Kamu Aman', style: AppTextStyles.bodySmall(context)),
+                      backgroundColor: themeService.cardColor,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -495,7 +503,10 @@ Widget _tutRow(
         ),
       floatingActionButton: _showBackToTop
           ? FloatingActionButton(
-              onPressed: () => _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeOut),
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
+              },
               backgroundColor: const Color(0xFF58A6F0),
               child: const Icon(Icons.arrow_upward),
             )
@@ -514,12 +525,14 @@ class _DiaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final themeService = Provider.of<ThemeService>(context);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: themeService.cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
         border: Border.all(color: const Color(0xFFD7EAF8)),
       ),
       child: Column(
@@ -528,20 +541,23 @@ class _DiaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(child: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+              Expanded(child: Text(title, style: AppTextStyles.bodyLarge(context).copyWith(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
               IconButton(
                 icon: const Icon(Icons.more_vert),
                 onPressed: () {
+                  HapticFeedback.selectionClick();
                   showModalBottomSheet(
                     context: context,
+                    backgroundColor: themeService.dialogBackgroundColor,
                     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
                     builder: (context) => Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ListTile(
                           leading: const Icon(Icons.delete, color: Colors.red),
-                          title: const Text('Hapus Catatan', style: TextStyle(color: Colors.red)),
+                          title: Text('Hapus Catatan', style: AppTextStyles.bodyMedium(context).copyWith(color: Colors.red)),
                           onTap: () {
+                            HapticFeedback.heavyImpact();
                             Navigator.pop(context);
                             onDelete();
                           },
@@ -553,9 +569,9 @@ class _DiaryCard extends StatelessWidget {
               ),
             ],
           ),
-          Text(content, style: const TextStyle(color: Colors.black87), maxLines: 2, overflow: TextOverflow.ellipsis),
+          Text(content, style: AppTextStyles.bodyMedium(context).copyWith(color: themeService.textSecondaryColor), maxLines: 2, overflow: TextOverflow.ellipsis),
           const SizedBox(height: 10),
-          Text(date, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+          Text(date, style: AppTextStyles.bodySmall(context).copyWith(fontSize: 11)),
         ],
       ),
     );

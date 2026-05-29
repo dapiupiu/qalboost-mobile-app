@@ -1,4 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class AppTextStyles {
+  static TextStyle bodyLarge(BuildContext context) => GoogleFonts.nunito(
+        fontSize: 16,
+        height: 1.5,
+        color: Theme.of(context).colorScheme.onSurface,
+      );
+
+  static TextStyle bodyMedium(BuildContext context) => GoogleFonts.nunito(
+        fontSize: 14,
+        height: 1.4,
+        color: Theme.of(context).colorScheme.onSurface,
+      );
+
+  static TextStyle bodySmall(BuildContext context) => GoogleFonts.nunito(
+        fontSize: 12,
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+      );
+
+  static TextStyle titleLarge(BuildContext context) => GoogleFonts.nunito(
+        fontSize: 22,
+        fontWeight: FontWeight.bold,
+        color: Theme.of(context).colorScheme.onSurface,
+      );
+
+  static TextStyle titleMedium(BuildContext context) => GoogleFonts.nunito(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: Theme.of(context).colorScheme.onSurface,
+      );
+}
 
 class ThemeService extends ChangeNotifier {
   static final ThemeService _instance = ThemeService._internal();
@@ -57,7 +89,7 @@ Color get consulAvatarColor =>
     isDarkMode ? const Color(0xFF1A2633) : Colors.white;
 
 Color get consulShadowColor =>
-    isDarkMode ? Colors.black.withOpacity(0.35) : Colors.black12;
+    isDarkMode ? Colors.black.withValues(alpha: 0.35) : Colors.black12;
 
 // Q-QUOTES
 Color get quotesCardColor =>
@@ -195,7 +227,7 @@ Color get bottomNavActiveIconColor =>
     Colors.white;
 
 Color get bottomNavInactiveIconColor =>
-    isDarkMode ? Colors.white54 : Colors.white.withOpacity(0.5);
+    isDarkMode ? Colors.white54 : Colors.white.withValues(alpha: 0.5);
 
 Color get bottomNavShadowColor =>
     isDarkMode ? const Color(0xFFB3E5FC) : const Color(0xFFB3E5FC);
@@ -234,6 +266,7 @@ Color get drawerSubTextColor =>
 Color get drawerDividerColor =>
     isDarkMode ? Colors.white24 : Colors.black12;
 
+// DRAWER AVATAR
 Color get drawerAvatarBackground =>
     isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
 
@@ -252,13 +285,13 @@ Color get drawerAboutButtonColor =>
 Color get drawerDeveloperCircleColor =>
     isDarkMode
         ? const Color(0xFF314A5F)
-        : const Color(0xFF58A6F0).withOpacity(0.15);
+        : const Color(0xFF58A6F0).withValues(alpha: 0.15);
 
 Color get drawerDeveloperNumberColor =>
     isDarkMode ? Colors.white : const Color(0xFF58A6F0);
 
 Color get drawerOverlayColor =>
-    Colors.black.withOpacity(0.4);
+    Colors.black.withValues(alpha: 0.4);
 
 Color get drawerExitColor =>
     Colors.redAccent;
@@ -313,7 +346,7 @@ Color get moodPageTitleColor =>
     isDarkMode ? Colors.white : Colors.black87;
 
 Color get moodPageEmptyDayColor =>
-    isDarkMode ? const Color(0xFF3A3A3A) : Colors.white.withOpacity(0.5);
+    isDarkMode ? const Color(0xFF3A3A3A) : Colors.white.withValues(alpha: 0.5);
 
 Color get moodPageEmptyDayTextColor =>
     isDarkMode ? Colors.white70 : Colors.black54;
@@ -325,10 +358,10 @@ Color get moodPageBadDayColor =>
     isDarkMode ? const Color(0xFF4A1F1F) : Colors.red.shade100;
 
 Color get moodPageGoodBorderColor =>
-    isDarkMode ? Colors.greenAccent.withOpacity(0.45) : Colors.green.shade200;
+    isDarkMode ? Colors.greenAccent.withValues(alpha: 0.45) : Colors.green.shade200;
 
 Color get moodPageBadBorderColor =>
-    isDarkMode ? Colors.redAccent.withOpacity(0.45) : Colors.red.shade200;
+    isDarkMode ? Colors.redAccent.withValues(alpha: 0.45) : Colors.red.shade200;
 
 Color get moodPageRecapTextColor =>
     isDarkMode ? Colors.white : Colors.black87;
@@ -379,10 +412,10 @@ Color get loginInputColor =>
     isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF8F8F8);
 
 Color get loginInputBorderColor =>
-    isDarkMode ? Colors.white.withOpacity(0.06) : Colors.transparent;
+    isDarkMode ? Colors.white.withValues(alpha: 0.06) : Colors.transparent;
 
 Color get loginInputShadowColor =>
-    isDarkMode ? Colors.black.withOpacity(0.25) : Colors.black.withOpacity(0.05);
+    isDarkMode ? Colors.black.withValues(alpha: 0.25) : Colors.black.withValues(alpha: 0.05);
 
 Color get loginTitleColor =>
     isDarkMode ? Colors.white : const Color(0xFF1F1B18);
@@ -408,12 +441,22 @@ Color get loginButtonTextColor =>
       brightness: Brightness.light,
       scaffoldBackgroundColor: const Color(0xFFF6E9E1),
       primaryColor: const Color(0xFFFF8A5B),
-      fontFamily: 'Poppins',
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFFF6E9E1),
-        foregroundColor: Color(0xFF1F1B18),
+      textTheme: GoogleFonts.nunitoTextTheme(
+        ThemeData.light().textTheme.copyWith(
+          bodyLarge: GoogleFonts.nunito(height: 1.5),
+          bodyMedium: GoogleFonts.nunito(height: 1.4),
+        ),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: const Color(0xFFF6E9E1),
+        foregroundColor: const Color(0xFF1F1B18),
         elevation: 0,
         centerTitle: true,
+        titleTextStyle: GoogleFonts.nunito(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFF1F1B18),
+        ),
       ),
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFFFF8A5B),
@@ -428,12 +471,22 @@ Color get loginButtonTextColor =>
       brightness: Brightness.dark,
       scaffoldBackgroundColor: const Color(0xFF121212),
       primaryColor: const Color(0xFFFFC59E),
-      fontFamily: 'Poppins',
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF121212),
+      textTheme: GoogleFonts.nunitoTextTheme(
+        ThemeData.dark().textTheme.copyWith(
+          bodyLarge: GoogleFonts.nunito(height: 1.5),
+          bodyMedium: GoogleFonts.nunito(height: 1.4),
+        ),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: const Color(0xFF121212),
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        titleTextStyle: GoogleFonts.nunito(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
       ),
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFFFFC59E),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -46,6 +48,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _toggleNotification(bool val) async {
+    HapticFeedback.lightImpact();
     if (val) {
       var status = await Permission.notification.request();
 
@@ -106,14 +109,14 @@ class _SettingsPageState extends State<SettingsPage> {
             Icons.arrow_back,
             color: themeService.iconColor,
           ),
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.of(context).maybePop();
+          },
         ),
         title: Text(
           'Settings',
-          style: TextStyle(
-            color: themeService.textPrimaryColor,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -125,89 +128,94 @@ class _SettingsPageState extends State<SettingsPage> {
               _buildProfileCard(themeService),
               const SizedBox(height: 16),
               Expanded(
-                child: ListView(
-                  children: [
-                    _roundedExpansion(
-                      themeService: themeService,
-                      icon: Icons.question_answer,
-                      title: 'FAQ',
+                child: AnimationLimiter(
+                  child: ListView(
+                    physics: const BouncingScrollPhysics(),
+                    children: AnimationConfiguration.toStaggeredList(
+                      duration: const Duration(milliseconds: 375),
+                      childAnimationBuilder: (widget) => SlideAnimation(
+                        horizontalOffset: 50.0,
+                        child: FadeInAnimation(child: widget),
+                      ),
                       children: [
-                        _buildNestedFAQ(
-                          themeService,
-                          'Bagaimana cara simpan mood?',
-                          'Buka menu Q-Checker di navigasi bawah (ikon bulan), pilih mood kamu, tulis cerita singkat, lalu klik simpan.',
+                        _roundedExpansion(
+                          themeService: themeService,
+                          icon: Icons.question_answer,
+                          title: 'FAQ',
+                          children: [
+                            _buildNestedFAQ(
+                              themeService,
+                              'Bagaimana cara simpan mood?',
+                              'Buka menu Q-Checker di navigasi bawah (ikon bulan), pilih mood kamu, tulis cerita singkat, lalu klik simpan.',
+                            ),
+                            _buildNestedFAQ(
+                              themeService,
+                              'Apakah data saya aman?',
+                              'Tentu! QalBoost menyimpan data kamu secara lokal di perangkat dan terenkripsi berdasarkan akun loginmu.',
+                            ),
+                            _buildNestedFAQ(
+                              themeService,
+                              'Bagaimana cara melihat riwayat?',
+                              'Klik "Buka Kalender" di halaman Home atau klik tab Mood Tracker untuk melihat grafik perasaanmu.',
+                            ),
+                          ],
                         ),
-                        _buildNestedFAQ(
-                          themeService,
-                          'Apakah data saya aman?',
-                          'Tentu! QalBoost menyimpan data kamu secara lokal di perangkat dan terenkripsi berdasarkan akun loginmu.',
+                        const SizedBox(height: 8),
+                        _roundedExpansion(
+                          themeService: themeService,
+                          icon: Icons.notifications,
+                          title: 'Notifikasi',
+                          children: [
+                            SwitchListTile(
+                              title: Text(
+                                'Aktifkan Notifikasi',
+                                style: AppTextStyles.bodyMedium(context),
+                              ),
+                              subtitle: Text(
+                                'Notifikasi akan muncul setiap 15 detik',
+                                style: AppTextStyles.bodySmall(context),
+                              ),
+                              value: _notifAktif,
+                              activeTrackColor: themeService.primaryColor,
+                              activeThumbColor: themeService.isDarkMode
+                                  ? const Color(0xFF1E1E1E)
+                                  : Colors.white,
+                              onChanged: (val) => _toggleNotification(val),
+                            ),
+                          ],
                         ),
-                        _buildNestedFAQ(
-                          themeService,
-                          'Bagaimana cara melihat riwayat?',
-                          'Klik "Buka Kalender" di halaman Home atau klik tab Mood Tracker untuk melihat grafik perasaanmu.',
+                        const SizedBox(height: 8),
+                        _roundedExpansion(
+                          themeService: themeService,
+                          icon: Icons.palette,
+                          title: 'Preferensi',
+                          children: [
+                            SwitchListTile(
+                              title: Text(
+                                'Mode Malam (Dark Mode)',
+                                style: AppTextStyles.bodyMedium(context),
+                              ),
+                              value: _isDarkMode,
+                              activeTrackColor: themeService.primaryColor,
+                              activeThumbColor: themeService.isDarkMode
+                                  ? const Color(0xFF1E1E1E)
+                                  : Colors.white,
+                              onChanged: (val) {
+                                HapticFeedback.lightImpact();
+                                setState(() => _isDarkMode = val);
+                                themeService.setThemeMode(
+                                  val ? ThemeMode.dark : ThemeMode.light,
+                                );
+                              },
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 30),
+                        _buildLogoutButton(themeService),
+                        const SizedBox(height: 40),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    _roundedExpansion(
-                      themeService: themeService,
-                      icon: Icons.notifications,
-                      title: 'Notifikasi',
-                      children: [
-                        SwitchListTile(
-                          title: Text(
-                            'Aktifkan Notifikasi',
-                            style: TextStyle(
-                              color: themeService.textPrimaryColor,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'Notifikasi akan muncul setiap 15 detik',
-                            style: TextStyle(
-                              color: themeService.textSecondaryColor,
-                            ),
-                          ),
-                          value: _notifAktif,
-                          activeTrackColor: themeService.primaryColor,
-                          activeColor: themeService.isDarkMode
-                              ? const Color(0xFF1E1E1E)
-                              : Colors.white,
-                          onChanged: (val) => _toggleNotification(val),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    _roundedExpansion(
-                      themeService: themeService,
-                      icon: Icons.palette,
-                      title: 'Preferensi',
-                      children: [
-                        SwitchListTile(
-                          title: Text(
-                            'Mode Malam (Dark Mode)',
-                            style: TextStyle(
-                              color: themeService.textPrimaryColor,
-                            ),
-                          ),
-                          value: _isDarkMode,
-                          activeTrackColor: themeService.primaryColor,
-                          activeColor: themeService.isDarkMode
-                              ? const Color(0xFF1E1E1E)
-                              : Colors.white,
-                          onChanged: (val) {
-                            setState(() => _isDarkMode = val);
-                            themeService.setThemeMode(
-                              val ? ThemeMode.dark : ThemeMode.light,
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-                    _buildLogoutButton(themeService),
-                    const SizedBox(height: 40),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -226,24 +234,19 @@ class _SettingsPageState extends State<SettingsPage> {
     return ExpansionTile(
       iconColor: themeService.primaryColor,
       collapsedIconColor: themeService.textSecondaryColor,
+      onExpansionChanged: (val) {
+        if (val) HapticFeedback.selectionClick();
+      },
       title: Text(
         question,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: themeService.textPrimaryColor,
-        ),
+        style: AppTextStyles.bodyMedium(context).copyWith(fontWeight: FontWeight.w500),
       ),
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           child: Text(
             answer,
-            style: TextStyle(
-              color: themeService.textSecondaryColor,
-              fontSize: 13,
-              height: 1.5,
-            ),
+            style: AppTextStyles.bodySmall(context).copyWith(height: 1.5),
           ),
         ),
       ],
@@ -251,15 +254,16 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildProfileCard(ThemeService themeService) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       width: double.infinity,
       decoration: BoxDecoration(
         color: themeService.settingsCardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(
-              themeService.isDarkMode ? 0.35 : 0.12,
+            color: Colors.black.withValues(
+              alpha: themeService.isDarkMode ? 0.35 : 0.12,
             ),
             blurRadius: 8,
             offset: const Offset(0, 4),
@@ -282,23 +286,17 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 12),
           Text(
             _homeProvider.userName,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: themeService.textPrimaryColor,
-            ),
+            style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             _userEmail,
-            style: TextStyle(
-              fontSize: 12,
-              color: themeService.textSecondaryColor,
-            ),
+            style: AppTextStyles.bodySmall(context),
           ),
           const SizedBox(height: 12),
           ElevatedButton.icon(
             onPressed: () {
+              HapticFeedback.lightImpact();
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -326,7 +324,10 @@ class _SettingsPageState extends State<SettingsPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: ElevatedButton.icon(
-        onPressed: _handleLogout,
+        onPressed: () {
+          HapticFeedback.heavyImpact();
+          _handleLogout();
+        },
         icon: const Icon(Icons.logout),
         label: const Text('Keluar Akun'),
         style: ElevatedButton.styleFrom(
@@ -349,44 +350,42 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: themeService.dialogBackgroundColor,
         title: Text(
           'Logout',
-          style: TextStyle(
-            color: themeService.textPrimaryColor,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
         ),
         content: Text(
           'Apakah kamu yakin ingin keluar dari akun?',
-          style: TextStyle(
-            color: themeService.textPrimaryColor,
-          ),
+          style: AppTextStyles.bodyMedium(context),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.pop(context);
+            },
             child: Text(
               'Batal',
-              style: TextStyle(
+              style: AppTextStyles.bodyMedium(context).copyWith(
                 color: themeService.textSecondaryColor,
               ),
             ),
           ),
           TextButton(
             onPressed: () async {
+              HapticFeedback.heavyImpact();
               final prefs = await SharedPreferences.getInstance();
               await NotificationService().cancelAll();
               await prefs.clear();
 
-              if (mounted) {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/login',
-                  (route) => false,
-                );
-              }
+              if (!context.mounted) return;
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/login',
+                (route) => false,
+              );
             },
-            child: const Text(
+            child: Text(
               'Ya, Keluar',
-              style: TextStyle(color: Colors.red),
+              style: AppTextStyles.bodyMedium(context).copyWith(color: Colors.red),
             ),
           ),
         ],
@@ -407,13 +406,13 @@ class _SettingsPageState extends State<SettingsPage> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: themeService.isDarkMode
-              ? Colors.white.withOpacity(0.06)
+              ? Colors.white.withValues(alpha: 0.06)
               : Colors.transparent,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(
-              themeService.isDarkMode ? 0.28 : 0.10,
+            color: Colors.black.withValues(
+              alpha: themeService.isDarkMode ? 0.28 : 0.10,
             ),
             blurRadius: 6,
             offset: const Offset(0, 3),
@@ -425,6 +424,9 @@ class _SettingsPageState extends State<SettingsPage> {
         child: ExpansionTile(
           iconColor: themeService.primaryColor,
           collapsedIconColor: themeService.textSecondaryColor,
+          onExpansionChanged: (val) {
+            if (val) HapticFeedback.selectionClick();
+          },
           leading: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
@@ -440,10 +442,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           title: Text(
             title,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: themeService.textPrimaryColor,
-            ),
+            style: AppTextStyles.bodyMedium(context).copyWith(fontWeight: FontWeight.w600),
           ),
           children: children,
         ),

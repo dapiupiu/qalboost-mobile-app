@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -8,10 +9,6 @@ import '../../../core/components/app_drawer.dart';
 import '../../../core/components/custom_bottom_nav.dart';
 import '../provider/home_provider.dart';
 import '../../main_features/model/mood_model.dart';
-import '../../sub_features/presentation/diary.dart';
-import '../../sub_features/presentation/tips.dart';
-import '../../sub_features/presentation/consul.dart';
-import '../../sub_features/presentation/quotes.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -62,11 +59,13 @@ class _HomePageState extends State<HomePage> {
       _currentArticle =
           _currentArticle < articles.length - 1 ? _currentArticle + 1 : 0;
 
-      _articleController.animateToPage(
-        _currentArticle,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
+      if (_articleController.hasClients) {
+        _articleController.animateToPage(
+          _currentArticle,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
     });
   }
 
@@ -100,14 +99,25 @@ class _HomePageState extends State<HomePage> {
 
   Widget _getMoodImage(String? emoji) {
     if (emoji == '😊') {
-      return Image.asset('assets/images/baik.png', width: 80, height: 80);
+      return Image.asset(
+        'assets/images/baik.png',
+        width: 80,
+        height: 80,
+        cacheWidth: 240,
+      );
     } else if (emoji == '😢') {
-      return Image.asset('assets/images/buruk.png', width: 80, height: 80);
+      return Image.asset(
+        'assets/images/buruk.png',
+        width: 80,
+        height: 80,
+        cacheWidth: 240,
+      );
     } else {
       return Image.asset(
         'assets/images/b_aja.png',
         width: 80,
         height: 80,
+        cacheWidth: 240,
         errorBuilder: (c, e, s) =>
             const Text('🌙', style: TextStyle(fontSize: 36)),
       );
@@ -115,6 +125,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _openArticle(String link) async {
+    HapticFeedback.lightImpact();
     final Uri url = Uri.parse(link);
 
     if (await canLaunchUrl(url)) {
@@ -137,80 +148,81 @@ class _HomePageState extends State<HomePage> {
         color: themeService.primaryColor,
         backgroundColor: themeService.cardColor,
         onRefresh: _refreshData,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(themeService),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Bagaimana Perasaan\nKamu Hari Ini?',
-                  style: TextStyle(
-                    fontSize: 34,
-                    fontWeight: FontWeight.w800,
-                    color: themeService.textPrimaryColor,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildMenuItem(
-                      'assets/images/quotes.png',
-                      'Q-Quotes',
-                      const QuotesSimpleScreen(),
-                    ),
-                    _buildMenuItem(
-                      'assets/images/consul.png',
-                      'Q-Consul',
-                      const ConsulPage(),
-                    ),
-                    _buildMenuItem(
-                      'assets/images/diary.png',
-                      'Q-Diary',
-                      const DiaryPage(),
-                    ),
-                    _buildMenuItem(
-                      'assets/images/tips.png',
-                      'Q-Tips',
-                      const TipsPage(),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              _buildHistorySection(themeService),
-              const SizedBox(height: 12),
-              _buildMoodRow(themeService),
-              const SizedBox(height: 30),
-              _buildDailyPerasaan(themeService),
-              const SizedBox(height: 30),
-              _buildArticleSection(themeService),
-              const SizedBox(height: 30),
-            ],
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
           ),
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(themeService),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Bagaimana Perasaan\nKamu Hari Ini?',
+                      style: AppTextStyles.titleLarge(context).copyWith(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w800,
+                        height: 1.1,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildMenuItem(
+                          'assets/images/quotes.png',
+                          'Q-Quotes',
+                          '/quotes',
+                        ),
+                        _buildMenuItem(
+                          'assets/images/consul.png',
+                          'Q-Consul',
+                          '/consul',
+                        ),
+                        _buildMenuItem(
+                          'assets/images/diary.png',
+                          'Q-Diary',
+                          '/diary',
+                        ),
+                        _buildMenuItem(
+                          'assets/images/tips.png',
+                          'Q-Tips',
+                          '/tips',
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  _buildHistorySection(themeService),
+                  const SizedBox(height: 12),
+                  _buildMoodRow(themeService),
+                  const SizedBox(height: 30),
+                  _buildDailyPerasaan(themeService),
+                  const SizedBox(height: 30),
+                  _buildArticleSection(themeService),
+                  const SizedBox(height: 30),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: const CustomBottomNav(currentIndex: 0),
     );
   }
 
-  Widget _buildMenuItem(String path, String label, Widget page) {
+  Widget _buildMenuItem(String path, String label, String routeName) {
     return Expanded(
       child: AnimatedMenuButton(
         assetPath: path,
         label: label,
-        page: page,
+        routeName: routeName,
       ),
     );
   }
@@ -226,7 +238,10 @@ class _HomePageState extends State<HomePage> {
               Builder(
                 builder: (context) {
                   return GestureDetector(
-                    onTap: () => Scaffold.of(context).openDrawer(),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Scaffold.of(context).openDrawer();
+                    },
                     child: CircleAvatar(
                       backgroundColor: themeService.primaryColor,
                       child: Icon(
@@ -243,16 +258,12 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Text(
                     'Selamat Datang,',
-                    style: TextStyle(
-                      color: themeService.textSecondaryColor,
-                    ),
+                    style: AppTextStyles.bodySmall(context),
                   ),
                   Text(
                     _homeProvider.userName,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyLarge(context).copyWith(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: themeService.textPrimaryColor,
                     ),
                   ),
                 ],
@@ -263,6 +274,7 @@ class _HomePageState extends State<HomePage> {
             'assets/images/app_logo.png',
             width: 48,
             height: 48,
+            cacheWidth: 144,
             errorBuilder: (c, e, s) => Icon(
               Icons.auto_awesome,
               color: themeService.primaryColor,
@@ -281,20 +293,19 @@ class _HomePageState extends State<HomePage> {
         children: [
           Text(
             'History Mood',
-            style: TextStyle(
+            style: AppTextStyles.bodyLarge(context).copyWith(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: themeService.textPrimaryColor,
             ),
           ),
           GestureDetector(
-            onTap: () =>
-                Navigator.pushNamed(context, '/mood').then((_) => _refreshData()),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.pushNamed(context, '/mood').then((_) => _refreshData());
+            },
             child: Text(
               'Buka Kalender',
-              style: TextStyle(
-                fontSize: 12,
-                color: themeService.textSecondaryColor,
+              style: AppTextStyles.bodySmall(context).copyWith(
+                decoration: TextDecoration.underline,
               ),
             ),
           ),
@@ -359,8 +370,8 @@ class _HomePageState extends State<HomePage> {
                           : null,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(
-                            themeService.isDarkMode ? 0.25 : 0.05,
+                          color: Colors.black.withValues(
+                            alpha: themeService.isDarkMode ? 0.25 : 0.05,
                           ),
                           blurRadius: 4,
                         ),
@@ -376,7 +387,7 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 6),
                   Text(
                     dayName,
-                    style: TextStyle(
+                    style: AppTextStyles.bodySmall(context).copyWith(
                       fontSize: 10,
                       color: isToday
                           ? themeService.homeMoodTodayBorderColor
@@ -404,9 +415,8 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'Perasaan Kamu Hari ini',
-            style: TextStyle(
+            style: AppTextStyles.bodyLarge(context).copyWith(
               fontWeight: FontWeight.bold,
-              color: themeService.textPrimaryColor,
             ),
           ),
         ),
@@ -414,7 +424,8 @@ class _HomePageState extends State<HomePage> {
 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: todayMood != null
@@ -423,8 +434,8 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(
-                    themeService.isDarkMode ? 0.35 : 0.12,
+                  color: Colors.black.withValues(
+                    alpha: themeService.isDarkMode ? 0.35 : 0.12,
                   ),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
@@ -443,8 +454,7 @@ class _HomePageState extends State<HomePage> {
                         todayMood != null
                             ? '"${todayMood.note}"'
                             : '"Belum ada catatan hari ini"',
-                        style: TextStyle(
-                          color: themeService.textPrimaryColor,
+                        style: AppTextStyles.bodyMedium(context).copyWith(
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -453,10 +463,8 @@ class _HomePageState extends State<HomePage> {
                         todayMood != null
                             ? (todayMood.emoji == '😊' ? 'Baik' : 'Buruk')
                             : 'Kosong',
-                        style: TextStyle(
+                        style: AppTextStyles.titleMedium(context).copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: themeService.textPrimaryColor,
                         ),
                       ),
                     ],
@@ -472,21 +480,25 @@ class _HomePageState extends State<HomePage> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/checker')
-                .then((_) => _refreshData()),
-            child: Container(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.pushNamed(context, '/checker')
+                  .then((_) => _refreshData());
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: themeService.cardColor,
                 border: Border.all(
-                  color: themeService.textSecondaryColor,
+                  color: themeService.textSecondaryColor.withValues(alpha: 0.3),
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 'Tuliskan aktivitas atau perasaanmu hari ini...',
-                style: TextStyle(
+                style: AppTextStyles.bodyMedium(context).copyWith(
                   color: themeService.textSecondaryColor,
                 ),
               ),
@@ -505,10 +517,8 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'Hari Ini Ada Apa',
-            style: TextStyle(
+            style: AppTextStyles.bodyLarge(context).copyWith(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: themeService.textPrimaryColor,
             ),
           ),
         ),
@@ -538,8 +548,8 @@ class _HomePageState extends State<HomePage> {
                       color: themeService.cardColor,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(
-                            themeService.isDarkMode ? 0.35 : 0.12,
+                          color: Colors.black.withValues(
+                            alpha: themeService.isDarkMode ? 0.35 : 0.12,
                           ),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
@@ -557,12 +567,13 @@ class _HomePageState extends State<HomePage> {
                             child: Image.asset(
                               article['image']!,
                               fit: BoxFit.cover,
+                              cacheHeight: 570,
                               errorBuilder: (context, error, stackTrace) {
-                                return Center(
+                                return const Center(
                                   child: Icon(
-                                    Icons.image,
+                                    Icons.image_not_supported,
                                     size: 60,
-                                    color: themeService.primaryColor,
+                                    color: Colors.grey,
                                   ),
                                 );
                               },
@@ -577,7 +588,7 @@ class _HomePageState extends State<HomePage> {
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
                               colors: [
-                                Colors.black.withOpacity(0.65),
+                                Colors.black.withValues(alpha: 0.65),
                                 Colors.transparent,
                               ],
                             ),
@@ -590,10 +601,9 @@ class _HomePageState extends State<HomePage> {
                           bottom: 18,
                           child: Text(
                             article['title']!,
-                            style: const TextStyle(
+                            style: AppTextStyles.titleMedium(context).copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 18,
                             ),
                           ),
                         ),
@@ -620,7 +630,7 @@ class _HomePageState extends State<HomePage> {
               decoration: BoxDecoration(
                 color: _currentArticle == index
                     ? themeService.primaryColor
-                    : themeService.textSecondaryColor.withOpacity(0.5),
+                    : themeService.textSecondaryColor.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
@@ -634,13 +644,13 @@ class _HomePageState extends State<HomePage> {
 class AnimatedMenuButton extends StatefulWidget {
   final String assetPath;
   final String label;
-  final Widget page;
+  final String routeName;
 
   const AnimatedMenuButton({
     super.key,
     required this.assetPath,
     required this.label,
-    required this.page,
+    required this.routeName,
   });
 
   @override
@@ -677,13 +687,15 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
     final themeService = Provider.of<ThemeService>(context);
 
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
+      onTapDown: (_) {
+        HapticFeedback.lightImpact();
+        _controller.forward();
+      },
       onTapUp: (_) {
         _controller.reverse().then((_) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => widget.page),
-          );
+          if (mounted) {
+            Navigator.pushNamed(context, widget.routeName);
+          }
         });
       },
       onTapCancel: () => _controller.reverse(),
@@ -698,8 +710,8 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(
-                    themeService.isDarkMode ? 0.35 : 0.12,
+                  color: Colors.black.withValues(
+                    alpha: themeService.isDarkMode ? 0.35 : 0.12,
                   ),
                   blurRadius: 6,
                   offset: const Offset(0, 3),
@@ -714,6 +726,7 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
                   child: Image.asset(
                     widget.assetPath,
                     fit: BoxFit.contain,
+                    cacheWidth: 225,
                     errorBuilder: (c, e, s) => Icon(
                       Icons.extension,
                       color: themeService.primaryColor,
@@ -727,10 +740,9 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
           Text(
             widget.label,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 11,
+            style: AppTextStyles.bodySmall(context).copyWith(
               fontWeight: FontWeight.w600,
-              color: themeService.textPrimaryColor,
+              fontSize: 11,
             ),
           ),
         ],

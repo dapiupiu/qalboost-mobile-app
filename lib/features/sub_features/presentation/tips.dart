@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/theme_service.dart';
@@ -9,6 +10,7 @@ class TipsPage extends StatelessWidget {
 
   void _showTutorial(BuildContext context) {
     final themeService = Provider.of<ThemeService>(context, listen: false);
+    HapticFeedback.selectionClick();
 
     showModalBottomSheet(
       context: context,
@@ -36,11 +38,7 @@ class TipsPage extends StatelessWidget {
               const SizedBox(height: 15),
               Text(
                 'Cara Menggunakan Q-Tips',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: themeService.textPrimaryColor,
-                ),
+                style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               _tutorialItem(
@@ -48,18 +46,21 @@ class TipsPage extends StatelessWidget {
                 'Pilih Kategori',
                 'Gunakan tab Sedih, Marah, atau Tenang sesuai dengan kondisi perasaanmu.',
                 themeService,
+                context,
               ),
               _tutorialItem(
                 Icons.tips_and_updates_outlined,
                 'Baca Tips',
                 'Baca saran yang tersedia untuk membantu menenangkan hati dan pikiran.',
                 themeService,
+                context,
               ),
               _tutorialItem(
                 Icons.touch_app_outlined,
                 'Gunakan Pintasan',
                 'Tekan pintasan fitur untuk menuju halaman lain yang sesuai dengan kebutuhanmu.',
                 themeService,
+                context,
               ),
               const SizedBox(height: 15),
               SizedBox(
@@ -71,7 +72,10 @@ class TipsPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                  },
                   child: Text(
                     'Mengerti',
                     style: TextStyle(
@@ -92,6 +96,7 @@ class TipsPage extends StatelessWidget {
     String title,
     String desc,
     ThemeService themeService,
+    BuildContext context,
   ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -108,17 +113,11 @@ class TipsPage extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: themeService.textPrimaryColor,
-                  ),
+                  style: AppTextStyles.bodyMedium(context).copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
                   desc,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: themeService.textSecondaryColor,
-                  ),
+                  style: AppTextStyles.bodySmall(context),
                 ),
               ],
             ),
@@ -138,22 +137,26 @@ class TipsPage extends StatelessWidget {
     required String routeName,
   }) {
     return InkWell(
-      onTap: () => Navigator.pushNamed(context, routeName),
+      onTap: () {
+        HapticFeedback.lightImpact();
+        Navigator.pushNamed(context, routeName);
+      },
       borderRadius: BorderRadius.circular(14),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: themeService.tipsShortcutColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: themeService.isDarkMode
-                ? Colors.white.withOpacity(0.08)
+                ? Colors.white.withValues(alpha: 0.08)
                 : Colors.transparent,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(
-                themeService.isDarkMode ? 0.25 : 0.05,
+              color: Colors.black.withValues(
+                alpha: themeService.isDarkMode ? 0.25 : 0.05,
               ),
               blurRadius: 8,
               offset: const Offset(0, 2),
@@ -178,19 +181,12 @@ class TipsPage extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: themeService.textPrimaryColor,
-                    ),
+                    style: AppTextStyles.bodyMedium(context).copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     desc,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: themeService.textSecondaryColor,
-                    ),
+                    style: AppTextStyles.bodySmall(context).copyWith(fontSize: 10),
                   ),
                 ],
               ),
@@ -211,6 +207,7 @@ class TipsPage extends StatelessWidget {
     IconData icon,
     Color color,
     ThemeService themeService,
+    BuildContext context,
   ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -222,11 +219,7 @@ class TipsPage extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                fontSize: 12,
-                height: 1.4,
-                color: themeService.textPrimaryColor,
-              ),
+              style: AppTextStyles.bodySmall(context),
             ),
           ),
         ],
@@ -236,11 +229,13 @@ class TipsPage extends StatelessWidget {
 
   Widget _buildAyatCard({
     required ThemeService themeService,
+    required BuildContext context,
     required String arab,
     required String arti,
     required String sumber,
   }) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -248,13 +243,13 @@ class TipsPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: themeService.isDarkMode
-              ? Colors.white.withOpacity(0.08)
+              ? Colors.white.withValues(alpha: 0.08)
               : Colors.transparent,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(
-              themeService.isDarkMode ? 0.25 : 0.04,
+            color: Colors.black.withValues(
+              alpha: themeService.isDarkMode ? 0.25 : 0.04,
             ),
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -282,11 +277,9 @@ class TipsPage extends StatelessWidget {
             child: Text(
               arti,
               textAlign: TextAlign.left,
-              style: TextStyle(
-                fontSize: 12,
+              style: AppTextStyles.bodySmall(context).copyWith(
                 fontStyle: FontStyle.italic,
                 height: 1.5,
-                color: themeService.textPrimaryColor,
               ),
             ),
           ),
@@ -295,10 +288,9 @@ class TipsPage extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               sumber,
-              style: TextStyle(
-                fontSize: 11,
+              style: AppTextStyles.bodySmall(context).copyWith(
                 fontWeight: FontWeight.bold,
-                color: themeService.textSecondaryColor,
+                fontSize: 11,
               ),
             ),
           ),
@@ -328,15 +320,14 @@ class TipsPage extends StatelessWidget {
               color: themeService.iconColor,
               size: 22,
             ),
-            onPressed: () => Navigator.maybePop(context),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.maybePop(context);
+            },
           ),
           title: Text(
             'Q-Tips',
-            style: TextStyle(
-              color: themeService.textPrimaryColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
+            style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
           actions: [
@@ -359,6 +350,7 @@ class TipsPage extends StatelessWidget {
                 themeService.isDarkMode ? themeService.primaryColor : primaryBlue,
             indicatorSize: TabBarIndicatorSize.label,
             indicatorWeight: 3,
+            onTap: (index) => HapticFeedback.selectionClick(),
             labelStyle: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
@@ -372,7 +364,8 @@ class TipsPage extends StatelessWidget {
         ),
         body: Column(
           children: [
-            Container(
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
               width: double.infinity,
               margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -381,8 +374,8 @@ class TipsPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(
-                      themeService.isDarkMode ? 0.25 : 0.05,
+                    color: Colors.black.withValues(
+                      alpha: themeService.isDarkMode ? 0.25 : 0.05,
                     ),
                     blurRadius: 10,
                   ),
@@ -394,13 +387,10 @@ class TipsPage extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Harus\nNgapain Sih\nKalau Lagi...',
-                      style: TextStyle(
+                      style: AppTextStyles.titleLarge(context).copyWith(
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
                         height: 1.1,
-                        color: themeService.isDarkMode
-                            ? Colors.white
-                            : const Color(0xFF4E342E),
                       ),
                     ),
                   ),
@@ -408,8 +398,9 @@ class TipsPage extends StatelessWidget {
                     'assets/images/tips.png',
                     width: 65,
                     height: 65,
+                    cacheWidth: 195,
                     errorBuilder: (context, error, stackTrace) => Icon(
-                      Icons.tips_and_updates,
+                      Icons.image_not_supported,
                       size: 55,
                       color: themeService.primaryColor,
                     ),
@@ -436,18 +427,21 @@ class TipsPage extends StatelessWidget {
                         Icons.water_drop,
                         Colors.blue,
                         themeService,
+                        context,
                       ),
                       _buildTipPoint(
                         'Ambil air wudhu dan ceritakan segalanya kepada Allah dalam sujud.',
                         Icons.self_improvement,
                         Colors.green,
                         themeService,
+                        context,
                       ),
                       _buildTipPoint(
                         'Cari udara segar atau jalan kaki santai selama 5-10 menit.',
                         Icons.directions_walk,
                         Colors.orange,
                         themeService,
+                        context,
                       ),
                     ],
                     shortcutTitle: 'Tulis di (Q-Diary)',
@@ -463,7 +457,7 @@ class TipsPage extends StatelessWidget {
                     intro:
                         'Marah itu api. Yuk, kita dinginkan perlahan agar tidak melukai diri sendiri.',
                     ayatArab:
-                        'وَالْكَاظِمِينَ الْغَيْظَ وَالْعَافِينَ عَنِ النَّاسِ',
+                        'وَALْكَاظِمِينَ الْغَيْظَ وَALْكَاظِمِينَ الْغَيْظَ وَالْعَافِينَ عَنِ النَّاسِ',
                     ayatArti:
                         'Dan orang-orang yang menahan amarahnya serta memaafkan kesalahan orang lain.',
                     ayatSumber: 'QS. Ali Imran: 134',
@@ -473,18 +467,21 @@ class TipsPage extends StatelessWidget {
                         Icons.timer,
                         Colors.redAccent,
                         themeService,
+                        context,
                       ),
                       _buildTipPoint(
                         'Ubah posisi; jika marah saat berdiri maka duduklah, jika duduk maka berbaringlah.',
                         Icons.airline_seat_legroom_extra,
                         Colors.brown,
                         themeService,
+                        context,
                       ),
                       _buildTipPoint(
                         'Tarik napas dalam (4 detik), tahan (4 detik), dan buang perlahan (4 detik).',
                         Icons.air,
                         Colors.blueGrey,
                         themeService,
+                        context,
                       ),
                     ],
                     shortcutTitle: 'Konsultasi (Q-Konsul)',
@@ -509,18 +506,21 @@ class TipsPage extends StatelessWidget {
                         Icons.vibration,
                         Colors.blue,
                         themeService,
+                        context,
                       ),
                       _buildTipPoint(
                         'Baca kembali catatan diary lamamu untuk melihat sejauh mana kamu berkembang.',
                         Icons.history_edu,
                         Colors.purple,
                         themeService,
+                        context,
                       ),
                       _buildTipPoint(
                         'Bagikan energi positifmu dengan memberikan bantuan atau senyuman pada orang lain.',
                         Icons.volunteer_activism,
                         Colors.pink,
                         themeService,
+                        context,
                       ),
                     ],
                     shortcutTitle: 'Cek Mood (Q-Checker)',
@@ -556,7 +556,8 @@ class TipsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -565,18 +566,15 @@ class TipsPage extends StatelessWidget {
             ),
             child: Text(
               intro,
-              style: TextStyle(
-                fontSize: 13,
+              style: AppTextStyles.bodyMedium(context).copyWith(
                 fontWeight: FontWeight.w600,
-                height: 1.4,
-                color: themeService.isDarkMode
-                    ? Colors.white
-                    : Colors.black87,
+                color: themeService.isDarkMode ? Colors.white : Colors.black87,
               ),
             ),
           ),
           const SizedBox(height: 12),
           _buildAyatCard(
+            context: context,
             themeService: themeService,
             arab: ayatArab,
             arti: ayatArti,
@@ -585,10 +583,8 @@ class TipsPage extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             'TIPS UNTUKMU',
-            style: TextStyle(
-              fontSize: 10,
+            style: AppTextStyles.bodySmall(context).copyWith(
               fontWeight: FontWeight.bold,
-              color: themeService.textSecondaryColor,
               letterSpacing: 1.0,
             ),
           ),
@@ -597,10 +593,8 @@ class TipsPage extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             'PINTASAN FITUR',
-            style: TextStyle(
-              fontSize: 10,
+            style: AppTextStyles.bodySmall(context).copyWith(
               fontWeight: FontWeight.bold,
-              color: themeService.textSecondaryColor,
               letterSpacing: 1.0,
             ),
           ),

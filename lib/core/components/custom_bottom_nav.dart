@@ -36,8 +36,8 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(
-                    themeService.isDarkMode ? 0.35 : 0.15,
+                  color: Colors.black.withValues(
+                    alpha: themeService.isDarkMode ? 0.35 : 0.15,
                   ),
                   blurRadius: 12,
                   offset: const Offset(0, -2),
@@ -110,7 +110,7 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
                       boxShadow: [
                         BoxShadow(
                           color: themeService.bottomNavShadowColor
-                              .withOpacity(themeService.isDarkMode ? 0.35 : 0.5),
+                              .withValues(alpha: themeService.isDarkMode ? 0.35 : 0.5),
                           blurRadius: 25,
                           spreadRadius: 2,
                         ),
@@ -119,6 +119,7 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
                     child: Image.asset(
                       'assets/images/bulan.png',
                       fit: BoxFit.contain,
+                      cacheWidth: 345, // 115 * 3
                       errorBuilder: (context, error, stackTrace) =>
                           const Center(
                         child: Icon(

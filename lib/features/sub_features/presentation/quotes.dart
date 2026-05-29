@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
@@ -75,6 +76,7 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
   void _showTutorial(BuildContext context) {
     final themeService =
         Provider.of<ThemeService>(context, listen: false);
+    HapticFeedback.selectionClick();
 
     showModalBottomSheet(
       context: context,
@@ -104,11 +106,7 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
 
               Text(
                 'Cara Menggunakan Q-Quotes',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: themeService.textPrimaryColor,
-                ),
+                style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 20),
@@ -145,7 +143,10 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                  },
                   child: Text(
                     'Mengerti',
                     style: TextStyle(
@@ -184,18 +185,12 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: themeService.textPrimaryColor,
-                  ),
+                  style: AppTextStyles.bodyMedium(context).copyWith(fontWeight: FontWeight.bold),
                 ),
 
                 Text(
                   desc,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: themeService.textSecondaryColor,
-                  ),
+                  style: AppTextStyles.bodySmall(context),
                 ),
               ],
             ),
@@ -229,15 +224,14 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
             color: themeService.iconColor,
             size: 22,
           ),
-          onPressed: () => Navigator.maybePop(context),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.maybePop(context);
+          },
         ),
         title: Text(
           'Q-Quotes',
-          style: TextStyle(
-            color: themeService.textPrimaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          style: AppTextStyles.titleMedium(context).copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -279,21 +273,15 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
                         children: [
                           Text(
                             widget.headerTitle,
-                            style: TextStyle(
+                            style: AppTextStyles.titleLarge(context).copyWith(
                               fontSize: 26,
                               fontWeight: FontWeight.w800,
-                              color:
-                                  themeService.textPrimaryColor,
                             ),
                           ),
 
                           Text(
                             widget.headerSubtitle,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: themeService
-                                  .textSecondaryColor,
-                            ),
+                            style: AppTextStyles.bodyMedium(context),
                           ),
                         ],
                       ),
@@ -303,6 +291,7 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
                       'assets/images/quotes.png',
                       width: 80,
                       height: 80,
+                      cacheWidth: 240,
                     ),
                   ],
                 ),
@@ -350,11 +339,7 @@ class _QuotesSimpleScreenState extends State<QuotesSimpleScreen> {
                     const EdgeInsets.symmetric(vertical: 15),
                 child: Text(
                   '← swipe left/right →',
-                  style: TextStyle(
-                    color:
-                        themeService.textSecondaryColor,
-                    fontSize: 12,
-                  ),
+                  style: AppTextStyles.bodySmall(context),
                 ),
               ),
             ],
@@ -411,6 +396,7 @@ class _QHVideoCardState extends State<QHVideoCard> {
   }
 
   void _rewind10Seconds() {
+    HapticFeedback.lightImpact();
     final currentPos = _controller.value.position;
 
     final newPos =
@@ -427,7 +413,8 @@ class _QHVideoCardState extends State<QHVideoCard> {
   Widget build(BuildContext context) {
     final themeService = Provider.of<ThemeService>(context);
 
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.symmetric(
         horizontal: 25,
         vertical: 15,
@@ -437,8 +424,8 @@ class _QHVideoCardState extends State<QHVideoCard> {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(
-              themeService.isDarkMode ? 0.35 : 0.1,
+            color: Colors.black.withValues(
+              alpha: themeService.isDarkMode ? 0.35 : 0.1,
             ),
             blurRadius: 20,
             offset: const Offset(0, 10),
@@ -466,6 +453,7 @@ class _QHVideoCardState extends State<QHVideoCard> {
                             ConnectionState.done) {
                           return GestureDetector(
                             onTap: () {
+                              HapticFeedback.mediumImpact();
                               _controller.value.isPlaying
                                   ? _controller.pause()
                                   : _controller.play();
@@ -501,8 +489,8 @@ class _QHVideoCardState extends State<QHVideoCard> {
                             padding:
                                 const EdgeInsets.all(10),
                             decoration:
-                                const BoxDecoration(
-                              color: Colors.black26,
+                                BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.26),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -534,9 +522,8 @@ class _QHVideoCardState extends State<QHVideoCard> {
               children: [
                 Text(
                   widget.quote.contentText,
-                  style: const TextStyle(
+                  style: AppTextStyles.bodyMedium(context).copyWith(
                     color: Colors.white,
-                    fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
                   textAlign: TextAlign.center,
@@ -594,6 +581,7 @@ class _QHVideoCardState extends State<QHVideoCard> {
 
                     GestureDetector(
                       onTap: () {
+                        HapticFeedback.mediumImpact();
                         _controller.value.isPlaying
                             ? _controller.pause()
                             : _controller.play();
@@ -628,6 +616,7 @@ class _QHVideoCardState extends State<QHVideoCard> {
                         size: 28,
                       ),
                       onPressed: () {
+                        HapticFeedback.lightImpact();
                         setState(() {
                           _controller.setLooping(
                             !_controller

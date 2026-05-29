@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/theme_service.dart';
@@ -14,39 +15,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   bool _isLoading = false;
-
-  Future<void> _handleLogin() async {
-    setState(() => _isLoading = true);
-
-    final authProvider = context.read<AuthProvider>();
-
-    bool success = await authProvider.login(
-      _emailController.text.trim(),
-      _passwordController.text.trim(),
-    );
-
-    setState(() => _isLoading = false);
-
-    if (success) {
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (route) => false,
-        );
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Email atau Password salah!'),
-          ),
-        );
-      }
-    }
-  }
 
   @override
   void dispose() {
@@ -55,165 +24,219 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  Future<void> _handleLogin() async {
+    HapticFeedback.mediumImpact();
+    setState(() => _isLoading = true);
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    bool success = await authProvider.login(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (success) {
+      Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login Gagal! Email atau Password salah.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeService = Provider.of<ThemeService>(context);
 
-    final bool isKeyboardVisible =
-        MediaQuery.of(context).viewInsets.bottom != 0;
-
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: themeService.loginBackgroundColor,
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: Column(
-                children: [
-                  const SizedBox(height: 30),
-
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Image.asset(
-                      'assets/images/mix.png',
-                      width: 130,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-
-                  const SizedBox(height: 35),
-
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    height: isKeyboardVisible ? 100 : 180,
-                    child: Image.asset(
-                      'assets/images/regis.png',
-                      fit: BoxFit.contain,
-                      errorBuilder: (c, e, s) => Icon(
-                        Icons.wb_cloudy,
-                        size: 100,
-                        color: themeService.loginButtonColor,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  Text(
-                    'Selamat Datang Kembali!',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: themeService.loginTitleColor,
-                    ),
-                  ),
-
-                  const SizedBox(height: 45),
-
-                  _buildTextField(
-                    themeService,
-                    'Masukan Email',
-                    _emailController,
-                    Icons.email_outlined,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  _buildTextField(
-                    themeService,
-                    'Masukan Password',
-                    _passwordController,
-                    Icons.lock_outline,
-                    isPassword: true,
-                  ),
-
-                  const SizedBox(height: 35),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: themeService.loginButtonColor,
-                        elevation: themeService.isDarkMode ? 0 : 5,
-                        shadowColor:
-                            themeService.loginButtonColor.withOpacity(0.35),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? CircularProgressIndicator(
-                              color: themeService.loginButtonTextColor,
-                            )
-                          : Text(
-                              'Login',
-                              style: TextStyle(
-                                color: themeService.loginButtonTextColor,
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Belum Mempunyai Akun? ',
-                        style: TextStyle(
-                          color: themeService.loginBottomTextColor,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          '/register',
-                        ),
-                        child: Text(
-                          'Daftar',
-                          style: TextStyle(
-                            color: themeService.loginButtonColor,
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                            decorationColor: themeService.loginButtonColor,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+              ),
+              child: IntrinsicHeight(
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: 200,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: themeService.isDarkMode
+                              ? const Color(0xFF1E1E1E)
+                              : const Color(0xFFD7EAF8),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(30),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-                ],
+                    ),
+                    GestureDetector(
+                      onTap: () => FocusScope.of(context).unfocus(),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 100),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Image.asset(
+                                'assets/images/mix.png',
+                                width: 130,
+                                cacheWidth: 390,
+                                fit: BoxFit.contain,
+                                errorBuilder: (c, e, s) => const Icon(Icons.image_not_supported),
+                              ),
+                            ),
+                            const SizedBox(height: 40),
+                            Center(
+                              child: Image.asset(
+                                'assets/images/regis.png',
+                                height: 180,
+                                cacheHeight: 540,
+                                fit: BoxFit.contain,
+                                errorBuilder: (c, e, s) => Icon(
+                                  Icons.wb_cloudy,
+                                  size: 100,
+                                  color: themeService.loginButtonColor,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            Text(
+                              'Selamat Datang',
+                              style: AppTextStyles.titleLarge(context).copyWith(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Silakan login untuk melanjutkan',
+                              style: AppTextStyles.bodyMedium(context).copyWith(
+                                color: themeService.textSecondaryColor,
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            _buildLabel('Email'),
+                            _buildTextField(
+                              controller: _emailController,
+                              hint: 'Masukkan email kamu',
+                              icon: Icons.email_outlined,
+                              themeService: themeService,
+                            ),
+                            const SizedBox(height: 20),
+                            _buildLabel('Password'),
+                            _buildTextField(
+                              controller: _passwordController,
+                              hint: 'Masukkan password kamu',
+                              icon: Icons.lock_outline,
+                              isPassword: true,
+                              themeService: themeService,
+                            ),
+                            const SizedBox(height: 40),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 55,
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _handleLogin,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: themeService.loginButtonColor,
+                                  foregroundColor: themeService.loginButtonTextColor,
+                                  elevation: themeService.isDarkMode ? 0 : 4,
+                                  shadowColor: themeService.loginButtonColor
+                                      .withValues(alpha: 0.35),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: _isLoading
+                                    ? const CircularProgressIndicator(
+                                        color: Colors.white)
+                                    : const Text(
+                                        'Masuk Sekarang',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Belum punya akun?',
+                                    style: AppTextStyles.bodySmall(context),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      HapticFeedback.lightImpact();
+                                      Navigator.pushNamed(context, '/register');
+                                    },
+                                    child: Text(
+                                      'Daftar di sini',
+                                      style: AppTextStyles.bodySmall(context).copyWith(
+                                        color: themeService.loginButtonColor,
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 40),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: Text(
+        label,
+        style: AppTextStyles.bodyMedium(context).copyWith(
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
 
-  Widget _buildTextField(
-    ThemeService themeService,
-    String hint,
-    TextEditingController controller,
-    IconData icon, {
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
     bool isPassword = false,
+    required ThemeService themeService,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: themeService.loginInputColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: themeService.loginInputBorderColor,
-        ),
         boxShadow: [
           BoxShadow(
             color: themeService.loginInputShadowColor,
@@ -225,14 +248,11 @@ class _LoginPageState extends State<LoginPage> {
       child: TextField(
         controller: controller,
         obscureText: isPassword,
-        style: TextStyle(
-          color: themeService.loginTitleColor,
-        ),
+        style: AppTextStyles.bodyMedium(context),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(
+          hintStyle: AppTextStyles.bodyMedium(context).copyWith(
             color: themeService.loginHintColor,
-            fontSize: 14,
           ),
           prefixIcon: Icon(
             icon,

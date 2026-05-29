@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/theme_service.dart';
@@ -43,12 +45,14 @@ class _MoodPageState extends State<MoodPage> {
         'assets/images/baik.png',
         width: size,
         height: size,
+        cacheWidth: (size * 3).toInt(),
       );
     } else if (emoji == '😢') {
       return Image.asset(
         'assets/images/buruk.png',
         width: size,
         height: size,
+        cacheWidth: (size * 3).toInt(),
       );
     }
 
@@ -63,7 +67,7 @@ class _MoodPageState extends State<MoodPage> {
         shadows: [
           Shadow(
             blurRadius: 3.0,
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             offset: const Offset(1, 1),
           ),
         ],
@@ -104,6 +108,10 @@ class _MoodPageState extends State<MoodPage> {
         elevation: 0,
         leading: BackButton(
           color: themeService.iconColor,
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.pop(context);
+          },
         ),
         centerTitle: true,
         title: Row(
@@ -115,16 +123,13 @@ class _MoodPageState extends State<MoodPage> {
                 color: themeService.iconColor,
               ),
               onPressed: () {
+                HapticFeedback.lightImpact();
                 setState(() => _moodProvider.previousMonth());
               },
             ),
             Text(
               '${_getMonthName(_moodProvider.currentMonth)} ${_moodProvider.currentYear}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: themeService.moodPageTitleColor,
-              ),
+              style: AppTextStyles.titleMedium(context),
             ),
             IconButton(
               icon: Icon(
@@ -132,6 +137,7 @@ class _MoodPageState extends State<MoodPage> {
                 color: themeService.iconColor,
               ),
               onPressed: () {
+                HapticFeedback.lightImpact();
                 setState(() => _moodProvider.nextMonth());
               },
             ),
@@ -149,39 +155,51 @@ class _MoodPageState extends State<MoodPage> {
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    return GridView.builder(
-                      physics: const ClampingScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 7,
-                        mainAxisSpacing: 8,
-                        crossAxisSpacing: 8,
-                        childAspectRatio: 0.82,
+                    return AnimationLimiter(
+                      child: GridView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 7,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 8,
+                          childAspectRatio: 0.82,
+                        ),
+                        itemCount: days.length,
+                        itemBuilder: (context, index) {
+                          final dayNum = days[index];
+
+                          if (dayNum == null) {
+                            return const SizedBox.shrink();
+                          }
+
+                          final dateKey =
+                              "${_moodProvider.currentYear}-${_moodProvider.currentMonth.toString().padLeft(2, '0')}-${dayNum.toString().padLeft(2, '0')}";
+
+                          final MoodModel? moodData =
+                              _moodProvider.userMoods.cast<MoodModel?>().firstWhere(
+                                    (m) => m?.dateKey == dateKey,
+                                    orElse: () => null,
+                                  );
+
+                          return AnimationConfiguration.staggeredGrid(
+                            position: index,
+                            duration: const Duration(milliseconds: 375),
+                            columnCount: 7,
+                            child: SlideAnimation(
+                              verticalOffset: 30.0,
+                              child: FadeInAnimation(
+                                child: _buildDayCell(
+                                  context,
+                                  dayNum,
+                                  moodData,
+                                  themeService,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      itemCount: days.length,
-                      itemBuilder: (context, index) {
-                        final dayNum = days[index];
-
-                        if (dayNum == null) {
-                          return const SizedBox.shrink();
-                        }
-
-                        final dateKey =
-                            "${_moodProvider.currentYear}-${_moodProvider.currentMonth.toString().padLeft(2, '0')}-${dayNum.toString().padLeft(2, '0')}";
-
-                        final MoodModel? moodData =
-                            _moodProvider.userMoods.cast<MoodModel?>().firstWhere(
-                                  (m) => m?.dateKey == dateKey,
-                                  orElse: () => null,
-                                );
-
-                        return _buildDayCell(
-                          context,
-                          dayNum,
-                          moodData,
-                          themeService,
-                        );
-                      },
                     );
                   },
                 ),
@@ -221,11 +239,13 @@ class _MoodPageState extends State<MoodPage> {
   ) {
     return GestureDetector(
       onTap: () {
+        HapticFeedback.mediumImpact();
         if (data != null) {
           _showMoodDetail(context, day, data, themeService);
         }
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: data != null
               ? _getDayColor(data.emoji, themeService)
@@ -238,14 +258,14 @@ class _MoodPageState extends State<MoodPage> {
                 )
               : Border.all(
                   color: themeService.isDarkMode
-                      ? Colors.white.withOpacity(0.06)
+                      ? Colors.white.withValues(alpha: 0.06)
                       : Colors.transparent,
                   width: 1,
                 ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(
-                themeService.isDarkMode ? 0.20 : 0.04,
+              color: Colors.black.withValues(
+                alpha: themeService.isDarkMode ? 0.20 : 0.04,
               ),
               blurRadius: 5,
               offset: const Offset(0, 2),
@@ -257,9 +277,8 @@ class _MoodPageState extends State<MoodPage> {
           children: [
             Text(
               '$day',
-              style: TextStyle(
+              style: AppTextStyles.bodySmall(context).copyWith(
                 fontSize: 10,
-                color: themeService.moodPageEmptyDayTextColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -292,13 +311,13 @@ class _MoodPageState extends State<MoodPage> {
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
           color: themeService.isDarkMode
-              ? Colors.white.withOpacity(0.06)
+              ? Colors.white.withValues(alpha: 0.06)
               : Colors.transparent,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(
-              themeService.isDarkMode ? 0.25 : 0.12,
+            color: Colors.black.withValues(
+              alpha: themeService.isDarkMode ? 0.25 : 0.12,
             ),
             blurRadius: 4,
           ),

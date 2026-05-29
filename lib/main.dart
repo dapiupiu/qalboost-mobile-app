@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -53,17 +54,55 @@ class MyApp extends StatelessWidget {
 
       home: const VideoSplashScreen(),
 
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/register': (context) => const RegisterPage(),
-        '/home': (context) => const HomePage(),
-        '/settings': (context) => const SettingsPage(),
-        '/mood': (context) => const MoodPage(),
-        '/tips': (context) => const TipsPage(),
-        '/checker': (context) => const CheckerSimpleScreen(),
-        '/consul': (context) => const ConsulPage(),
-        '/quotes': (context) => const QuotesSimpleScreen(),
-        '/diary': (context) => const DiaryPage(),
+      onGenerateRoute: (settings) {
+        Widget page;
+        switch (settings.name) {
+          case '/login':
+            page = const LoginPage();
+            break;
+          case '/register':
+            page = const RegisterPage();
+            break;
+          case '/home':
+            page = const HomePage();
+            break;
+          case '/settings':
+            page = const SettingsPage();
+            break;
+          case '/mood':
+            page = const MoodPage();
+            break;
+          case '/tips':
+            page = const TipsPage();
+            break;
+          case '/checker':
+            page = const CheckerSimpleScreen();
+            break;
+          case '/consul':
+            page = const ConsulPage();
+            break;
+          case '/quotes':
+            page = const QuotesSimpleScreen();
+            break;
+          case '/diary':
+            page = const DiaryPage();
+            break;
+          default:
+            return null;
+        }
+
+        return PageRouteBuilder(
+          settings: settings,
+          pageBuilder: (context, animation, secondaryAnimation) => page,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SharedAxisTransition(
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              transitionType: SharedAxisTransitionType.horizontal,
+              child: child,
+            );
+          },
+        );
       },
     );
   }
