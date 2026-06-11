@@ -63,7 +63,7 @@ Aplikasi QalBoost telah mengimplementasikan 13 tampilan/halaman antarmuka yang b
 2. **Login Page** (`login_page.dart`)
 3. **Register Page** (`register_page.dart`)
 4. **Home Page** (`home_page.dart`)
-5. **Chat Screen** (`chat_screen.dart`)
+5. **Chat View** (`chat_screen.dart`)
 6. **Checker View** (`checker.dart`)
 7. **Mood View** (`mood.dart`)
 8. **Diary View** (`diary.dart`)
