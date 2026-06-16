@@ -5,7 +5,7 @@
 <h1 align="center">QalBoost</h1>
 
 <p align="center">
-  <strong>Aplikasi Pendukung Kesehatan Mental dan Pelacakan Emosi Mandiri.</strong>
+  <strong>Aplikasi Pendukung Kesehatan Mental dan Pelacakan Emosi Mandiri</strong>
 </p>
 
 <p align="center">
@@ -47,7 +47,7 @@ Filosofi desain QalBoost berpusat pada **Frictionless User Experience**. Kami me
 
 | Kategori | Teknologi |
 | :--- | :--- |
-| **Language** | Dart SDK ^3.11.1 |
+| **Language** | Dart SDK 3.11.1 |
 | **UI Framework** | Flutter Framework |
 | **State Management** | ChangeNotifierProvider (Global State Layer) |
 | **Data Pipeline** | JSON Serialization/Deserialization via Factory Methods |
@@ -177,4 +177,4 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek QalBoost di lingkungan lo
 
 Proyek ini merupakan proyek original dan seluruh konten dan aset dalam repositori ini adalah bagian dari ekosistem QalBoost. 
 
-Copyright © 2026 **Tim QalBoost - Kelompok 1**. Seluruh hak cipta dilindungi undang-undang.
+Copyright © 2026 **Tim QalBoost - Kelompok 1**
